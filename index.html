@@ -1,0 +1,761 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Furkan Kale Robotik</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Robotik kodlama yazıları, projeler, uygulamalar ve ücretsiz hesaplama araçları.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: bir devre kartı gibi; her bölüm kart üzerindeki bir bileşen alanı, serigrafi etiketiyle (U1, J2…) işaretli. 1180px ızgara. */
+:root{
+  --bg:#F1F5F1; --surface:#FFFFFF; --sunken:#E6EDE7; --ink:#10241B; --muted:#53675C; --line:#D2DCD4;
+  --mask:#1C6A4C; --on-mask:#FFFFFF; --gold:#C8961C; --gold-ink:#7A5800; --trace:#A9CDBA;
+  --ok:#1C7A49; --warn:#9E6200; --info:#2D5C9C; --danger:#B3261E;
+  --f-display:"Chakra Petch","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r:6px; --wrap:1180px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0A1C14; --surface:#0F271C; --sunken:#0C2118; --ink:#E3EEE6; --muted:#96AE9F; --line:#20402F;
+  --mask:#45B484; --on-mask:#05200F; --gold:#E2B647; --gold-ink:#E9C561; --trace:#1E4A35;
+  --ok:#5ECB8F; --warn:#E8A93C; --info:#82AAE9; --danger:#F08A80; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0A1C14; --surface:#0F271C; --sunken:#0C2118; --ink:#E3EEE6; --muted:#96AE9F; --line:#20402F;
+  --mask:#45B484; --on-mask:#05200F; --gold:#E2B647; --gold-ink:#E9C561; --trace:#1E4A35;
+  --ok:#5ECB8F; --warn:#E8A93C; --info:#82AAE9; --danger:#F08A80; color-scheme:dark}
+
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:3px}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;text-wrap:balance;margin:0;letter-spacing:-.01em}
+p{margin:0}
+.wrap{max-width:var(--wrap);margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.btn{display:inline-flex;align-items:center;gap:8px;font:600 15px/1 var(--f-body);padding:12px 18px;border-radius:var(--r);border:1px solid var(--mask);text-decoration:none;cursor:pointer;transition:transform .15s,background .15s}
+.btn-primary{background:var(--mask);color:var(--on-mask)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn:hover{transform:translateY(-1px)}
+.btn-ghost:hover{border-color:var(--mask)}
+
+/* Önizleme şeridi */
+.preview-note{background:var(--sunken);border-bottom:1px solid var(--line);font-size:13px;color:var(--muted)}
+.preview-note .wrap{padding-block:8px}
+
+/* Header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.chip{position:relative;width:40px;height:30px;background:var(--ink);color:var(--bg);border-radius:3px;display:grid;place-items:center;font:700 14px/1 var(--f-display);letter-spacing:.04em}
+.chip::before,.chip::after{content:"";position:absolute;left:5px;right:5px;height:4px;background:repeating-linear-gradient(90deg,var(--gold) 0 4px,transparent 4px 8px)}
+.chip::before{top:-4px}.chip::after{bottom:-4px}
+.brand b{font:600 18px/1.1 var(--f-display);display:block}
+.brand small{font:400 11px/1 var(--f-mono);color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.nav{display:flex;gap:4px;flex-wrap:wrap}
+.nav a{font-size:14px;font-weight:500;text-decoration:none;padding:8px 10px;border-radius:var(--r);color:var(--muted)}
+.nav a:hover{color:var(--ink);background:var(--sunken)}
+@media (max-width:820px){.nav{display:none}}
+
+/* Section scaffolding */
+section{padding-block:72px;border-bottom:1px solid var(--line)}
+.eyebrow{font:500 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--gold-ink);display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:10px;height:10px;border-radius:50%;border:2px solid var(--gold)}
+.sec-head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:32px}
+.sec-head h2{font-size:clamp(28px,4vw,40px);margin-top:12px}
+.sec-head p{color:var(--muted);max-width:52ch;margin-top:10px}
+
+/* Hero */
+.hero{padding-block:56px 72px;background-image:radial-gradient(var(--line) 1px,transparent 1.4px);background-size:22px 22px}
+.hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(38px,6vw,68px);font-weight:700;margin-top:18px}
+.hero h1 em{font-style:normal;color:var(--mask)}
+.hero .lede{font-size:18px;color:var(--muted);max-width:46ch;margin-top:20px}
+.hero .ctas{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.topics{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;padding:0;list-style:none}
+.topics li{font:500 12px/1 var(--f-mono);padding:7px 10px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted)}
+.sim{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 18px 40px -24px color-mix(in srgb,var(--ink) 40%,transparent);min-width:0}
+.sim-bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--line);font:500 12px/1 var(--f-mono);color:var(--muted)}
+.sim-bar .live{display:flex;align-items:center;gap:6px;color:var(--ok)}
+.sim-bar .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ok)}
+#arm{display:block;width:100%;aspect-ratio:4/3;max-width:100%;touch-action:none;cursor:crosshair}
+.readout{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.readout div{padding:10px 14px;border-right:1px solid var(--line)}
+.readout div:last-child{border-right:0}
+.readout span{display:block;font:500 11px/1 var(--f-mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.readout strong{font:600 20px/1.4 var(--f-mono);font-variant-numeric:tabular-nums}
+.sim-code{margin:0;padding:12px 14px;background:var(--sunken);border-top:1px solid var(--line);font:400 13px/1.5 var(--f-mono);overflow-x:auto;white-space:pre}
+.sim-code .k{color:var(--mask)}.sim-code .n{color:var(--gold-ink)}.sim-code .c{color:var(--muted)}
+@media (max-width:900px){.hero .wrap{grid-template-columns:1fr;gap:32px}}
+
+/* İçerikler */
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:24px}
+.filter-btn{font:500 14px/1 var(--f-body);padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.filter-btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.search{margin-left:auto;display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:0 12px;min-width:0;flex:0 1 280px}
+.search input{border:0;background:transparent;color:var(--ink);font:400 15px var(--f-body);padding:10px 0;width:100%;min-width:0;outline:none}
+.search:focus-within{border-color:var(--mask)}
+@media (max-width:640px){.search{margin-left:0;flex:1 1 100%}}
+.posts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+@media (max-width:960px){.posts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:600px){.posts{grid-template-columns:1fr}}
+.post{display:flex;flex-direction:column;gap:12px;padding:20px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);transition:border-color .15s,transform .15s}
+.post:hover{border-color:var(--mask);transform:translateY(-2px)}
+.post-meta{display:flex;justify-content:space-between;gap:8px;font:500 12px/1 var(--f-mono);color:var(--muted)}
+.tag{color:var(--mask);font-weight:500}
+.post h3{font-size:20px;font-weight:600}
+.post p{color:var(--muted);font-size:15px}
+.post-foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:12px;border-top:1px dashed var(--line);font-size:13px}
+.level{display:inline-flex;align-items:center;gap:6px;font:500 12px/1 var(--f-mono)}
+.level i{display:inline-flex;gap:2px}
+.level i b{width:6px;height:10px;border-radius:1px;background:var(--line)}
+.level i b.on{background:var(--gold)}
+.fmt{font:500 12px/1 var(--f-mono);padding:5px 8px;border-radius:4px;background:var(--sunken);color:var(--muted)}
+.empty{grid-column:1/-1;padding:40px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:var(--r)}
+
+/* Uygulamalar */
+.apps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:960px){.apps{grid-template-columns:1fr}}
+.app{display:grid;grid-template-rows:auto 1fr;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.app-screen{height:180px;background:var(--sunken);border-bottom:1px solid var(--line);display:grid;place-items:center;padding:20px}
+.app-body{display:flex;flex-direction:column;gap:12px;padding:22px}
+.app-title{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.app h3{font-size:24px}
+.status{font:500 12px/1 var(--f-mono);padding:5px 9px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.status.live{color:var(--ok)}.status.beta{color:var(--info)}.status.dev{color:var(--warn)}
+.app p{color:var(--muted);font-size:15px}
+.feat{list-style:none;padding:0;margin:0;display:grid;gap:6px;font-size:14px}
+.feat li{display:flex;gap:10px}
+.feat li::before{content:"";flex:none;width:8px;height:8px;margin-top:7px;border-radius:50%;background:var(--gold)}
+.app-foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--line)}
+.platforms{font:500 12px/1 var(--f-mono);color:var(--muted)}
+.app-foot a{font-weight:600;font-size:14px;color:var(--mask);text-decoration:none}
+.app-foot a:hover{text-decoration:underline}
+/* mini ekranlar */
+.m-servo{width:100%;max-width:240px;display:grid;gap:12px}
+.m-row{display:grid;grid-template-columns:28px 1fr 38px;gap:10px;align-items:center;font:500 11px var(--f-mono);color:var(--muted)}
+.m-track{height:6px;border-radius:3px;background:var(--line);position:relative}
+.m-track b{position:absolute;inset:0 auto 0 0;border-radius:3px;background:var(--mask)}
+.m-track b::after{content:"";position:absolute;right:-6px;top:-4px;width:14px;height:14px;border-radius:50%;background:var(--surface);border:2px solid var(--mask)}
+.m-pins{display:grid;grid-template-columns:repeat(10,14px);gap:7px}
+.m-pins span{width:14px;height:14px;border-radius:2px;border:2px solid var(--muted);opacity:.55}
+.m-pins span.p{border-color:var(--gold);background:var(--gold);opacity:1}
+.m-pins span.a{border-color:var(--mask);background:var(--mask);opacity:1}
+.m-pins span.i{border-color:var(--info);background:var(--info);opacity:1}
+.m-legend{display:flex;gap:12px;margin-top:12px;font:500 11px var(--f-mono);color:var(--muted)}
+.m-legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px}
+.m-blocks{display:grid;gap:4px;font:600 12px var(--f-body)}
+.m-blocks div{padding:7px 12px;border-radius:4px;color:var(--on-mask);width:max-content}
+.m-blocks .b1{background:var(--mask)}
+.m-blocks .b2{background:var(--gold);color:#1d1400;margin-left:16px}
+.m-blocks .b3{background:var(--info);color:var(--bg);margin-left:16px}
+
+/* Araçlar */
+.tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:900px){.tools{grid-template-columns:1fr}}
+.tool{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;display:grid;gap:18px;min-width:0}
+.tool h3{font-size:22px}
+.tool > p{color:var(--muted);font-size:15px;margin-top:-10px}
+.fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:480px){.fields{grid-template-columns:1fr 1fr}}
+.field{display:grid;gap:6px;min-width:0}
+.field label{font:500 12px/1.2 var(--f-mono);color:var(--muted);letter-spacing:.04em}
+.field input,.field select{width:100%;min-width:0;font:500 16px var(--f-mono);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:9px 10px}
+.field input:focus,.field select:focus{outline:none;border-color:var(--mask)}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.presets button{font:500 12px var(--f-mono);padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:6px}
+.presets button:hover{border-color:var(--mask)}
+.presets button i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.result{background:var(--sunken);border-radius:var(--r);padding:16px;display:grid;gap:12px}
+.result-main{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.result-main strong{font:600 28px/1 var(--f-mono)}
+.result-main small{display:block;font:500 12px var(--f-mono);color:var(--muted);margin-bottom:6px}
+.kv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;font-size:13px}
+.kv div span{display:block;font:500 11px var(--f-mono);color:var(--muted)}
+.kv div b{font:600 15px var(--f-mono)}
+.err{color:var(--danger);font-size:14px}
+.code{margin:0;padding:12px;background:var(--bg);border:1px solid var(--line);border-radius:var(--r);font:400 13px/1.55 var(--f-mono);overflow-x:auto;white-space:pre}
+.range-row{display:flex;align-items:center;gap:14px}
+.range-row input[type=range]{flex:1;accent-color:var(--mask);min-width:0}
+.range-row output{font:600 18px var(--f-mono);min-width:54px;text-align:right}
+
+/* Öğrenme yolu */
+.path{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;counter-reset:s;position:relative}
+.path li{position:relative;padding:0 18px 0 0}
+.path li::before{counter-increment:s;content:counter(s);display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--surface);border:2px solid var(--gold);font:700 16px var(--f-display);color:var(--gold-ink);position:relative;z-index:1}
+.path li::after{content:"";position:absolute;top:19px;left:40px;right:0;height:2px;background:repeating-linear-gradient(90deg,var(--trace) 0 8px,transparent 8px 12px)}
+.path li:last-child::after{display:none}
+.path h3{font-size:18px;margin-top:16px}
+.path p{font-size:14px;color:var(--muted);margin-top:6px}
+.path .dur{font:500 12px var(--f-mono);color:var(--mask);margin-top:10px;display:block}
+@media (max-width:900px){
+  .path{grid-template-columns:1fr;gap:24px}
+  .path li{padding:0 0 0 58px}
+  .path li::before{position:absolute;left:0;top:0}
+  .path li::after{top:44px;left:19px;right:auto;bottom:-24px;width:2px;height:auto;background:repeating-linear-gradient(180deg,var(--trace) 0 8px,transparent 8px 12px)}
+  .path h3{margin-top:8px}
+}
+
+/* Atölye notları */
+.notes-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:48px}
+@media (max-width:900px){.notes-grid{grid-template-columns:1fr;gap:24px}}
+.notes{list-style:none;padding:0;margin:0;border-left:2px solid var(--line)}
+.notes li{position:relative;padding:0 0 26px 24px}
+.notes li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--mask)}
+.notes time{font:500 12px var(--f-mono);color:var(--muted)}
+.notes p{margin-top:4px;max-width:62ch}
+.notes .t{font:500 12px var(--f-mono);color:var(--mask);margin-top:6px;display:block}
+.compose{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;gap:12px;align-self:start}
+.compose textarea{width:100%;min-height:96px;resize:vertical;font:400 15px/1.5 var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:10px}
+.compose textarea:focus{outline:none;border-color:var(--mask)}
+.compose .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font:500 12px var(--f-mono);color:var(--muted)}
+
+/* Hakkımda */
+.about{display:grid;grid-template-columns:1fr 1.1fr;gap:48px;align-items:start}
+@media (max-width:900px){.about{grid-template-columns:1fr;gap:32px}}
+.about-text{display:grid;gap:16px;max-width:60ch}
+.about-text h2{font-size:clamp(28px,4vw,40px);margin-top:12px}
+.about-text p{color:var(--muted)}
+.bom-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.bom{width:100%;border-collapse:collapse;font-size:14px;min-width:440px}
+.bom caption{text-align:left;padding:14px 16px;font:600 13px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--line)}
+.bom th,.bom td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+.bom tr:last-child td{border-bottom:0}
+.bom th{font:500 11px var(--f-mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.bom td:first-child{font:500 13px var(--f-mono);color:var(--gold-ink);white-space:nowrap}
+.bom td:last-child{color:var(--muted)}
+
+/* İletişim */
+.contact{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:start}
+@media (max-width:900px){.contact{grid-template-columns:1fr}}
+.news{background:var(--mask);color:var(--on-mask);border-radius:10px;padding:clamp(24px,4vw,40px);display:grid;gap:16px}
+.news h2{font-size:clamp(26px,3.5vw,36px)}
+.news p{opacity:.9;max-width:50ch}
+.news form{display:flex;gap:10px;flex-wrap:wrap}
+.news input{flex:1 1 220px;min-width:0;font:400 16px var(--f-body);padding:12px 14px;border-radius:var(--r);border:1px solid transparent;background:var(--surface);color:var(--ink)}
+.news button{font:600 15px var(--f-body);padding:12px 18px;border-radius:var(--r);border:0;background:var(--ink);color:var(--bg);cursor:pointer}
+.news .msg{font-size:14px;min-height:1.4em}
+.socials{display:grid;gap:10px}
+.socials a{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);text-decoration:none;font-weight:600}
+.socials a:hover{border-color:var(--mask)}
+.socials a span{font:400 13px var(--f-mono);color:var(--muted)}
+
+footer{padding-block:32px;font-size:13px;color:var(--muted)}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
+</style>
+
+<div class="preview-note"><div class="wrap">Tasarım önizlemesi: yazılar, uygulamalar ve notlar örnek içeriktir. Kendi içeriklerinle değiştirilmek üzere hazırlandı.</div></div>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#ana">
+      <span class="chip">FK</span>
+      <span><b>Furkan Kale</b><small>robotik · kodlama</small></span>
+    </a>
+    <nav class="nav" aria-label="Ana menü">
+      <a href="#icerikler">İçerikler</a>
+      <a href="#uygulamalar">Uygulamalar</a>
+      <a href="#araclar">Araçlar</a>
+      <a href="#yol">Öğrenme yolu</a>
+      <a href="#notlar">Atölye notları</a>
+      <a href="#hakkimda">Hakkımda</a>
+      <a href="#iletisim">İletişim</a>
+    </nav>
+  </div>
+</header>
+
+<main id="ana">
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Robotik kodlama atölyesi</div>
+      <h1>Kodu yaz, <em>robotu hareket ettir.</em></h1>
+      <p class="lede">Arduino'dan ROS 2'ye adım adım yazılar, çalışan proje dosyaları ve kendi geliştirdiğim uygulamalar. Her içerik bir masada denenmiş, kablosu takılmış hâliyle burada.</p>
+      <div class="ctas">
+        <a class="btn btn-primary" href="#icerikler">İçeriklere göz at →</a>
+        <a class="btn btn-ghost" href="#uygulamalar">Uygulamalarım</a>
+      </div>
+      <ul class="topics" aria-label="Konular">
+        <li>Arduino</li><li>ESP32</li><li>Raspberry Pi</li><li>ROS 2</li><li>Python</li><li>OpenCV</li><li>PID</li>
+      </ul>
+    </div>
+    <figure class="sim" style="margin:0">
+      <div class="sim-bar"><span>2 eksenli kol · ters kinematik</span><span class="live">canlı</span></div>
+      <canvas id="arm" aria-label="İmleci takip eden iki eklemli robot kol simülasyonu"></canvas>
+      <div class="readout">
+        <div><span>Omuz J1</span><strong id="r1">90°</strong></div>
+        <div><span>Dirsek J2</span><strong id="r2">90°</strong></div>
+        <div><span>Uç (x, y)</span><strong id="r3">0, 0</strong></div>
+      </div>
+<pre class="sim-code" id="simcode"><span class="c">// imleci kolun üzerinde gezdir</span>
+<span class="k">omuz</span>.write(<span class="n">90</span>); <span class="k">dirsek</span>.write(<span class="n">90</span>);</pre>
+    </figure>
+  </div>
+</section>
+
+<section id="icerikler">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="eyebrow">U1 · İçerikler</div>
+        <h2>Yazılar, videolar ve projeler</h2>
+        <p>Seviyeye ve platforma göre filtrele. Her içerikte devre şeması, malzeme listesi ve kaynak kod var.</p>
+      </div>
+    </div>
+    <div class="filters" role="toolbar" aria-label="İçerik filtresi">
+      <div id="chips" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+      <label class="search" for="q">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="q" type="search" placeholder="Ara: servo, PID, kamera…" autocomplete="off">
+      </label>
+    </div>
+    <div class="posts" id="posts"></div>
+  </div>
+</section>
+
+<section id="uygulamalar">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="eyebrow">U2 · Uygulamalarım</div>
+        <h2>Atölyede ihtiyaç duyup yazdığım araçlar</h2>
+        <p>Her biri bir projede karşılaştığım sorunu çözmek için başladı. Ücretsiz deneyebilirsin.</p>
+      </div>
+    </div>
+    <div class="apps">
+      <article class="app">
+        <div class="app-screen">
+          <div class="m-servo" aria-hidden="true">
+            <div class="m-row"><span>J1</span><div class="m-track"><b style="width:52%"></b></div><span>94°</span></div>
+            <div class="m-row"><span>J2</span><div class="m-track"><b style="width:30%"></b></div><span>54°</span></div>
+            <div class="m-row"><span>J3</span><div class="m-track"><b style="width:74%"></b></div><span>133°</span></div>
+            <div class="m-row"><span>GR</span><div class="m-track"><b style="width:12%"></b></div><span>22°</span></div>
+          </div>
+        </div>
+        <div class="app-body">
+          <div class="app-title"><h3>ServoLab</h3><span class="status live">Yayında</span></div>
+          <p>Bluetooth ile robot kolunu telefondan sür, her servonun sınırlarını kalibre et ve hareketleri kaydedip tekrar oynat.</p>
+          <ul class="feat">
+            <li>HC-05 ve ESP32 BLE desteği</li>
+            <li>Kaydedilen hareketi Arduino koduna dönüştürme</li>
+            <li>Servo başına min/max darbe ayarı</li>
+          </ul>
+          <div class="app-foot"><span class="platforms">Android · iOS</span><a href="https://play.google.com" target="_blank" rel="noopener">İndir →</a></div>
+        </div>
+      </article>
+      <article class="app">
+        <div class="app-screen">
+          <div aria-hidden="true">
+            <div class="m-pins">
+              <span></span><span class="p"></span><span></span><span class="p"></span><span class="a"></span><span class="a"></span><span></span><span class="i"></span><span class="i"></span><span></span>
+              <span></span><span></span><span class="p"></span><span></span><span class="a"></span><span></span><span class="p"></span><span></span><span></span><span class="a"></span>
+            </div>
+            <div class="m-legend"><span><i style="background:var(--gold)"></i>PWM</span><span><i style="background:var(--mask)"></i>ADC</span><span><i style="background:var(--info)"></i>I²C</span></div>
+          </div>
+        </div>
+        <div class="app-body">
+          <div class="app-title"><h3>PinHarita</h3><span class="status beta">Beta</span></div>
+          <p>Kartını seç, hangi pinin PWM, ADC, I²C ya da SPI desteklediğini tek ekranda gör. Önyükleme sırasında sorun çıkaran pinler ayrıca işaretli.</p>
+          <ul class="feat">
+            <li>Uno R4, ESP32-S3, Pico 2, Raspberry Pi 5</li>
+            <li>Çakışma uyarısı: aynı pine iki görev atanınca</li>
+            <li>Çevrimdışı çalışır</li>
+          </ul>
+          <div class="app-foot"><span class="platforms">Web</span><a href="https://github.com" target="_blank" rel="noopener">Dene →</a></div>
+        </div>
+      </article>
+      <article class="app">
+        <div class="app-screen">
+          <div class="m-blocks" aria-hidden="true">
+            <div class="b1">tekrarla 4 kez</div>
+            <div class="b2">ileri git 20 cm</div>
+            <div class="b3">sağa dön 90°</div>
+            <div class="b1">bitti</div>
+          </div>
+        </div>
+        <div class="app-body">
+          <div class="app-title"><h3>RoboBlok</h3><span class="status dev">Geliştiriliyor</span></div>
+          <p>Çocuklar ve yeni başlayanlar için blok tabanlı kodlama. Bloklar arka planda gerçek Arduino koduna çevrilir, kod yan panelde görünür.</p>
+          <ul class="feat">
+            <li>Bloktan C++ koduna anlık çeviri</li>
+            <li>Sınıflar için hazır görev kartları</li>
+            <li>Türkçe arayüz</li>
+          </ul>
+          <div class="app-foot"><span class="platforms">Web · Tablet</span><a href="#iletisim">Bekleme listesi →</a></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="araclar">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="eyebrow">U3 · Ücretsiz araçlar</div>
+        <h2>Masada en çok lazım olan iki hesap</h2>
+        <p>Kayıt gerektirmez. Değerleri gir, sonucu ve kopyalanabilir kodu al.</p>
+      </div>
+    </div>
+    <div class="tools">
+      <div class="tool">
+        <h3>LED direnç hesaplayıcı</h3>
+        <p>R = (V<sub>besleme</sub> − V<sub>LED</sub>) / I. Sonuç, standart E12 serisinde bir üst değere yuvarlanır.</p>
+        <div class="presets" aria-label="LED rengi">
+          <button type="button" data-vf="2.0"><i style="background:#D3302A"></i>Kırmızı 2,0 V</button>
+          <button type="button" data-vf="2.1"><i style="background:#E8B21C"></i>Sarı 2,1 V</button>
+          <button type="button" data-vf="3.0"><i style="background:#2FA65A"></i>Yeşil 3,0 V</button>
+          <button type="button" data-vf="3.2"><i style="background:#2F6FD8"></i>Mavi 3,2 V</button>
+          <button type="button" data-vf="3.2"><i style="background:#F2F2F2;border:1px solid #999"></i>Beyaz 3,2 V</button>
+        </div>
+        <div class="fields">
+          <div class="field"><label for="vs">Besleme (V)</label><input id="vs" type="number" step="0.1" min="0" value="5"></div>
+          <div class="field"><label for="vf">LED ileri (V)</label><input id="vf" type="number" step="0.1" min="0" value="2.0"></div>
+          <div class="field"><label for="ima">Akım (mA)</label><input id="ima" type="number" step="1" min="1" value="15"></div>
+        </div>
+        <div class="result" id="rres" aria-live="polite"></div>
+      </div>
+
+      <div class="tool">
+        <h3>Servo açı → darbe genişliği</h3>
+        <p>50 Hz servo sinyali için darbe süresini, görev oranını ve ESP32 LEDC değerini hesaplar.</p>
+        <div class="range-row">
+          <input id="ang" type="range" min="0" max="180" value="90" aria-label="Servo açısı">
+          <output id="angout" for="ang">90°</output>
+        </div>
+        <div class="fields">
+          <div class="field"><label for="pmin">0° darbe (µs)</label><input id="pmin" type="number" step="10" value="500"></div>
+          <div class="field"><label for="pmax">180° darbe (µs)</label><input id="pmax" type="number" step="10" value="2500"></div>
+          <div class="field"><label for="bits">LEDC çözünürlük</label>
+            <select id="bits"><option value="10">10 bit</option><option value="12">12 bit</option><option value="14">14 bit</option><option value="16" selected>16 bit</option></select>
+          </div>
+        </div>
+        <div class="result" id="sres" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="yol">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="eyebrow">U4 · Öğrenme yolu</div>
+        <h2>Sıfırdan otonom robota</h2>
+        <p>Nereden başlayacağını bilmiyorsan bu sırayı izle. Her adım bir öncekinin üzerine kurulu.</p>
+      </div>
+    </div>
+    <ol class="path">
+      <li><h3>Elektronik temelleri</h3><p>Ohm yasası, breadboard, LED ve buton. İlk devreni kur.</p><span class="dur">~1 hafta</span></li>
+      <li><h3>Arduino ile kodlama</h3><p>Dijital/analog pinler, seri port, millis() ile zamanlama.</p><span class="dur">~2 hafta</span></li>
+      <li><h3>Sensörler ve motorlar</h3><p>Ultrasonik, IMU, DC motor sürücü ve servo kontrolü.</p><span class="dur">~3 hafta</span></li>
+      <li><h3>Kontrol ve haberleşme</h3><p>PID, enkoder okuma, ESP32 ile Wi-Fi ve BLE.</p><span class="dur">~3 hafta</span></li>
+      <li><h3>ROS 2 ve görüntü işleme</h3><p>Düğümler, topic'ler, OpenCV ile nesne takibi.</p><span class="dur">~4 hafta</span></li>
+    </ol>
+  </div>
+</section>
+
+<section id="notlar">
+  <div class="wrap notes-grid">
+    <div>
+      <div class="eyebrow">U5 · Atölye notları</div>
+      <h2 style="font-size:clamp(28px,4vw,40px);margin-top:12px">Kısa paylaşımlar</h2>
+      <p style="color:var(--muted);margin-top:10px;max-width:44ch">Uzun bir yazıya dönüşmeyen ama işe yarayan bulgular: bir hata, bir ipucu, masadan bir fotoğraf.</p>
+      <form class="compose" id="compose" style="margin-top:24px">
+        <label for="note" class="mono" style="font-size:12px;color:var(--muted)">Yeni not (önizleme)</label>
+        <textarea id="note" placeholder="Bugün atölyede ne öğrendin?"></textarea>
+        <div class="row"><span id="cnt">0 / 280</span><button class="btn btn-primary" type="submit" style="padding:10px 14px">Paylaş</button></div>
+      </form>
+    </div>
+    <ol class="notes" id="notes" reversed></ol>
+  </div>
+</section>
+
+<section id="hakkimda">
+  <div class="wrap about">
+    <div class="about-text">
+      <div class="eyebrow">U6 · Hakkımda</div>
+      <h2>Merhaba, ben Furkan.</h2>
+      <p>Robotik ve gömülü sistemler üzerine çalışıyor, öğrendiklerimi Türkçe kaynak olarak paylaşıyorum. Amacım, bir robotu ilk kez hareket ettirmek isteyen herkesin takıldığı yerde elinde çalışan bir örnek olması.</p>
+      <p>Yazılarda kullandığım her devreyi önce kendi masamda kuruyorum. Kodlar GitHub'da açık; hata bulursan ya da bir konu önermek istersen yazman yeterli.</p>
+      <div class="ctas" style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn btn-primary" href="#iletisim">Benimle iletişime geç</a>
+        <a class="btn btn-ghost" href="https://github.com" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+    <div class="bom-wrap">
+      <table class="bom">
+        <caption>Masamdaki malzeme listesi (BOM)</caption>
+        <thead><tr><th>Ref</th><th>Parça</th><th>Ne için</th></tr></thead>
+        <tbody>
+          <tr><td>U1</td><td>Arduino Uno R4 WiFi</td><td>Başlangıç projeleri ve dersler</td></tr>
+          <tr><td>U2</td><td>ESP32-S3 DevKitC</td><td>Kablosuz kontrol, BLE uygulamaları</td></tr>
+          <tr><td>U3</td><td>Raspberry Pi 5</td><td>ROS 2 Jazzy ve kamera işleri</td></tr>
+          <tr><td>M1–M4</td><td>MG996R servo</td><td>4 eksenli masaüstü kol</td></tr>
+          <tr><td>S1</td><td>MPU6050 IMU</td><td>Denge robotu, PID denemeleri</td></tr>
+          <tr><td>SW</td><td>KiCad · VS Code · PlatformIO</td><td>Kart tasarımı ve kodlama</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="iletisim" style="border-bottom:0">
+  <div class="wrap contact">
+    <div class="news">
+      <div class="eyebrow" style="color:inherit">J1 · Bülten</div>
+      <h2>Yeni içerik çıktığında haber al</h2>
+      <p>Ayda bir e-posta: yeni yazılar, uygulama güncellemeleri ve o ay denediğim bir devre. Reklam yok.</p>
+      <form id="nl" novalidate>
+        <label for="em" class="sr" style="position:absolute;left:-9999px">E-posta adresin</label>
+        <input id="em" type="email" placeholder="e-posta adresin" autocomplete="email">
+        <button type="submit">Abone ol</button>
+      </form>
+      <p class="msg" id="nlmsg" aria-live="polite"></p>
+    </div>
+    <div>
+      <div class="eyebrow">J2 · Sosyal</div>
+      <div class="socials" style="margin-top:16px">
+        <a href="https://youtube.com" target="_blank" rel="noopener">YouTube <span>video dersler →</span></a>
+        <a href="https://github.com" target="_blank" rel="noopener">GitHub <span>kaynak kodlar →</span></a>
+        <a href="https://instagram.com" target="_blank" rel="noopener">Instagram <span>atölyeden kareler →</span></a>
+        <a href="https://linkedin.com" target="_blank" rel="noopener">LinkedIn <span>profesyonel profil →</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><span>© 2026 Furkan Kale · İçerikler CC BY 4.0, kodlar MIT lisanslı</span><span class="mono">REV 1.0 · 2026-10</span></div></footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const fmt = (n, d = 0) => n.toLocaleString('tr-TR', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+  /* ---------- Robot kol (ters kinematik) ---------- */
+  const cv = document.getElementById('arm'), ctx = cv.getContext('2d');
+  const r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), r3 = document.getElementById('r3'), code = document.getElementById('simcode');
+  let W = 0, H = 0, C = {}, target = null, cur = null, lastMove = -1e9, trail = [], last = '';
+  const readColors = () => { C = { ink: css('--ink'), muted: css('--muted'), line: css('--line'), mask: css('--mask'), gold: css('--gold'), trace: css('--trace'), surface: css('--surface') }; };
+  readColors();
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors);
+  new MutationObserver(readColors).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  function geo() { const L = Math.min(W, H * 1.2); return { bx: W * 0.36, by: H * 0.84, L1: L * 0.34, L2: L * 0.28 }; }
+  function resize() {
+    const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    W = r.width; H = r.height; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
+    const g = geo(); if (!cur) { cur = { x: g.bx + g.L1 * 0.9, y: g.by - g.L1 * 1.1 }; target = { ...cur }; }
+  }
+  new ResizeObserver(resize).observe(cv); resize();
+
+  function ik(tx, ty) {
+    const { bx, by, L1, L2 } = geo();
+    let dx = tx - bx, dy = Math.max(by - ty, -10), d = Math.hypot(dx, dy);
+    const lo = Math.abs(L1 - L2) + 2, hi = L1 + L2 - 1;
+    if (d > hi) { dx *= hi / d; dy *= hi / d; d = hi; } if (d < lo) { const s = lo / (d || 1); dx *= s; dy *= s; d = lo; }
+    const t2 = Math.acos(Math.min(1, Math.max(-1, (d * d - L1 * L1 - L2 * L2) / (2 * L1 * L2))));
+    const t1 = Math.atan2(dy, dx) + Math.atan2(L2 * Math.sin(t2), L1 + L2 * Math.cos(t2));
+    const ex = bx + L1 * Math.cos(t1), ey = by - L1 * Math.sin(t1);
+    const wx = ex + L2 * Math.cos(t1 - t2), wy = ey - L2 * Math.sin(t1 - t2);
+    return { bx, by, ex, ey, wx, wy, t1, t2, L1, L2 };
+  }
+
+  function draw(now) {
+    if (!W) return;
+    if (now - lastMove > 2500 && !reduce) {
+      const g = geo(), t = now / 1000, R = (g.L1 + g.L2) * 0.62;
+      target = { x: g.bx + R * 0.9 * Math.cos(t * 0.55), y: g.by - R * 0.55 - R * 0.42 * Math.sin(t * 1.1) };
+    }
+    const k = reduce ? 1 : 0.12; cur.x += (target.x - cur.x) * k; cur.y += (target.y - cur.y) * k;
+    const s = ik(cur.x, cur.y);
+    ctx.clearRect(0, 0, W, H);
+    // lehim padleri ızgarası
+    ctx.fillStyle = C.line;
+    for (let x = 12; x < W; x += 22) for (let y = 12; y < H; y += 22) { ctx.beginPath(); ctx.arc(x, y, 1.3, 0, 7); ctx.fill(); }
+    // çalışma alanı
+    ctx.setLineDash([5, 6]); ctx.strokeStyle = C.trace; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(s.bx, s.by, s.L1 + s.L2, Math.PI, 0); ctx.stroke(); ctx.setLineDash([]);
+    // masa
+    ctx.strokeStyle = C.muted; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(12, s.by + 14); ctx.lineTo(W - 12, s.by + 14); ctx.stroke();
+    ctx.fillStyle = C.ink; ctx.fillRect(s.bx - 28, s.by + 2, 56, 12);
+    // iz
+    trail.push([s.wx, s.wy]); if (trail.length > 60) trail.shift();
+    ctx.strokeStyle = C.gold; ctx.lineWidth = 2; ctx.globalAlpha = 0.35; ctx.beginPath();
+    trail.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.stroke(); ctx.globalAlpha = 1;
+    // hedef
+    if (target) { ctx.strokeStyle = C.gold; ctx.lineWidth = 1.5; const tx = target.x, ty = target.y;
+      ctx.beginPath(); ctx.arc(tx, ty, 9, 0, 7); ctx.moveTo(tx - 15, ty); ctx.lineTo(tx + 15, ty); ctx.moveTo(tx, ty - 15); ctx.lineTo(tx, ty + 15); ctx.stroke(); }
+    // kollar
+    ctx.lineCap = 'round';
+    [[s.bx, s.by, s.ex, s.ey, 18], [s.ex, s.ey, s.wx, s.wy, 13]].forEach(([a, b, c, d, w]) => {
+      ctx.strokeStyle = C.ink; ctx.lineWidth = w + 4; ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke();
+      ctx.strokeStyle = C.mask; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke();
+    });
+    // tutucu
+    const ang = s.t1 - s.t2, gx = Math.cos(ang), gy = -Math.sin(ang), nx = -gy, ny = gx;
+    ctx.strokeStyle = C.ink; ctx.lineWidth = 4;
+    [-1, 1].forEach(sg => { ctx.beginPath(); ctx.moveTo(s.wx + nx * 8 * sg, s.wy + ny * 8 * sg); ctx.lineTo(s.wx + nx * 8 * sg + gx * 14, s.wy + ny * 8 * sg + gy * 14); ctx.stroke(); });
+    // eklemler (servo)
+    [[s.bx, s.by, 'J1'], [s.ex, s.ey, 'J2']].forEach(([x, y, l]) => {
+      ctx.fillStyle = C.surface; ctx.strokeStyle = C.gold; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 10, 0, 7); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = C.gold; ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 7); ctx.fill();
+      ctx.fillStyle = C.muted; ctx.font = '500 11px "JetBrains Mono", monospace'; ctx.fillText(l, x + 14, y + 22);
+    });
+    // değerler
+    const a1 = Math.round(Math.min(180, Math.max(0, s.t1 * 180 / Math.PI)));
+    const a2 = Math.round(Math.min(180, Math.max(0, s.t2 * 180 / Math.PI)));
+    const scale = 250 / (s.L1 + s.L2); // mm: 250 mm erişimli bir kol varsay
+    const px = Math.round((s.wx - s.bx) * scale), py = Math.round((s.by - s.wy) * scale);
+    const key = a1 + '|' + a2 + '|' + px + '|' + py;
+    if (key !== last) {
+      last = key; r1.textContent = a1 + '°'; r2.textContent = a2 + '°'; r3.textContent = px + ', ' + py;
+      code.innerHTML = '<span class="c">// uç: x=' + px + ' mm, y=' + py + ' mm</span>\n<span class="k">omuz</span>.write(<span class="n">' + a1 + '</span>); <span class="k">dirsek</span>.write(<span class="n">' + a2 + '</span>);';
+    }
+  }
+  function loop(now) { draw(now); if (!reduce) requestAnimationFrame(loop); }
+  requestAnimationFrame(loop);
+  const point = e => { const r = cv.getBoundingClientRect(); target = { x: e.clientX - r.left, y: e.clientY - r.top }; lastMove = performance.now(); if (reduce) draw(lastMove); };
+  cv.addEventListener('pointermove', point); cv.addEventListener('pointerdown', point);
+  if (reduce) { new ResizeObserver(() => draw(0)).observe(cv); }
+
+  /* ---------- İçerikler ---------- */
+  const POSTS = [
+    { t: 'Arduino ile ilk servo motorunu sür', d: 'Servo kütüphanesi, PWM mantığı ve potansiyometreyle açı kontrolü. Tek kablo hatasının neden kartı resetlediğini de anlatıyorum.', tag: 'Arduino', lv: 1, min: 8, f: 'Yazı' },
+    { t: 'Engelden kaçan robot: HC-SR04 ile', d: 'Ultrasonik sensörle mesafe ölçüp iki DC motoru L298N üzerinden yönlendiren tam proje. Şema ve 3B baskı dosyaları dahil.', tag: 'Arduino', lv: 1, min: 25, f: 'Proje' },
+    { t: 'PID kontrolü: teoriden koda', d: 'Kp, Ki, Kd ne işe yarar? Bir çizgi izleyen robotun salınımını adım adım ayarlayarak gösteriyorum.', tag: 'Arduino', lv: 3, min: 14, f: 'Video' },
+    { t: 'ESP32 ile Wi-Fi üzerinden robot kontrolü', d: 'ESP32 üzerinde küçük bir web sunucusu kurup telefon tarayıcısından joystick ile robotu sürmek.', tag: 'ESP32', lv: 2, min: 15, f: 'Proje' },
+    { t: 'MPU6050 ile eğim açısı okuma', d: 'İvmeölçer ve jiroskop verisini tamamlayıcı filtreyle birleştirip titremeyen bir açı değeri elde etmek.', tag: 'ESP32', lv: 2, min: 12, f: 'Yazı' },
+    { t: "Raspberry Pi 5'e ROS 2 Jazzy kurulumu", d: 'Ubuntu 24.04 üzerine kurulum, çalışma alanı oluşturma ve sık karşılaşılan colcon hataları.', tag: 'ROS 2', lv: 2, min: 18, f: 'Yazı' },
+    { t: 'İlk ROS 2 düğümün: publisher ve subscriber', d: "Python ile iki düğüm yazıp topic üzerinden sensör verisi aktarmak. rqt_graph ile akışı görselleştirmek.", tag: 'ROS 2', lv: 3, min: 20, f: 'Video' },
+    { t: 'OpenCV ile renk takibi yapan kamera', d: 'HSV maskesiyle bir topu bulup iki servoyla kamerayı onun peşinden döndürmek. Pan-tilt düzeneği dahil.', tag: 'Python', lv: 2, min: 22, f: 'Proje' },
+    { t: "Python'dan Arduino'ya seri haberleşme", d: 'pyserial ile bilgisayardan komut göndermek, gelen veriyi grafiğe dökmek ve bağlantı kopunca toparlamak.', tag: 'Python', lv: 1, min: 10, f: 'Yazı' }
+  ];
+  const TAGS = ['Tümü', 'Arduino', 'ESP32', 'ROS 2', 'Python'];
+  const LV = ['', 'Başlangıç', 'Orta', 'İleri'];
+  let tag = 'Tümü', q = '';
+  try { const s = localStorage.getItem('fk-tag'); if (TAGS.includes(s)) tag = s; } catch (e) {}
+  const chips = document.getElementById('chips'), posts = document.getElementById('posts');
+  function renderChips() {
+    chips.innerHTML = TAGS.map(t => `<button type="button" class="filter-btn" aria-pressed="${t === tag}" data-t="${t}">${t}</button>`).join('');
+  }
+  function renderPosts() {
+    const n = q.toLocaleLowerCase('tr');
+    const list = POSTS.filter(p => (tag === 'Tümü' || p.tag === tag) && (!n || (p.t + ' ' + p.d + ' ' + p.tag).toLocaleLowerCase('tr').includes(n)));
+    posts.innerHTML = list.length ? list.map(p => `
+      <article class="post">
+        <div class="post-meta"><span class="tag">${p.tag}</span><span>${p.min} dk</span></div>
+        <h3>${p.t}</h3>
+        <p>${p.d}</p>
+        <div class="post-foot">
+          <span class="level"><i>${[1, 2, 3].map(i => `<b class="${i <= p.lv ? 'on' : ''}"></b>`).join('')}</i>${LV[p.lv]}</span>
+          <span class="fmt">${p.f}</span>
+        </div>
+      </article>`).join('') : `<div class="empty">"${q.replace(/[<>&"]/g, '')}" için içerik bulunamadı. Başka bir kelime dene ya da filtreyi "Tümü" yap.</div>`;
+  }
+  chips.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; tag = b.dataset.t; try { localStorage.setItem('fk-tag', tag); } catch (er) {} renderChips(); renderPosts(); });
+  document.getElementById('q').addEventListener('input', e => { q = e.target.value.trim(); renderPosts(); });
+  renderChips(); renderPosts();
+
+  /* ---------- LED direnç ---------- */
+  const E12 = [10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82];
+  const BAND = ['#1a1a1a', '#7a4a1f', '#d0302a', '#ec7a1c', '#f2cc1d', '#2f9e4f', '#2f62c8', '#7d3fb3', '#8a8a8a', '#f4f4f4'];
+  const BANDN = ['siyah', 'kahverengi', 'kırmızı', 'turuncu', 'sarı', 'yeşil', 'mavi', 'mor', 'gri', 'beyaz'];
+  const ohm = r => r >= 1e6 ? fmt(r / 1e6, r % 1e6 ? 1 : 0) + ' MΩ' : r >= 1000 ? fmt(r / 1000, r % 1000 ? 1 : 0) + ' kΩ' : fmt(r, r < 10 && r % 1 ? 1 : 0) + ' Ω';
+  function e12up(R) {
+    R = Math.max(R, 1); let ex = Math.floor(Math.log10(R)) - 1, n = R / Math.pow(10, ex);
+    let e = E12.find(v => v >= n - 1e-9); if (!e) { e = 10; ex += 1; }
+    return { v: e * Math.pow(10, ex), d1: Math.floor(e / 10), d2: e % 10, m: ex };
+  }
+  function resistorSVG(b) {
+    const mult = b.m >= 0 ? BAND[b.m] : (b.m === -1 ? '#c9a03a' : '#c0c0c0');
+    return `<svg viewBox="0 0 220 44" width="220" height="44" role="img" aria-label="Renk bantları" style="max-width:100%">
+      <line x1="0" y1="22" x2="220" y2="22" stroke="#9a9a9a" stroke-width="3"/>
+      <rect x="40" y="6" width="140" height="32" rx="14" fill="#e6cf9e" stroke="#a88f5e"/>
+      <rect x="62" y="6" width="9" height="32" fill="${BAND[b.d1]}"/><rect x="82" y="6" width="9" height="32" fill="${BAND[b.d2]}"/>
+      <rect x="102" y="6" width="9" height="32" fill="${mult}"/><rect x="150" y="6" width="9" height="32" fill="#c9a03a"/></svg>`;
+  }
+  const vs = document.getElementById('vs'), vf = document.getElementById('vf'), ima = document.getElementById('ima'), rres = document.getElementById('rres');
+  function calcR() {
+    const V = parseFloat(vs.value), F = parseFloat(vf.value), I = parseFloat(ima.value) / 1000;
+    if (!(V > 0) || !(F >= 0) || !(I > 0)) { rres.innerHTML = '<p class="err">Üç alana da sıfırdan büyük bir sayı gir.</p>'; return; }
+    if (V <= F) { rres.innerHTML = `<p class="err">Besleme gerilimi (${fmt(V, 1)} V), LED'in ileri geriliminden (${fmt(F, 1)} V) yüksek olmalı. Bu değerlerle LED yanmaz.</p>`; return; }
+    const R = (V - F) / I, b = e12up(R), Ireal = (V - F) / b.v * 1000, P = Math.pow(Ireal / 1000, 2) * b.v;
+    const w = P <= 0.125 ? '¼ W' : P <= 0.25 ? '½ W' : P <= 0.5 ? '1 W' : '2 W';
+    const multName = b.m >= 0 ? BANDN[b.m] : (b.m === -1 ? 'altın' : 'gümüş');
+    rres.innerHTML = `
+      <div class="result-main"><div><small>Önerilen direnç (E12)</small><strong>${ohm(b.v)}</strong></div>${resistorSVG(b)}</div>
+      <div class="kv">
+        <div><span>Hesaplanan</span><b>${ohm(Math.round(R * 10) / 10)}</b></div>
+        <div><span>Gerçek akım</span><b>${fmt(Ireal, 1)} mA</b></div>
+        <div><span>Güç</span><b>${fmt(P * 1000, 0)} mW · ${w}</b></div>
+      </div>
+      <p class="mono" style="font-size:12px;color:var(--muted)">Bantlar: ${BANDN[b.d1]} · ${BANDN[b.d2]} · ${multName} · altın (%5)</p>`;
+  }
+  [vs, vf, ima].forEach(el => el.addEventListener('input', calcR));
+  document.querySelectorAll('.presets button').forEach(b => b.addEventListener('click', () => { vf.value = b.dataset.vf; calcR(); }));
+  calcR();
+
+  /* ---------- Servo darbe ---------- */
+  const ang = document.getElementById('ang'), angout = document.getElementById('angout'), pmin = document.getElementById('pmin'), pmax = document.getElementById('pmax'), bits = document.getElementById('bits'), sres = document.getElementById('sres');
+  function calcS() {
+    const a = +ang.value, lo = parseFloat(pmin.value), hi = parseFloat(pmax.value), nb = +bits.value;
+    angout.textContent = a + '°';
+    if (!(lo > 0) || !(hi > lo) || hi > 20000) { sres.innerHTML = '<p class="err">180° darbesi 0° darbesinden büyük ve 20 000 µs altında olmalı.</p>'; return; }
+    const us = Math.round(lo + (hi - lo) * a / 180), duty = us / 20000, ledc = Math.round(duty * (Math.pow(2, nb) - 1));
+    const rad = (180 - a) * Math.PI / 180, hx = 30 + 22 * Math.cos(rad), hy = 32 - 22 * Math.sin(rad);
+    sres.innerHTML = `
+      <div class="result-main"><div><small>Darbe genişliği</small><strong>${fmt(us)} µs</strong></div>
+        <svg viewBox="0 0 60 40" width="90" height="60" aria-hidden="true"><path d="M8 32 A22 22 0 0 1 52 32" fill="none" stroke="var(--line)" stroke-width="3"/>
+        <line x1="30" y1="32" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="var(--mask)" stroke-width="4" stroke-linecap="round"/><circle cx="30" cy="32" r="4" fill="var(--gold)"/></svg></div>
+      <div class="kv">
+        <div><span>Görev oranı</span><b>%${fmt(duty * 100, 2)}</b></div>
+        <div><span>Periyot</span><b>20 ms</b></div>
+        <div><span>LEDC (${nb} bit)</span><b>${fmt(ledc)}</b></div>
+      </div>
+<pre class="code"><span style="color:var(--muted)">// Arduino</span>
+servo.writeMicroseconds(${us});
+<span style="color:var(--muted)">// ESP32 (Arduino core 3.x)</span>
+ledcAttach(PIN, 50, ${nb});
+ledcWrite(PIN, ${ledc});</pre>`;
+  }
+  [ang, pmin, pmax, bits].forEach(el => el.addEventListener('input', calcS));
+  calcS();
+
+  /* ---------- Atölye notları ---------- */
+  const NOTES = [
+    { d: '2026-10-28', p: 'MG996R servolar 5 V USB beslemesinden çalışınca ESP32 sürekli resetliyordu. Servolara ayrı 6 V hat ve ortak GND ile sorun bitti.', t: '#güç #servo' },
+    { d: '2026-10-21', p: 'ROS 2 Jazzy\'de colcon build sırasında "setup.py install is deprecated" uyarısı zararsız. setuptools sürümünü düşürmeye gerek yok.', t: '#ros2' },
+    { d: '2026-10-14', p: 'Çizgi izleyende Kd değerini 0,8\'den 1,5\'e çıkarınca virajlardaki salınım neredeyse tamamen kayboldu. Videosu yakında.', t: '#pid' },
+    { d: '2026-10-05', p: 'PinHarita\'ya Raspberry Pi Pico 2 eklendi. Beta testine katılan herkese teşekkürler.', t: '#uygulama' }
+  ];
+  const notesEl = document.getElementById('notes');
+  const dateTR = s => new Date(s + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const renderNotes = () => notesEl.innerHTML = NOTES.map(n => `<li><time datetime="${n.d}">${dateTR(n.d)}</time><p>${esc(n.p)}</p><span class="t">${esc(n.t)}</span></li>`).join('');
+  renderNotes();
+  const note = document.getElementById('note'), cnt = document.getElementById('cnt');
+  note.addEventListener('input', () => { if (note.value.length > 280) note.value = note.value.slice(0, 280); cnt.textContent = note.value.length + ' / 280'; });
+  document.getElementById('compose').addEventListener('submit', e => {
+    e.preventDefault(); const v = note.value.trim(); if (!v) { note.focus(); return; }
+    NOTES.unshift({ d: new Date().toISOString().slice(0, 10), p: v, t: '#önizleme · yalnızca bu tarayıcıda görünür' });
+    renderNotes(); note.value = ''; cnt.textContent = '0 / 280';
+  });
+
+  /* ---------- Bülten ---------- */
+  document.getElementById('nl').addEventListener('submit', e => {
+    e.preventDefault(); const em = document.getElementById('em').value.trim(), msg = document.getElementById('nlmsg');
+    msg.textContent = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)
+      ? 'Bu bir tasarım önizlemesi. Site yayına alındığında form bir bülten servisine bağlanacak.'
+      : 'Geçerli bir e-posta adresi gir, örneğin ad@ornek.com.';
+  });
+})();
+</script>
+
+</body></html>
