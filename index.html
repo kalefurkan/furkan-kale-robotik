@@ -610,10 +610,17 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
   /* ---------- İçerikler ---------- */
   const POSTS = [
-    {"id": "buton-led", "t": "Butonla LED kontrolü", "d": "Arduino'nun ilk giriş-çıkış devresi: butona her basışta LED açılır ya da kapanır. INPUT_PULLUP ve buton titreşimi (debounce) bu projede öğreniliyor.", "tag": "Arduino", "lv": 1, "f": "Proje"},
-    {"id": "akilli-lamba", "t": "Işığa duyarlı akıllı lamba", "d": "LDR ile ortamın ışığını ölçüp karanlıkta LED'i yakan sistem. Analog okuma ve gerilim bölücü mantığını gösterir.", "tag": "Arduino", "lv": 1, "f": "Proje"},
-    {"id": "mesafe-alarmi", "t": "Mesafe alarmı: HC-SR04 ve buzzer", "d": "Ultrasonik sensörle mesafe ölçüp 30 cm içine giren nesnelerde buzzer çalan alarm. Nesne yaklaştıkça bip sıklaşır.", "tag": "Arduino", "lv": 2, "f": "Proje"},
-    {"id": "servo-pot", "t": "Potansiyometre ile servo kontrolü", "d": "Potansiyometreyi çevirince servo kolu 0–180° arasında onu takip eder. Analog okuma, map() ve Servo kütüphanesi.", "tag": "Arduino", "lv": 2, "f": "Proje"},
+    {"id": "led-yakma", "t": "1. LED yakma", "d": "Arduino'nun \"Merhaba Dünya\"sı: D13 pinine bağlı LED her saniye yanar ve söner. pinMode, digitalWrite ve delay komutlarını tanıtır.", "tag": "Arduino", "lv": 1, "f": "Proje"},
+    {"id": "trafik-lambasi", "t": "2. Trafik lambası", "d": "Kırmızı, sarı ve yeşil LED ile gerçek bir kavşak sırası: kırmızı, kırmızı+sarı, yeşil, sarı. Birden fazla çıkışı ve zamanlamayı birlikte kullanır.", "tag": "Arduino", "lv": 1, "f": "Proje"},
+    {"id": "buton-led", "t": "3. Butonla LED kontrolü", "d": "Arduino'nun ilk giriş-çıkış devresi: butona her basışta LED açılır ya da kapanır. INPUT_PULLUP ve buton titreşimi (debounce) bu projede öğreniliyor.", "tag": "Arduino", "lv": 1, "f": "Proje"},
+    {"id": "pot-led", "t": "4. Potansiyometre ile LED parlaklığı", "d": "Potansiyometreyi çevirdikçe LED'in parlaklığı değişir. Analog okuma (analogRead) ve PWM ile analog çıkış (analogWrite) birlikte kullanılır.", "tag": "Arduino", "lv": 1, "f": "Proje"},
+    {"id": "karasimsek", "t": "5. Karaşimşek devresi", "d": "Altı LED üzerinde ışık gidip gelir. Dizi (array) ve for döngüsü ile çok sayıda pini tek kod bloğunda yönetmeyi öğretir.", "tag": "Arduino", "lv": 2, "f": "Proje"},
+    {"id": "akilli-lamba", "t": "6. LDR ile LED yakma (akıllı lamba)", "d": "LDR ile ortamın ışığını ölçüp karanlıkta LED'i yakan sistem. Analog okuma ve gerilim bölücü mantığını gösterir.", "tag": "Arduino", "lv": 1, "f": "Proje"},
+    {"id": "rgb-led", "t": "7. RGB LED", "d": "Tek bir LED içinde kırmızı, yeşil ve mavi çip bulunur. analogWrite ile üç kanalı karıştırıp yedi renk üretiriz.", "tag": "Arduino", "lv": 2, "f": "Proje"},
+    {"id": "ntc-sicaklik", "t": "8. NTC ile sıcaklık ölçme", "d": "NTC termistörün direnci sıcaklıkla değişir. Gerilim bölücü ile okuyup yaklaşık sıcaklığı hesaplar, 30 °C üstünde LED'i yakarız.", "tag": "Arduino", "lv": 2, "f": "Proje"},
+    {"id": "mesafe-alarmi", "t": "9. Park sensörü: mesafe alarmı", "d": "Ultrasonik sensörle mesafe ölçüp 30 cm içine giren nesnelerde buzzer çalan alarm. Nesne yaklaştıkça bip sıklaşır.", "tag": "Arduino", "lv": 2, "f": "Proje"},
+    {"id": "pir-hareket", "t": "10. PIR hareket sensörü", "d": "HC-SR501 PIR sensörü ortamdaki kızılötesi değişimi, yani hareketi algılar. Hareket olunca LED yanar ve Seri Çizici'ye mesaj yazılır.", "tag": "Arduino", "lv": 1, "f": "Proje"},
+    {"id": "servo-pot", "t": "Ek proje: potansiyometre ile servo kontrolü", "d": "Potansiyometreyi çevirince servo kolu 0–180° arasında onu takip eder. Analog okuma, map() ve Servo kütüphanesi.", "tag": "Arduino", "lv": 2, "f": "Proje"},
     { t: 'ESP32 ile Wi-Fi üzerinden robot kontrolü', d: 'ESP32 üzerinde küçük bir web sunucusu kurup telefon tarayıcısından joystick ile robotu sürmek.', tag: 'ESP32', lv: 2, min: 15, f: 'Proje' },
     { t: 'MPU6050 ile eğim açısı okuma', d: 'İvmeölçer ve jiroskop verisini tamamlayıcı filtreyle birleştirip titremeyen bir açı değeri elde etmek.', tag: 'ESP32', lv: 2, min: 12, f: 'Yazı' },
     { t: "Raspberry Pi 5'e ROS 2 Jazzy kurulumu", d: 'Ubuntu 24.04 üzerine kurulum, çalışma alanı oluşturma ve sık karşılaşılan colcon hataları.', tag: 'ROS 2', lv: 2, min: 18, f: 'Yazı' },
@@ -635,6 +642,116 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     { t: "Code Spark, Kidlo Coding ve ABCya", d: "Küçük yaşlar için kodlama oyunları: diziler ve döngüler, fare kullanımı ve etkinlik oyunları.", tag: "Code Spark", f: 'Uygulama' }
   ];
   const DETAILS = {
+ "led-yakma": {
+  "parts": [
+   "Arduino Uno ve USB kablosu",
+   "Breadboard",
+   "1 × LED (5 mm)",
+   "1 × 220 Ω direnç",
+   "2 × jumper kablo"
+  ],
+  "wiring": [
+   [
+    "D13",
+    "LED anot (uzun bacak)"
+   ],
+   [
+    "LED katot (kısa bacak)",
+    "220 Ω direncin bir ucu"
+   ],
+   [
+    "Direncin diğer ucu",
+    "GND"
+   ]
+  ],
+  "img": "assets/devre/led-yakma.png",
+  "steps": [
+   "USB kablosunu çıkar; devreyi her zaman enerjisiz kur.",
+   "LED'i breadboard'a tak: uzun bacağı (anot) bir sütuna, kısa bacağı (katot) yanındaki sütuna.",
+   "LED'in anot sütununa D13 pininden gelen bir kablo bağla.",
+   "LED'in katot sütunundan başlayarak 220 Ω direnci tak; direncin diğer ucunu bir kabloyla GND'ye ver.",
+   "Kodu yükle (Arduino IDE'de Dosya → Örnekler → 01.Basics → Blink ile aynıdır).",
+   "LED bir saniye yanıp bir saniye söner. delay değerlerini değiştirip hızı dene."
+  ],
+  "code": "// LED yakma: D13'teki LED her saniye yanar ve söner\nconst int LED = 13;\n\nvoid setup() {\n  pinMode(LED, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(LED, HIGH);   // LED yansın\n  delay(1000);               // 1 saniye bekle\n  digitalWrite(LED, LOW);    // LED sönsün\n  delay(1000);\n}\n",
+  "notes": [
+   [
+    "Komutlar",
+    "pinMode(LED, OUTPUT) pini çıkış yapar. digitalWrite(LED, HIGH) pine 5 V verir (LED yanar), LOW 0 V verir (söner). delay(1000) kodu 1000 milisaniye bekletir."
+   ],
+   [
+    "Neden D13?",
+    "Uno kartında D13 pini, kart üzerindeki küçük \"L\" LED'ine de bağlıdır. Dış LED bağlamasan bile o LED yanıp söner."
+   ],
+   [
+    "LED yönü",
+    "LED yalnızca bir yönde akım geçirir: uzun bacak (anot) artı, kısa bacak (katot) eksi tarafa gider. Ters takarsan yanmaz, zarar da görmez."
+   ],
+   [
+    "Dene",
+    "Üç kısa, üç uzun, üç kısa yanıp sönerek SOS sinyali ver."
+   ]
+  ]
+ },
+ "trafik-lambasi": {
+  "parts": [
+   "Arduino Uno ve USB kablosu",
+   "Breadboard",
+   "1 × kırmızı, 1 × sarı, 1 × yeşil LED",
+   "3 × 220 Ω direnç",
+   "Jumper kablolar (7 adet)"
+  ],
+  "wiring": [
+   [
+    "D8",
+    "Kırmızı LED anot"
+   ],
+   [
+    "D9",
+    "Sarı LED anot"
+   ],
+   [
+    "D10",
+    "Yeşil LED anot"
+   ],
+   [
+    "Her LED'in katodu",
+    "220 Ω direnç, sonra ortak GND rayı"
+   ],
+   [
+    "GND rayı",
+    "Arduino GND"
+   ]
+  ],
+  "img": "assets/devre/trafik-lambasi.png",
+  "steps": [
+   "Devreyi enerjisiz kur. Üç LED'i breadboard'a aralıklı tak (kırmızı, sarı, yeşil).",
+   "Her LED'in anot sütununa ilgili pinden kablo çek: kırmızıya D8, sarıya D9, yeşile D10.",
+   "Her LED'in katot sütunundan başlayarak birer 220 Ω direnç tak.",
+   "Her direncin diğer ucunu bir kabloyla breadboard'un GND rayına bağla.",
+   "GND rayını bir kabloyla Arduino'nun GND pinine bağla.",
+   "Kodu yükle: kırmızı 5 sn, kırmızı+sarı 1,5 sn, yeşil 5 sn, sarı 2 sn yanar ve döngü başa döner."
+  ],
+  "code": "// Trafik lambası: kırmızı -> kırmızı+sarı -> yeşil -> sarı\nconst int KIRMIZI = 8;\nconst int SARI = 9;\nconst int YESIL = 10;\n\nvoid setup() {\n  pinMode(KIRMIZI, OUTPUT);\n  pinMode(SARI, OUTPUT);\n  pinMode(YESIL, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(KIRMIZI, HIGH);          // dur\n  delay(5000);\n\n  digitalWrite(SARI, HIGH);             // kırmızı + sarı: hazırlan\n  delay(1500);\n\n  digitalWrite(KIRMIZI, LOW);\n  digitalWrite(SARI, LOW);\n  digitalWrite(YESIL, HIGH);            // geç\n  delay(5000);\n\n  digitalWrite(YESIL, LOW);\n  digitalWrite(SARI, HIGH);             // yavaşla\n  delay(2000);\n  digitalWrite(SARI, LOW);\n}\n",
+  "notes": [
+   [
+    "Sıra neden böyle?",
+    "Kırmızı + sarı birlikte \"hazırlan\" anlamına gelir. Yeşilden sonra sarı \"yavaşla\" der, sonra kırmızıya dönülür."
+   ],
+   [
+    "Ortak GND rayı",
+    "Her LED için ayrı GND kablosu çekmek yerine katotları breadboard rayında birleştirip tek kabloyla Arduino'ya bağlarız."
+   ],
+   [
+    "Zamanlama",
+    "delay() süresince Arduino başka iş yapmaz. Butonlu yaya geçidi gibi eklemeler için ilerde millis() ile zamanlama öğrenilir."
+   ],
+   [
+    "Dene",
+    "3. projedeki butonu ekle: butona basılınca kırmızı yanıp yaya geçişi için süre uzasın."
+   ]
+  ]
+ },
  "buton-led": {
   "parts": [
    "Arduino Uno (veya uyumlu kart) ve USB kablosu",
@@ -693,6 +810,116 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
    [
     "Dene",
     "İkinci bir LED ve ikinci bir buton ekle; biri LED'i açsın, diğeri kapatsın."
+   ]
+  ]
+ },
+ "pot-led": {
+  "parts": [
+   "Arduino Uno ve USB kablosu",
+   "Breadboard",
+   "1 × 10 kΩ potansiyometre",
+   "1 × LED",
+   "1 × 220 Ω direnç",
+   "Jumper kablolar"
+  ],
+  "wiring": [
+   [
+    "5V",
+    "Potansiyometre bir dış bacak"
+   ],
+   [
+    "GND",
+    "Potansiyometre diğer dış bacak"
+   ],
+   [
+    "A0",
+    "Potansiyometre orta bacak"
+   ],
+   [
+    "D9 (~)",
+    "LED anot (uzun bacak)"
+   ],
+   [
+    "LED katot (kısa bacak)",
+    "220 Ω direnç, direncin diğer ucu GND"
+   ]
+  ],
+  "img": "assets/devre/pot-led.png",
+  "steps": [
+   "Devreyi enerjisiz kur. LED'i ve 220 Ω direnci breadboard'a tak: D9 → LED anot, LED katot → 220 Ω → GND.",
+   "Potansiyometrenin bir dış bacağını 5V'a, diğer dış bacağını GND'ye bağla.",
+   "Potansiyometrenin orta bacağını A0'a bağla.",
+   "Kodu yükle ve Seri Çizici'yi aç (9600 baud).",
+   "Potansiyometreyi yavaşça çevir: LED'in parlaklığı ve Seri Çizici'deki 0–255 arası değer birlikte değişir."
+  ],
+  "code": "// Potansiyometre ile LED parlaklığı\nconst int POT = A0;\nconst int LED = 9;      // PWM pini (~ işaretli)\n\nvoid setup() {\n  pinMode(LED, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int deger = analogRead(POT);                 // 0 ... 1023\n  int parlaklik = map(deger, 0, 1023, 0, 255); // 0 ... 255\n  analogWrite(LED, parlaklik);\n\n  Serial.println(parlaklik);\n  delay(50);\n}\n",
+  "notes": [
+   [
+    "İki farklı aralık",
+    "analogRead 0–1023 arasında (10 bit) değer okur. analogWrite ise 0–255 arasında (8 bit) değer kabul eder. map() ile birini diğerine orantılarız."
+   ],
+   [
+    "PWM nedir?",
+    "Arduino pine gerçek bir ara gerilim vermez. Pini çok hızlı açıp kapar; açık kalma oranı (görev oranı) parlaklığı belirler. Uno'da PWM pinleri 3, 5, 6, 9, 10 ve 11'dir (~ işaretli)."
+   ],
+   [
+    "Potansiyometre",
+    "Üç bacaklı ayarlı dirençtir: dış bacaklar 5V ve GND arasındadır, orta bacak dönme açısına göre 0–5 V arası gerilim verir."
+   ],
+   [
+    "Dene",
+    "Parlaklığı ters çevir: map(deger, 0, 1023, 255, 0)."
+   ]
+  ]
+ },
+ "karasimsek": {
+  "parts": [
+   "Arduino Uno ve USB kablosu",
+   "Breadboard",
+   "6 × LED (tercihen kırmızı)",
+   "1 × 220 Ω direnç",
+   "Jumper kablolar (13 adet)"
+  ],
+  "wiring": [
+   [
+    "D8, D9, D10, D11, D12, D13",
+    "Sırayla 1.–6. LED'in anotları"
+   ],
+   [
+    "6 LED'in katodu",
+    "Breadboard GND rayı"
+   ],
+   [
+    "GND rayı",
+    "220 Ω direnç üzerinden Arduino GND"
+   ]
+  ],
+  "img": "assets/devre/karasimsek.png",
+  "steps": [
+   "Devreyi enerjisiz kur. Altı LED'i breadboard'a aynı yönde, aralıklı tak (üst sıra).",
+   "D8'den D13'e kadar altı pini sırayla LED'lerin anot sütunlarına bağla.",
+   "Her LED'in katot sütunundan breadboard'un GND rayına bir kablo çek.",
+   "GND rayını tek bir 220 Ω direnç üzerinden Arduino GND'sine bağla.",
+   "Kodu yükle: ışık soldan sağa, sonra sağdan sola gidip gelir.",
+   "BEKLEME değerini küçültüp büyüterek hızı değiştir."
+  ],
+  "code": "// Karaşimşek: ışık 6 LED üzerinde gidip gelir\nconst int LEDLER[] = {8, 9, 10, 11, 12, 13};\nconst int SAYI = 6;\nconst int BEKLEME = 80;   // ms; küçültürsen hızlanır\n\nvoid setup() {\n  for (int i = 0; i < SAYI; i++) {\n    pinMode(LEDLER[i], OUTPUT);\n  }\n}\n\nvoid loop() {\n  // ileri: 0 -> 5\n  for (int i = 0; i < SAYI; i++) {\n    digitalWrite(LEDLER[i], HIGH);\n    delay(BEKLEME);\n    digitalWrite(LEDLER[i], LOW);\n  }\n  // geri: 4 -> 1 (uçlar iki kez yanmasın)\n  for (int i = SAYI - 2; i > 0; i--) {\n    digitalWrite(LEDLER[i], HIGH);\n    delay(BEKLEME);\n    digitalWrite(LEDLER[i], LOW);\n  }\n}\n",
+  "notes": [
+   [
+    "Dizi ve döngü",
+    "LEDLER[] dizisi pin numaralarını tutar. for döngüsü her pini sırayla yakıp söndürür; altı ayrı satır yazmak gerekmez."
+   ],
+   [
+    "Neden tek direnç?",
+    "Aynı anda yalnızca bir LED yandığı için akımın tamamı tek dirençten geçer. Birden fazla LED aynı anda yanacaksa her LED'e ayrı direnç gerekir."
+   ],
+   [
+    "Geri dönüş",
+    "Geri sayımda 4'ten 1'e inilir; böylece uçlardaki LED'ler iki kez üst üste yanmaz ve hareket akıcı görünür."
+   ],
+   [
+    "Dene",
+    "Hızı bir potansiyometreyle (4. proje) ayarla."
    ]
   ]
  },
@@ -762,6 +989,121 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
    ]
   ]
  },
+ "rgb-led": {
+  "parts": [
+   "Arduino Uno ve USB kablosu",
+   "Breadboard",
+   "1 × RGB LED (ortak katot)",
+   "3 × 220 Ω direnç",
+   "Jumper kablolar"
+  ],
+  "wiring": [
+   [
+    "D9 (~)",
+    "220 Ω direnç, sonra RGB LED kırmızı (R) bacağı"
+   ],
+   [
+    "D10 (~)",
+    "220 Ω direnç, sonra RGB LED yeşil (G) bacağı"
+   ],
+   [
+    "D11 (~)",
+    "220 Ω direnç, sonra RGB LED mavi (B) bacağı"
+   ],
+   [
+    "RGB LED ortak katot (en uzun bacak)",
+    "GND"
+   ]
+  ],
+  "img": "assets/devre/rgb-led.png",
+  "steps": [
+   "Devreyi enerjisiz kur. RGB LED'i breadboard'a tak. Sırayla kırmızı, ortak katot (en uzun bacak), yeşil, mavi bacaklar yan yana gelir.",
+   "Ortak katot bacağını bir kabloyla GND'ye bağla.",
+   "Kırmızı, yeşil ve mavi bacakların her birine birer 220 Ω direnç tak.",
+   "Her direncin diğer ucunu sırayla D9, D10 ve D11'e kablola.",
+   "Kodu yükle: LED sırayla kırmızı, yeşil, mavi, sarı, mor, turkuaz ve beyaz yanar."
+  ],
+  "code": "// RGB LED (ortak katot): renk karışımı\nconst int KIRMIZI = 9;\nconst int YESIL = 10;\nconst int MAVI = 11;\n\nvoid renk(int k, int y, int m) {\n  analogWrite(KIRMIZI, k);\n  analogWrite(YESIL, y);\n  analogWrite(MAVI, m);\n}\n\nvoid setup() {\n  pinMode(KIRMIZI, OUTPUT);\n  pinMode(YESIL, OUTPUT);\n  pinMode(MAVI, OUTPUT);\n}\n\nvoid loop() {\n  renk(255, 0, 0);       // kırmızı\n  delay(1000);\n  renk(0, 255, 0);       // yeşil\n  delay(1000);\n  renk(0, 0, 255);       // mavi\n  delay(1000);\n  renk(255, 255, 0);     // sarı\n  delay(1000);\n  renk(255, 0, 255);     // mor\n  delay(1000);\n  renk(0, 255, 255);     // turkuaz\n  delay(1000);\n  renk(255, 255, 255);   // beyaz\n  delay(1000);\n}\n",
+  "notes": [
+   [
+    "Renk karışımı",
+    "Kırmızı + yeşil = sarı, kırmızı + mavi = mor, yeşil + mavi = turkuaz, üçü birden = beyaz. analogWrite değerini 0–255 arasında ayarlayarak aradaki tonları da elde edersin."
+   ],
+   [
+    "Ortak katot / ortak anot",
+    "Bu devrede üç rengin eksi bacağı ortaktır (ortak katot): HIGH yakar. Ortak anot LED alırsan ortak bacak 5V'a gider ve değerler ters çalışır (0 yakar, 255 söndürür)."
+   ],
+   [
+    "Neden üç direnç?",
+    "Her renk çipi ayrı bir LED'dir ve kendi akım sınırlayıcısına ihtiyaç duyar."
+   ],
+   [
+    "Dene",
+    "Üç potansiyometre ile renk karıştırıcı yap: her biri bir kanalı kontrol etsin."
+   ]
+  ]
+ },
+ "ntc-sicaklik": {
+  "parts": [
+   "Arduino Uno ve USB kablosu",
+   "Breadboard",
+   "1 × 10 kΩ NTC termistör",
+   "1 × 10 kΩ direnç",
+   "1 × LED",
+   "1 × 220 Ω direnç",
+   "Jumper kablolar"
+  ],
+  "wiring": [
+   [
+    "5V",
+    "10 kΩ direncin bir ucu"
+   ],
+   [
+    "10 kΩ direncin diğer ucu",
+    "A0 ve NTC'nin bir ucu (aynı sütun)"
+   ],
+   [
+    "NTC'nin diğer ucu",
+    "GND"
+   ],
+   [
+    "D8",
+    "LED anot (uzun bacak)"
+   ],
+   [
+    "LED katot (kısa bacak)",
+    "220 Ω direnç, direncin diğer ucu GND"
+   ]
+  ],
+  "img": "assets/devre/ntc-sicaklik.png",
+  "steps": [
+   "Devreyi enerjisiz kur. 10 kΩ direnç ile NTC'yi breadboard'da aynı sütunda uç uça birleştir (gerilim bölücü).",
+   "10 kΩ direncin serbest ucunu 5V'a, NTC'nin serbest ucunu GND'ye bağla.",
+   "İki parçanın birleştiği sütundan A0'a kablo çek.",
+   "LED devresini kur: D8 → LED anot, LED katot → 220 Ω → GND.",
+   "Kodu yükle ve Seri Çizici'yi aç. Parmağınla NTC'yi ısıt; değerin değiştiğini izle.",
+   "Sıcaklık 30 °C'ye ulaşınca LED yanar."
+  ],
+  "code": "// NTC ile sıcaklık ölçme (yaklaşık): 30 °C ve üstünde LED yanar\nconst int NTC_PIN = A0;   // 5V - 10k direnç - A0 - NTC - GND\nconst int LED = 8;\nconst float ESIK = 30.0;  // °C\n\nvoid setup() {\n  pinMode(LED, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int adc = analogRead(NTC_PIN);\n\n  // İki kalibrasyon noktası: 20 °C ≈ 569, 40 °C ≈ 355 (10 kΩ NTC, B=3950)\n  // Aralarında doğrusal yaklaşım yapıyoruz (20-40 °C arası yaklaşık doğru)\n  float sicaklik = 20.0 + (569.0 - adc) * 20.0 / (569.0 - 355.0);\n\n  Serial.print(\"ADC: \");\n  Serial.print(adc);\n  Serial.print(\"  Sicaklik: \");\n  Serial.println(sicaklik);\n\n  if (sicaklik >= ESIK) {\n    digitalWrite(LED, HIGH);\n  } else {\n    digitalWrite(LED, LOW);\n  }\n  delay(500);\n}\n",
+  "notes": [
+   [
+    "NTC nedir?",
+    "Negatif sıcaklık katsayılı dirençtir: ısındıkça direnci düşer. Bu 10 kΩ'luk NTC 25 °C'de 10 kΩ, daha sıcakta daha düşük değer verir."
+   ],
+   [
+    "Gerilim bölücü",
+    "NTC alt tarafta olduğu için sıcaklık arttıkça A0 gerilimi düşer. 20 °C'de yaklaşık 569, 40 °C'de yaklaşık 355 okunur."
+   ],
+   [
+    "Bu hesap yaklaşık",
+    "Kodda 20 °C ve 40 °C noktaları arasında doğrusal ara değer buluyoruz. NTC doğrusal değildir; bu aralıkta ±1 °C hata normaldir, aralığın dışında hata artar. Daha doğru ölçüm için Steinhart-Hart ya da B parametresi denklemi ve log() fonksiyonu kullanılır."
+   ],
+   [
+    "Kalibrasyon",
+    "569 ve 355 değerleri B=3950 olan 10 kΩ bir NTC ve 10 kΩ direnç için hesaplandı. Farklı bir NTC kullanırsan bir termometreyle iki noktada ölçüp bu iki sayıyı kendin güncelle."
+   ]
+  ]
+ },
  "mesafe-alarmi": {
   "parts": [
    "Arduino Uno ve USB kablosu",
@@ -826,6 +1168,65 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
    [
     "Doğruluk",
     "HC-SR04 yaklaşık 2–400 cm aralığında çalışır. Kumaş gibi yumuşak ya da sensöre açılı duran yüzeyler yankıyı zayıflatır."
+   ]
+  ]
+ },
+ "pir-hareket": {
+  "parts": [
+   "Arduino Uno ve USB kablosu",
+   "HC-SR501 PIR hareket sensörü",
+   "Breadboard",
+   "1 × LED",
+   "1 × 220 Ω direnç",
+   "Jumper kablolar"
+  ],
+  "wiring": [
+   [
+    "5V",
+    "PIR VCC"
+   ],
+   [
+    "GND",
+    "PIR GND"
+   ],
+   [
+    "D2",
+    "PIR OUT"
+   ],
+   [
+    "D8",
+    "LED anot (uzun bacak)"
+   ],
+   [
+    "LED katot (kısa bacak)",
+    "220 Ω direnç, direncin diğer ucu GND"
+   ]
+  ],
+  "img": "assets/devre/pir-hareket.png",
+  "steps": [
+   "Devreyi enerjisiz kur. PIR sensörünün üç bacağını kontrol et: VCC, OUT, GND (kartın üzerinde yazar).",
+   "VCC'yi 5V'a, GND'yi GND'ye, OUT'u D2'ye bağla.",
+   "LED devresini kur: D8 → LED anot, LED katot → 220 Ω → GND.",
+   "Kodu yükle ve Seri Çizici'yi aç.",
+   "Sensörün önünde elini hareket ettir: LED yanar ve \"Hareket var\" yazılır. Hareket durunca bir süre sonra LED söner."
+  ],
+  "code": "// PIR hareket sensörü: hareket algılanınca LED yanar\nconst int PIR = 2;\nconst int LED = 8;\n\nvoid setup() {\n  pinMode(PIR, INPUT);\n  pinMode(LED, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  if (digitalRead(PIR) == HIGH) {\n    digitalWrite(LED, HIGH);\n    Serial.println(\"Hareket var\");\n  } else {\n    digitalWrite(LED, LOW);\n  }\n  delay(100);\n}\n",
+  "notes": [
+   [
+    "PIR nasıl çalışır?",
+    "Sensör, vücut sıcaklığındaki nesnelerin yaydığı kızılötesi ışımadaki değişimi algılar. Hareketsiz duran birini ya da ısı farkı oluşturmayan hareketi algılamayabilir."
+   ],
+   [
+    "Isınma süresi",
+    "Güç verdikten sonra sensörün ortama alışması için yaklaşık 30–60 saniye gerekir; bu sürede yanlış alarm verebilir."
+   ],
+   [
+    "Ayar potları",
+    "HC-SR501 üzerinde iki küçük pot vardır: biri algılama mesafesini, diğeri OUT'un kaç saniye HIGH kalacağını ayarlar."
+   ],
+   [
+    "Dene",
+    "LED yerine aktif buzzer bağla ve basit bir hırsız alarmı yap."
    ]
   ]
  },
