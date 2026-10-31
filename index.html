@@ -578,6 +578,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     { t: 'İlk ROS 2 düğümün: publisher ve subscriber', d: "Python ile iki düğüm yazıp topic üzerinden sensör verisi aktarmak. rqt_graph ile akışı görselleştirmek.", tag: 'ROS 2', lv: 3, min: 20, f: 'Video' },
     { t: 'OpenCV ile renk takibi yapan kamera', d: 'HSV maskesiyle bir topu bulup iki servoyla kamerayı onun peşinden döndürmek. Pan-tilt düzeneği dahil.', tag: 'Python', lv: 2, min: 22, f: 'Proje' },
     { t: "Python'dan Arduino'ya seri haberleşme", d: 'pyserial ile bilgisayardan komut göndermek, gelen veriyi grafiğe dökmek ve bağlantı kopunca toparlamak.', tag: 'Python', lv: 1, min: 10, f: 'Yazı' },
+    { t: "Raspberry Pi ile robotları kontrol etmek", d: "Kredi kartı boyutunda tam bir Linux bilgisayarı. Python ile sensörleri okuyup motorları sürmek, kamera ve ağ bağlantısı gerektiren robot projeleri için kullanılır.", tag: "Raspberry Pi", f: "Uygulama" },
     { t: "Scratch Jr. ile blok kodlama", d: "Blok tabanlı kodlamaya ilk adım. Serbest etkinlik ve STEM çalışmalarında kullanılıyor.", tag: "Scratch Jr.", f: 'Uygulama' },
     { t: "Scratch ile oyun ve proje geliştirme", d: "Zamanlama, mesajlaşma blokları, kod akışını izleme, değişken ve fonksiyon (özel blok) konuları Scratch projeleriyle işleniyor.", tag: "Scratch", f: 'Uygulama' },
     { t: "Kodu Game Lab ile oyun tasarımı", d: "Draw Your Game ve Scratch Jr. ile birlikte dijital oyun tasarımı modülünde kullanılıyor.", tag: "Kodu Game Lab", f: 'Uygulama' },
@@ -591,7 +592,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     { t: "Draw Your Game ile çizerek oyun yapma", d: "Dijital oyun tasarımı modülünde Scratch Jr. ve Kodu Game Lab ile birlikte kullanılıyor.", tag: "Draw Your Game", f: 'Uygulama' },
     { t: "Code Spark, Kidlo Coding ve ABCya", d: "Küçük yaşlar için kodlama oyunları: diziler ve döngüler, fare kullanımı ve etkinlik oyunları.", tag: "Code Spark", f: 'Uygulama' }
   ];
-  const TAGS = ['Tümü', 'Arduino', 'ESP32', 'ROS 2', 'Python', 'Scratch Jr.', 'Scratch', 'Kodu Game Lab', 'Minecraft', 'Tinkercad', 'SPIKE', 'TaleBot', 'Cognimates', 'Draw Your Game', 'Code Spark'];
+  const TAGS = ['Tümü', 'Arduino', 'ESP32', 'ROS 2', 'Python', 'Raspberry Pi', 'Scratch Jr.', 'Scratch', 'Kodu Game Lab', 'Minecraft', 'Tinkercad', 'SPIKE', 'TaleBot', 'Cognimates', 'Draw Your Game', 'Code Spark'];
   const LV = ['', 'Başlangıç', 'Orta', 'İleri'];
   let tag = 'Tümü', q = '';
   try { const s = localStorage.getItem('fk-tag'); if (TAGS.includes(s)) tag = s; } catch (e) {}
