@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PinHarita · Kartın pin haritası</title>
+<meta name="description" content="Uno R4, ESP32-S3, Pico 2 ve Raspberry Pi 5 için pin işlevleri, önyükleme uyarıları ve çakışma denetimi. Çevrimdışı çalışır.">
+<meta name="theme-color" content="#1C6A4C">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#F1F5F1;--surface:#fff;--sunken:#E6EDE7;--ink:#10241B;--muted:#53675C;--line:#D2DCD4;--mask:#1C6A4C;--on-mask:#fff;--gold:#C8961C;--ok:#1C6A4C;--err:#B3261E;--warn:#8A5A00;--info:#2A6FA8;
+ --f-pwm:#B3541E;--f-adc:#2A6FA8;--f-dac:#8A3F9E;--f-i2c:#1C6A4C;--f-spi:#8A6410;--f-uart:#4A5B52;--f-int:#B0285A;--f-touch:#137A86;--f-power:#B3261E;--f-gnd:#55605A;
+ --f-display:"Chakra Petch","Arial Narrow",system-ui,sans-serif;--f-body:Figtree,system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#0A1C14;--surface:#0F271C;--sunken:#0C2118;--ink:#E3EEE6;--muted:#96AE9F;--line:#20402F;--mask:#45B484;--on-mask:#05200F;--gold:#E2B647;--ok:#45B484;--err:#FF8A80;--warn:#E2B647;--info:#7DB6E8;
+ --f-pwm:#C9703A;--f-adc:#3F86C4;--f-dac:#A55BB8;--f-i2c:#2E8A63;--f-spi:#A57C14;--f-uart:#5E7367;--f-int:#D2527F;--f-touch:#2AA0AE;--f-power:#D4574E;--f-gnd:#6F7D75}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+header .logo{display:flex;align-items:center;gap:10px}
+header h1{font:700 22px var(--f-display);margin:0}
+header a{color:var(--mask);font-weight:600;text-decoration:none;font-size:14px}
+header .sub{color:var(--muted);font-size:14px}
+header .sp{flex:1}
+#off{font:500 12px var(--f-mono);color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+#off.ready{color:var(--ok);border-color:var(--ok)}
+.band{max-width:1320px;margin:12px auto 0;padding:0 20px}
+.band div{background:var(--sunken);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:10px;padding:9px 14px;font-size:13.5px}
+.band b{font-family:var(--f-display)}
+main{display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);grid-template-areas:"kart diag" "filtre diag" "detay diag" "plan diag" "src src";gap:16px;padding:16px 20px;max-width:1320px;margin:0 auto;align-items:start}
+@media (max-width:900px){main{grid-template-columns:minmax(0,1fr);grid-template-areas:"kart" "filtre" "diag" "detay" "plan" "src"}}
+#p-kart{grid-area:kart}#p-filtre{grid-area:filtre}#p-diag{grid-area:diag}#p-detay{grid-area:detay}#p-plan{grid-area:plan}#p-src{grid-area:src}
+.panel{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.panel h2{font:600 15px var(--f-display);margin:0 0 10px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.panel h2 .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--mask);color:var(--on-mask);font-size:12px}
+.btn{font:600 13px var(--f-body);border:0;border-radius:7px;padding:7px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:var(--mask);color:var(--on-mask)}
+.btn.alt{background:var(--sunken);color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible,a:focus-visible,pre:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tools label,label.l{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+select,input[type=text],input[type=search]{font:500 13px var(--f-body);padding:7px 9px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);max-width:100%;min-width:0}
+.hint{color:var(--muted);font-size:12.5px;margin:8px 0 0}
+.boards{display:grid;gap:6px}
+.boards button{all:unset;cursor:pointer;display:grid;gap:1px;padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.boards button b{font:600 14px var(--f-display)}
+.boards button small{color:var(--muted);font-size:12px}
+.boards button[aria-pressed=true]{background:var(--mask);color:var(--on-mask);border-color:var(--mask)}
+.boards button[aria-pressed=true] small{color:var(--on-mask);opacity:.85}
+.boards button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chips button{all:unset;cursor:pointer;font:600 12.5px var(--f-body);padding:5px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:inline-flex;gap:6px;align-items:center}
+.chips button::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--c,var(--muted))}
+.chips button[aria-pressed=true]{background:var(--c);color:#fff;border-color:var(--c)}
+.chips button[aria-pressed=true]::before{background:#fff}
+.chips button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.count{font:500 12px var(--f-mono);color:var(--muted)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px;background:var(--c)}
+/* tahta */
+.board{display:flex;gap:10px;justify-content:center;align-items:flex-start;flex-wrap:nowrap}
+.board.uno{flex-direction:column;align-items:stretch}
+.grp{min-width:0}
+.grp h3{font:500 11px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px}
+.grp.v{display:grid;gap:4px;flex:1 1 0;max-width:230px}
+.grp.h .row{display:flex;flex-wrap:wrap;gap:4px}
+.chip{flex:1 1 auto;min-width:0;background:var(--sunken);border:1px solid var(--line);border-radius:7px;padding:3px 7px}
+.board .mid{align-self:stretch;display:grid;place-items:center;min-width:70px;flex:0 1 140px;border:2px solid var(--line);border-radius:12px;background:repeating-linear-gradient(135deg,var(--sunken) 0 8px,transparent 8px 16px);text-align:center;padding:8px;color:var(--muted);font:600 12px var(--f-display)}
+.board .mid small{display:block;font:400 11px var(--f-body);margin-top:6px}
+.pin{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:6px;min-width:0;width:100%;padding:4px 7px;border:1px solid var(--line);border-left:4px solid var(--c,var(--line));border-radius:7px;background:var(--surface);font-size:12.5px;position:relative}
+.grp.h .pin{flex-direction:column;align-items:flex-start;gap:2px;width:auto;min-width:46px}
+.pin .ph{font:500 10px var(--f-mono);color:var(--muted);min-width:16px;flex:none}
+.pin .lb{font:600 12.5px var(--f-mono);white-space:nowrap}
+.pin .bd{display:flex;flex-wrap:wrap;gap:2px;margin-left:auto}
+.grp.h .pin .bd{margin-left:0}
+.bd span{font:700 9px/1 var(--f-mono);color:#fff;padding:2px 3px;border-radius:3px;background:var(--c)}
+.pin.k-power{--c:var(--f-power)}.pin.k-gnd{--c:var(--f-gnd)}.pin.k-special{--c:var(--muted)}
+.pin.k-power,.pin.k-gnd,.pin.k-special{cursor:pointer}
+.pin .mk{font:700 11px var(--f-mono);flex:none}
+.pin.w-boot{border-style:dashed;border-color:var(--warn)}
+.pin.w-unusable{border-style:dashed;border-color:var(--err);text-decoration:line-through}
+.pin.sel{outline:3px solid var(--gold);outline-offset:1px}
+.pin.dim{opacity:.28}
+.pin.hit{box-shadow:0 0 0 2px var(--mask)}
+.pin.asg::after{content:attr(data-asg);position:absolute;top:-7px;right:4px;font:700 9px/1 var(--f-mono);background:var(--gold);color:#10241B;padding:2px 4px;border-radius:3px;max-width:90%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pin.bad{border-color:var(--err);box-shadow:0 0 0 2px var(--err)}
+.pin:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (max-width:560px){.board .mid{display:none}.pin .bd span{font-size:0;width:8px;height:8px;padding:0;border-radius:50%}.pin .lb{font-size:11.5px}.pin{padding:4px 5px;gap:3px}.board{gap:6px}.grp.h .pin{min-width:40px}}
+/* detay */
+.dh{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.dh h3{margin:0;font:700 20px var(--f-display)}
+.dh small{color:var(--muted);font:500 12px var(--f-mono)}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:8px 0}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.tbl{overflow-x:auto}
+.wlist{display:grid;gap:6px;margin:8px 0;padding:0;list-style:none}
+.wlist li{border:1px solid var(--line);border-left:4px solid var(--info);border-radius:8px;padding:6px 10px;font-size:13px;background:var(--sunken)}
+.wlist li.err{border-left-color:var(--err)}.wlist li.warn{border-left-color:var(--warn)}
+.wlist b{font:600 11px var(--f-mono);text-transform:uppercase;letter-spacing:.05em;margin-right:6px}
+.vf{font:600 10px var(--f-mono);border:1px solid var(--warn);color:var(--warn);border-radius:4px;padding:0 4px;margin-left:6px}
+.tabs{display:flex;gap:6px;margin:8px 0 6px}
+.tabs button{all:unset;cursor:pointer;font:600 12.5px var(--f-body);padding:4px 10px;border:1px solid var(--line);border-radius:999px}
+.tabs button[aria-pressed=true]{background:var(--mask);color:var(--on-mask);border-color:var(--mask)}
+.tabs button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+pre{margin:0 0 8px;background:#0E1F17;color:#D7E8DC;border-radius:10px;padding:10px 12px;font:12.5px/1.55 var(--f-mono);overflow:auto;max-height:260px;white-space:pre}
+.cl{font:600 11px var(--f-mono);color:var(--muted);margin:6px 0 3px}
+/* plan */
+.form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.form .full{grid-column:1/-1}
+.form label{display:grid;gap:3px;font-size:12px;color:var(--muted)}
+.form select,.form input{width:100%}
+#alist{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+#alist li{display:flex;gap:8px;align-items:center;border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:13px;background:var(--surface)}
+#alist li .t{min-width:0;flex:1;overflow-wrap:anywhere}
+#alist code{font:600 12px var(--f-mono)}
+#msgs{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:6px}
+#msgs li{border:1px solid var(--line);border-left:4px solid var(--info);border-radius:8px;padding:7px 10px;font-size:13px;cursor:pointer;background:var(--surface)}
+#msgs li.err{border-left-color:var(--err)}#msgs li.warn{border-left-color:var(--warn)}
+#msgs li b{font:600 11px var(--f-mono);text-transform:uppercase;margin-right:6px}
+#msgs li.err b{color:var(--err)}#msgs li.warn b{color:var(--warn)}#msgs li.info b{color:var(--info)}
+#msgs li.good{border-left-color:var(--ok);cursor:default}
+#toast{min-height:20px;font-size:13px;color:var(--ok);font-weight:600;margin-top:6px}
+.src{display:grid;gap:6px;padding-left:20px;font-size:13.5px;margin:6px 0}
+.src a{color:var(--mask)}
+ul.notes{padding-left:20px;font-size:13.5px;margin:6px 0;color:var(--ink)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="5" y="6" width="22" height="20" rx="4" fill="#1C6A4C"/><g fill="#fff"><rect x="1" y="9" width="4" height="2.4" rx="1"/><rect x="1" y="15" width="4" height="2.4" rx="1"/><rect x="1" y="21" width="4" height="2.4" rx="1"/><rect x="27" y="9" width="4" height="2.4" rx="1"/><rect x="27" y="15" width="4" height="2.4" rx="1"/><rect x="27" y="21" width="4" height="2.4" rx="1"/></g><circle cx="16" cy="16" r="4" fill="#C8961C"/></svg><h1>PinHarita</h1></div>
+  <span class="sub">Kartını seç · pin işlevlerini gör · çakışmaları yakala</span>
+  <span class="sp"></span>
+  <span id="off" role="status">Çevrimdışı: kontrol ediliyor…</span>
+  <a href="../index.html#araclar">← Siteye dön</a>
+</header>
+<div class="band"><div><b>Dürüst not:</b> Pin verisi üretici belgelerinden ve açık kaynak çekirdek dosyalarından derlendi (kartın altındaki <i>Kaynaklar</i> bölümü). Doğrulanamayan bilgiler <span class="vf">doğrula</span> rozetiyle işaretlidir. Kart sürümüne göre fark olabilir; bağlantı yapmadan önce kendi kartının belgesine bak. Bu araç gerçek bir devrede denenmemiştir ve bir güvence değildir.</div></div>
+<main>
+  <section class="panel" id="p-kart" aria-label="Kart seçimi">
+    <h2><span class="n">1</span>Kartını seç</h2>
+    <div class="boards" id="boards" role="group" aria-label="Kartlar"></div>
+  </section>
+  <section class="panel" id="p-filtre" aria-label="Filtre ve arama">
+    <h2><span class="n">2</span>İşleve göre bul</h2>
+    <input type="search" id="q" placeholder="Pin adı ya da işlev ara (ör. SDA, A0, PWM)" aria-label="Pin ara" style="width:100%">
+    <div class="chips" id="chips" role="group" aria-label="İşlev filtresi"></div>
+    <div class="tools">
+      <label>Eşleşme <select id="mode"><option value="all">Seçilenlerin hepsi</option><option value="any">Herhangi biri</option></select></label>
+      <label id="flexl" hidden><input type="checkbox" id="flex"> GPIO matrisi (esnek) atamalarını say</label>
+      <button class="btn alt" id="fclear" type="button">Süz kaldır</button>
+    </div>
+    <p class="count" id="cnt" role="status" aria-live="polite"></p>
+    <div class="legend" id="legend" aria-label="Renk açıklaması"></div>
+    <p class="hint">Klavye: <b>/</b> aramaya gider, oklarla pinler arasında gezin, Enter pini seçer.</p>
+  </section>
+  <section class="panel" id="p-diag" aria-label="Pin diyagramı">
+    <h2><span class="n">3</span><span id="bt">Pin diyagramı</span></h2>
+    <div class="board" id="board"></div>
+    <p class="hint" id="bhint"></p>
+  </section>
+  <section class="panel" id="p-detay" aria-label="Pin ayrıntısı" aria-live="polite">
+    <h2><span class="n">4</span>Pin ayrıntısı</h2>
+    <div id="detail"><p class="hint">Diyagramdan bir pine tıkla.</p></div>
+  </section>
+  <section class="panel" id="p-plan" aria-label="Plan ve çakışma denetimi">
+    <h2><span class="n">5</span>Planın ve çakışma denetimi</h2>
+    <form class="form" id="form">
+      <label class="full">Görev<select id="ftask"></select></label>
+      <label>Pin<select id="fpin"></select></label>
+      <label>Bağlanan cihazın gerilimi<select id="fvolt"><option value="">Belirtme</option><option value="3.3">3,3 V</option><option value="5">5 V</option></select></label>
+      <label class="full">Ad (isteğe bağlı)<input type="text" id="fname" maxlength="40" placeholder="ör. Sol motor, Mesafe sensörü"></label>
+      <div class="full tools"><button class="btn" type="submit">Görev ekle</button><span class="count" id="pcount"></span></div>
+    </form>
+    <ul id="alist" aria-label="Atamalar"></ul>
+    <ul id="msgs" aria-live="polite" aria-label="Denetim sonuçları"></ul>
+    <div class="tools" style="margin-top:12px">
+      <button class="btn alt" id="bshare" type="button">Bağlantı kopyala</button>
+      <button class="btn alt" id="bconst" type="button">Sabitleri kopyala</button>
+      <button class="btn alt" id="bcsv" type="button">CSV indir</button>
+      <button class="btn alt" id="bjson" type="button">JSON indir</button>
+      <button class="btn alt" id="bclear" type="button">Planı temizle</button>
+    </div>
+    <div id="toast" role="status"></div>
+    <div class="cl" id="clab">Sabitler</div>
+    <pre id="consts" tabindex="0" aria-label="Üretilen pin sabitleri"></pre>
+    <p class="hint">Plan bu tarayıcıda (localStorage) her kart için ayrı saklanır; adres çubuğundaki bağlantı da planı taşır.</p>
+  </section>
+  <section class="panel" id="p-src" aria-label="Kaynaklar">
+    <h2><span class="n">6</span><span id="srct">Kaynaklar</span></h2>
+    <ol class="src" id="srcs"></ol>
+    <ul class="notes" id="notes"></ul>
+  </section>
+</main>
+<script src="boards.js"></script>
+<script src="rules.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

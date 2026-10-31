@@ -368,7 +368,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <div>
         <div class="eyebrow">U2 · Uygulamalarım</div>
         <h2>Atölyede ihtiyaç duyup yazdığım araçlar</h2>
-        <p>Her biri bir projede karşılaştığım sorunu çözmek için başladı. Ücretsiz deneyebilirsin.</p>
+        <p>Her biri bir projede karşılaştığım sorunu çözmek için başladı. Tarayıcıda, kurulum gerekmeden çalışır.</p>
       </div>
     </div>
     <div class="apps">
@@ -383,13 +383,14 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         </div>
         <div class="app-body">
           <div class="app-title"><h3>ServoLab</h3><span class="status live">Yayında</span></div>
-          <p>Bluetooth ile robot kolunu telefondan sür, her servonun sınırlarını kalibre et ve hareketleri kaydedip tekrar oynat.</p>
+          <p>Robot kolunun servolarını tarayıcıdan sür: her servoyu kalibre et, pozları kaydedip oynat ve hareketi çalışan bir Arduino sketch'ine dönüştür. Kurulum gerekmez.</p>
           <ul class="feat">
-            <li>HC-05 ve ESP32 BLE desteği</li>
-            <li>Kaydedilen hareketi Arduino koduna dönüştürme</li>
-            <li>Servo başına min/max darbe ayarı</li>
+            <li>2–6 servo: açı sınırı, 400–2600 µs darbe aralığı, ters çevirme, ev açısı</li>
+            <li>Canlı kol önizlemesi ve poz zaman çizelgesi (doğrusal ya da yumuşak geçiş, JSON dışa/içe aktarma)</li>
+            <li>Servo.h kodu ve alıcı sketch'ler üretir: Uno, ESP32, USB, HC-05, ESP32 BLE</li>
+            <li>USB (Web Serial) ve BLE (Web Bluetooth) ile bağlanır; çevrimdışı çalışır. HC-05 klasik Bluetooth olduğu için tarayıcıdan bağlanamaz, sayfada yolu anlatılıyor</li>
           </ul>
-          <div class="app-foot"><span class="platforms">Android · iOS</span><a href="https://play.google.com" target="_blank" rel="noopener">İndir →</a></div>
+          <div class="app-foot"><span class="platforms">Web · Chrome / Edge</span><a href="servolab/">Aç →</a></div>
         </div>
       </article>
       <article class="app">
@@ -404,13 +405,14 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         </div>
         <div class="app-body">
           <div class="app-title"><h3>PinHarita</h3><span class="status beta">Beta</span></div>
-          <p>Kartını seç, hangi pinin PWM, ADC, I²C ya da SPI desteklediğini tek ekranda gör. Önyükleme sırasında sorun çıkaran pinler ayrıca işaretli.</p>
+          <p>Kartını seç, hangi pinin PWM, ADC, I²C, SPI ya da UART yapabildiğini diyagramda gör; pinlere görev ata, çakışmaları ve önyükleme sorunlarını gerekçesiyle öğren.</p>
           <ul class="feat">
-            <li>Uno R4, ESP32-S3, Pico 2, Raspberry Pi 5</li>
-            <li>Çakışma uyarısı: aynı pine iki görev atanınca</li>
-            <li>Çevrimdışı çalışır</li>
+            <li>Arduino UNO R4, ESP32-S3-DevKitC-1, Raspberry Pi Pico 2 ve Raspberry Pi 5 (40 pin)</li>
+            <li>İşlev filtresi ve arama; her pin için çevre birimi, mantık seviyesi ve kod karşılığı</li>
+            <li>Çakışma denetimi: aynı pine iki görev, desteklenmeyen işlev, strapping/kullanılamaz pin, ESP32-S3'te ADC2 + Wi-Fi, 5 V–3,3 V seviyesi</li>
+            <li>Planı Arduino sabitleri (const int) ya da CSV olarak dışa aktarır, bağlantıyla paylaşır; kaynak bağlantıları uygulamada, doğrulanamayan pinler "doğrula" rozetli; çevrimdışı çalışır</li>
           </ul>
-          <div class="app-foot"><span class="platforms">Web</span><a href="https://github.com" target="_blank" rel="noopener">Dene →</a></div>
+          <div class="app-foot"><span class="platforms">Web</span><a href="pinharita/">Aç →</a></div>
         </div>
       </article>
       <article class="app">

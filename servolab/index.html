@@ -1,0 +1,973 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ServoLab · Servo robot kol laboratuvarı</title>
+<meta name="description" content="Servo robot kolunu kaydırıcılarla sür, her servoyu kalibre et, pozları kaydedip oynat, Arduino kodunu üret. USB (Web Serial) ve BLE (Web Bluetooth) ile bağlan.">
+<meta name="theme-color" content="#1C6A4C">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#F1F5F1;--surface:#fff;--sunken:#E6EDE7;--ink:#10241B;--muted:#53675C;--line:#D2DCD4;--mask:#1C6A4C;--on-mask:#fff;--gold:#C8961C;--ok:#1C6A4C;--warn:#A4410E;--blue:#2A6FA8;
+ --floor:#E9EFE8;--f-display:"Chakra Petch","Arial Narrow",system-ui,sans-serif;--f-body:Figtree,system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#0A1C14;--surface:#0F271C;--sunken:#0C2118;--ink:#E3EEE6;--muted:#96AE9F;--line:#20402F;--mask:#45B484;--on-mask:#05200F;--gold:#E2B647;--ok:#45B484;--warn:#F0A070;--blue:#6DAEE0;--floor:#10281D}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);overflow-x:hidden}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+header .logo{display:flex;align-items:center;gap:10px}
+header h1{font:700 22px var(--f-display);margin:0}
+header a{color:var(--mask);font-weight:600;text-decoration:none;font-size:14px}
+header .sub{color:var(--muted);font-size:14px}
+header .sp{flex:1}
+.chip{font:500 12px var(--f-mono);padding:3px 9px;border-radius:999px;border:1px solid var(--line);background:var(--sunken);color:var(--muted)}
+.chip.ok{color:var(--ok);border-color:var(--ok)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,summary:focus-visible,pre:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.band{max-width:1320px;margin:16px auto 0;padding:0 20px}
+.band .panel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 22px;border-left:4px solid var(--gold)}
+@media (max-width:900px){.band .panel{grid-template-columns:1fr}}
+.band h2{margin-bottom:4px}
+.band p,.band ul{margin:0;font-size:13.5px}
+.band ul{padding-left:18px}
+main{display:grid;grid-template-columns:minmax(320px,440px) minmax(0,1fr);gap:16px;padding:16px 20px;max-width:1320px;margin:0 auto}
+@media (max-width:900px){main{grid-template-columns:minmax(0,1fr);padding:16px}.band{padding:0 16px}header{padding:12px 16px}}
+.col{display:grid;gap:16px;align-content:start;min-width:0}
+.panel{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.panel h2{font:600 15px var(--f-display);margin:0 0 10px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.panel h2 .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--mask);color:var(--on-mask);font-size:12px;flex:none}
+.grp{font:500 11px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:10px 0 5px}
+.btn{font:600 13px var(--f-body);border:0;border-radius:7px;padding:7px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;background:var(--mask);color:var(--on-mask)}
+.btn.alt{background:var(--sunken);color:var(--ink);border:1px solid var(--line)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.btn:disabled{opacity:.5;cursor:default}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tools label,.lbl{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+select,input[type=number],input[type=text],textarea{font:500 13px var(--f-body);padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);max-width:100%}
+input[type=number]{font-family:var(--f-mono);width:78px}
+input[type=checkbox]{width:18px;height:18px;accent-color:var(--mask)}
+.hint,.note{font-size:12.5px;color:var(--muted);margin:8px 0 0}
+code{font:500 12px var(--f-mono)}
+/* kaydırıcılar */
+.srv{display:grid;grid-template-columns:minmax(0,1fr) 78px;gap:2px 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.srv:last-child{border-bottom:0}
+.srv .nm{font:600 13px var(--f-display);grid-column:1/-1;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.srv .nm small{font:500 11.5px var(--f-mono);color:var(--muted)}
+input[type=range]{-webkit-appearance:none;appearance:none;height:30px;background:transparent;width:100%;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:4px;border:1px solid var(--line);background:linear-gradient(to right,var(--sunken) 0 var(--lo,0%),var(--mask) var(--lo,0%) var(--hi,100%),var(--sunken) var(--hi,100%) 100%)}
+input[type=range]::-moz-range-track{height:8px;border-radius:4px;border:1px solid var(--line);background:linear-gradient(to right,var(--sunken) 0 var(--lo,0%),var(--mask) var(--lo,0%) var(--hi,100%),var(--sunken) var(--hi,100%) 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--surface);border:3px solid var(--ink);margin-top:-9px}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--surface);border:3px solid var(--ink)}
+input[type=range]:focus-visible{outline:none}
+input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--gold);outline-offset:2px}
+input[type=range]:focus-visible::-moz-range-thumb{outline:2px solid var(--gold);outline-offset:2px}
+/* kalibrasyon */
+.cal{border:1px solid var(--line);border-radius:10px;background:var(--sunken);margin-bottom:8px}
+.cal summary{cursor:pointer;padding:8px 10px;font:600 13px var(--f-display);list-style:none;display:flex;gap:8px;align-items:center}
+.cal summary::-webkit-details-marker{display:none}
+.cal summary::after{content:"+";margin-left:auto;font:500 16px var(--f-mono);color:var(--muted)}
+.cal[open] summary::after{content:"−"}
+.cal .body{padding:0 10px 10px}
+.fg{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.fg label{display:grid;gap:2px;font-size:12px;color:var(--muted)}
+.fg input[type=number],.fg input[type=text]{width:100%}
+.fg .chk{display:flex;align-items:center;gap:8px;align-self:end;padding-bottom:6px}
+.us{font:500 12px var(--f-mono);color:var(--ink);margin:8px 0 4px;overflow-wrap:anywhere}
+.warn{color:var(--warn);font-weight:600}
+/* önizleme */
+canvas{width:100%;aspect-ratio:8/5;background:var(--floor);border:1px solid var(--line);border-radius:12px;display:block}
+.fk{font:500 13px var(--f-mono);margin-top:8px;overflow-wrap:anywhere}
+/* poz listesi */
+.pose{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:8px;background:var(--surface)}
+.pose.now{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset}
+.pose .ph{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
+.pose .ph b{font:700 13px var(--f-display);margin-right:auto}
+.pose .pv{display:flex;gap:8px;flex-wrap:wrap}
+.pose .pv label{display:grid;gap:1px;font:500 10.5px var(--f-mono);color:var(--muted);text-transform:uppercase}
+.pose .pv input{width:66px}
+.prog{font:500 12.5px var(--f-mono);color:var(--muted);min-height:20px;margin-top:6px}
+/* kod */
+pre{margin:0;background:#0E1F17;color:#D7E8DC;border-radius:10px;padding:12px;font:12.5px/1.55 var(--f-mono);overflow:auto;max-height:460px;white-space:pre}
+pre .c{color:#7FA38C}pre .k{color:#F0B96B}pre .n{color:#8EC7F0}pre .f{color:#9FE0B8}pre .p{color:#C79BE0}pre .s{color:#E8D58A}
+.codehead{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}.codehead h2{margin:0}.codehead .sp{flex:1}.codehead small{color:var(--muted);font:500 12px var(--f-mono)}
+/* bağlantı */
+.status{font-size:13.5px;margin:8px 0;padding:8px 10px;border-radius:8px;background:var(--sunken);border:1px solid var(--line)}
+.status.ok{border-color:var(--ok);color:var(--ok);font-weight:600}
+.status.err{border-color:var(--warn);color:var(--warn)}
+.log{height:120px;overflow:auto;background:var(--sunken);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:12px/1.5 var(--f-mono);white-space:pre-wrap;overflow-wrap:anywhere}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0 10px;display:block;overflow-x:auto}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:500 11px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+details.more summary{cursor:pointer;font:600 14px var(--f-display);padding:4px 0}
+details.more .in{font-size:13.5px}
+details.more .in p{margin:6px 0}
+textarea{width:100%;min-height:110px;font:12px/1.45 var(--f-mono);resize:vertical}
+.sr{position:absolute;left:-9999px}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="3" y="24" width="14" height="5" rx="2" fill="#1C6A4C"/><path d="M10 24L14 11L25 8" fill="none" stroke="#1C6A4C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="14" cy="11" r="3" fill="#C8961C"/><path d="M25 8l4-1.5M25 8l3.5 3" stroke="#C8961C" stroke-width="2.2" stroke-linecap="round"/></svg><h1>ServoLab</h1></div>
+  <span class="sub">Servo robot kol · kalibrasyon · poz kaydı · Arduino kodu</span>
+  <span class="sp"></span>
+  <span class="chip" id="offl" role="status">Çevrimdışı: denetleniyor…</span>
+  <a href="../index.html#araclar">← Siteye dön</a>
+</header>
+
+<div class="band"><section class="panel" aria-label="Bilgi ve sınırlar">
+  <div><h2>Ne yapar?</h2><p>2–6 servoyu kaydırıcılarla sürer, her servoya min/max açı ve darbe genişliği (µs), ters çevirme, ev açısı ve pin tanımlar. Pozları kaydeder, oynatır, JSON olarak saklar ve <b>Servo.h</b> kullanan Arduino sketch'ine çevirir. Aynı komutları USB'den ya da BLE'den kolundaki karta gönderebilir.</p></div>
+  <div><h2>Tarayıcı gereksinimi</h2><ul>
+    <li><b>USB (Web Serial):</b> masaüstü Chrome / Edge / Opera, HTTPS ya da localhost.</li>
+    <li><b>BLE (Web Bluetooth):</b> Chrome / Edge (masaüstü ve Android), HTTPS.</li>
+    <li><b>iOS Safari: ikisi de yok.</b> Arayüz, önizleme ve kod üretimi yine çalışır.</li>
+    <li><b>HC-05 tarayıcıdan bağlanamaz</b> (klasik Bluetooth). Aşağıdaki Bağlantı bölümünde yolu var.</li></ul></div>
+  <div><h2>Denenmedi</h2><p><b>Gerçek robot kolla, gerçek HC-05 ya da ESP32 ile denenmedi.</b> USB/BLE bağlantı kodu donanımsız ortamda yazıldı; yalnızca protokol biçimleyici/ayrıştırıcı sahte portla, üretilen sketch'ler ise sahte başlıklarla g++ söz dizimi denetimiyle ve bilgisayarda çalışan bir simülasyonla sınandı. Servo gücünü ayrı besle, kolu ilk denemede boş alanda ve düşük hızda çalıştır.</p></div>
+</section></div>
+
+<main>
+  <div class="col">
+    <section class="panel" aria-label="Servo kontrolü">
+      <h2><span class="n">1</span>Servo kontrolü</h2>
+      <div id="sliders"></div>
+      <div class="tools" style="margin-top:10px">
+        <button class="btn alt" id="goHome" type="button">Ev açılarına git</button>
+        <button class="btn" id="addPose" type="button">+ Poz ekle</button>
+      </div>
+      <p class="hint">Kaydırıcıya odaklanınca <code>←</code>/<code>→</code> ±1°, <code>Shift</code> ile ±10°, <code>Home</code>/<code>End</code> uçlara. Sınırlar kalibrasyondan gelir; sınırı aşan açı kırpılır. Elle yapılan değişiklik oynatmayı durdurur.</p>
+    </section>
+
+    <section class="panel" aria-label="Kalibrasyon">
+      <h2><span class="n">2</span>Kalibrasyon</h2>
+      <div class="tools"><label for="nsel">Servo sayısı</label>
+        <select id="nsel"><option>2</option><option>3</option><option selected>4</option><option>5</option><option>6</option></select>
+        <button class="btn alt sm" id="calReset" type="button">Hepsini varsayılana al</button></div>
+      <div id="cals" style="margin-top:10px"></div>
+      <p class="note">Darbe genişliği: <code>Servo.h</code> varsayılanı 544–2400 µs; izin verilen aralık 400–2600 µs. Ekranda gösterilen µs, üretilen kodun <code>writeMicroseconds</code> ile gönderdiği değerdir. Servolar farklıdır: sınırları servo gövdesine zorlamadan, küçük adımlarla bul. Ayarlar bu tarayıcıda (localStorage) saklanır.</p>
+    </section>
+
+    <section class="panel" aria-label="Bağlantı">
+      <h2><span class="n">6</span>Bağlantı</h2>
+      <div id="supp" class="hint" style="margin:0 0 8px"></div>
+      <div class="tools">
+        <button class="btn" id="bSerial" type="button">USB bağlan (Web Serial)</button>
+        <label>Baud <select id="baud" aria-label="Baud hızı"><option>9600</option><option>57600</option><option selected>115200</option></select></label>
+      </div>
+      <div class="tools" style="margin-top:8px">
+        <button class="btn" id="bBle" type="button">BLE bağlan (ESP32)</button>
+        <label><input type="checkbox" id="bleAll"> Tüm cihazları listele</label>
+      </div>
+      <div class="tools" style="margin-top:8px">
+        <button class="btn alt" id="bDisc" type="button" disabled>Bağlantıyı kes</button>
+        <label><input type="checkbox" id="live" checked> Canlı gönder (en çok 20 Hz)</label>
+      </div>
+      <div class="status" id="lstat" role="status" aria-live="polite">Bağlı değil.</div>
+      <div class="tools">
+        <button class="btn alt sm" id="sendP" type="button" disabled>Tüm açıları gönder (P)</button>
+        <button class="btn alt sm" id="sendH" type="button" disabled>Ev (H)</button>
+        <button class="btn alt sm" id="sendQ" type="button" disabled>Sor (?)</button>
+      </div>
+      <div class="tools" style="margin-top:8px">
+        <label class="sr" for="raw">Ham komut</label><input type="text" id="raw" placeholder="S1:90" style="flex:1;min-width:0;font-family:var(--f-mono)" aria-label="Ham komut"><button class="btn alt sm" id="sendRaw" type="button" disabled>Gönder</button>
+      </div>
+      <div class="grp">Günlük</div>
+      <div class="log" id="log" tabindex="0" role="log" aria-label="Bağlantı günlüğü"></div>
+
+      <details class="more" style="margin-top:10px"><summary>Protokol</summary><div class="in">
+        <p>Satır tabanlı, ASCII, her komut <code>\n</code> ile biter. Açılar tamsayı 0–180 (mantıksal açı; ters çevirme ve µs dönüşümü alıcıda yapılır).</p>
+        <table><thead><tr><th>Komut</th><th>Anlamı</th></tr></thead><tbody>
+          <tr><td><code>S&lt;n&gt;:&lt;açı&gt;</code></td><td>n. servoyu (1'den başlar) açıya götür. Örn. <code>S2:120</code></td></tr>
+          <tr><td><code>P a,b,c,d</code></td><td>Tüm servoları sırayla konumlandır. Örn. <code>P 90,60,120,40</code></td></tr>
+          <tr><td><code>H</code></td><td>Tüm servoları ev açılarına götür</td></tr>
+          <tr><td><code>?</code></td><td>Alıcı <code>SERVOLAB 1 &lt;servo sayısı&gt;</code> yanıtlar</td></tr></tbody></table>
+        <p>BLE'de kayıt (yazma) karakteristiği en çok 20 bayt aldığı için satır 20 baytlık parçalara bölünerek sırayla yazılır; alıcı karakter karakter birleştirir. Nordic UART Service: servis <code>6e400001-b5a3-f393-e0a9-e50e24dcca9e</code>, yazma <code>6e400002-…</code>, bildirim <code>6e400003-…</code>.</p></div></details>
+
+      <details class="more"><summary>HC-05 ile nasıl kullanılır?</summary><div class="in">
+        <p><b>HC-05 klasik Bluetooth (SPP) modülüdür; Web Bluetooth yalnızca BLE konuşur, bu yüzden bu sayfa HC-05'e doğrudan bağlanamaz.</b> Üç yol:</p>
+        <ol>
+          <li>Kod bölümünden <b>"Alıcı: HC-05 (SoftwareSerial)"</b> sketch'ini seç ve Arduino'ya yükle (HC-05 TX → belirlediğin RX pini; RX → TX pini, <b>5V→3,3V gerilim bölücü şart</b>).</li>
+          <li><b>Android:</b> telefonda "Serial Bluetooth Terminal" gibi bir uygulamayla HC-05'e eşleş ve yukarıdaki protokol komutlarını elle yaz (<code>S1:90</code>, <code>P 90,90,90,90</code>). Bu sayfa komutu üretmez, yalnızca belgeler.</li>
+          <li><b>Bilgisayar:</b> HC-05'i USB-TTL dönüştürücüyle bilgisayara bağla ve "USB bağlan" ile aynı komutları gönder (baud 9600). Bu, alıcı sketch'ten bağımsız, HC-05'in kendisini sınamak içindir.</li></ol>
+        <p>Telefondan tarayıcıyla canlı sürmek istiyorsan ESP32 (BLE) ya da BLE'li başka bir kart kullan.</p></div></details>
+    </section>
+  </div>
+
+  <div class="col">
+    <section class="panel" aria-label="Robot kol önizlemesi">
+      <h2><span class="n">3</span>Canlı önizleme</h2>
+      <canvas id="cv" width="640" height="400" role="img" aria-label="Robot kol yandan görünüm"></canvas>
+      <div class="fk" id="fk" aria-live="off"></div>
+      <p class="hint">Yandan görünüm: J2 omuz, J3 dirsek, GR kıskaç açıklığı. Sağ üst: J1 taban, üstten. Bağlantı uzunlukları sabit: taban 6 cm, kol 10 cm, ön kol 10 cm, kıskaç 5 cm (ileri kinematik). Taban çizgisi altındaki ince çubuk 10 cm ölçeğidir. <b>Açı kuralı varsayımdır:</b> J2 0° = kol yatay ileri, 90° = dik yukarı; J3 180° = ön kol kolla aynı doğrultuda, 90° = kola dik; J1 90° = ileri. Kendi kolunun montajı farklıysa ofset gerekir.</p>
+    </section>
+
+    <section class="panel" aria-label="Poz çizelgesi">
+      <h2><span class="n">4</span>Poz çizelgesi</h2>
+      <div class="tools">
+        <label>Süre (ms) <input type="number" id="dDur" value="1000" min="0" max="60000" step="100"></label>
+        <label>Bekleme (ms) <input type="number" id="dHold" value="0" min="0" max="60000" step="100"></label>
+        <button class="btn" id="addPose2" type="button">+ Poz ekle</button>
+      </div>
+      <div class="tools" style="margin-top:10px">
+        <button class="btn" id="play" type="button">▶ Oynat</button>
+        <button class="btn alt" id="stop" type="button" disabled>■ Durdur</button>
+        <label><input type="checkbox" id="loop"> Döngü</label>
+        <label>Hız <select id="spd"><option value="0.5">×0.5</option><option value="0.75">×0.75</option><option value="1" selected>×1</option><option value="1.5">×1.5</option><option value="2">×2</option></select></label>
+        <label>Geçiş <select id="interp"><option value="ease">Yumuşak (ease)</option><option value="linear">Doğrusal</option></select></label>
+      </div>
+      <div class="tools" style="margin-top:8px">
+        <label for="ex" class="sr">Hazır hareket</label>
+        <select id="ex" aria-label="Hazır hareket"><option value="">Hazır hareket yükle…</option></select>
+        <button class="btn alt sm" id="clearPoses" type="button">Tüm pozları sil</button>
+      </div>
+      <div class="prog" id="prog" role="status"></div>
+      <div id="poses" style="margin-top:8px"></div>
+      <p class="hint">Süre: önceki pozdan bu poza varış süresi. Bekleme: vardıktan sonra durma. Oynatma mevcut kaydırıcı açılarından başlar; üretilen sketch ev açılarından başlar.</p>
+      <details class="more" style="margin-top:8px"><summary>JSON dışa / içe aktar</summary><div class="in">
+        <label for="json" class="sr">JSON</label>
+        <textarea id="json" spellcheck="false" aria-label="JSON metni"></textarea>
+        <div class="tools" style="margin-top:8px">
+          <button class="btn alt sm" id="jExp" type="button">Dışa aktar (metne yaz)</button>
+          <button class="btn alt sm" id="jCopy" type="button">Kopyala</button>
+          <button class="btn alt sm" id="jDl" type="button">.json indir</button>
+          <button class="btn sm" id="jImp" type="button">İçe aktar</button>
+          <label class="lbl">Dosyadan: <input type="file" id="jFile" accept=".json,application/json" aria-label="JSON dosyası seç"></label>
+        </div>
+        <div class="status" id="jmsg" role="status" style="display:none"></div></div></details>
+    </section>
+
+    <section class="panel" aria-label="Arduino kodu">
+      <div class="codehead"><h2><span class="n">5</span>Arduino kodu</h2><small id="lines"></small><span class="sp"></span><button class="btn alt" id="copy" type="button">Kopyala</button></div>
+      <div class="tools" style="margin-bottom:8px">
+        <label for="ckind" class="sr">Çıktı türü</label>
+        <select id="ckind" aria-label="Çıktı türü">
+          <option value="uno">Bağımsız: pozları oynat (Uno/Nano · Servo.h)</option>
+          <option value="esp32">Bağımsız: pozları oynat (ESP32 · ESP32Servo)</option>
+          <option value="rx-usb">Alıcı: USB seri (Uno/Nano)</option>
+          <option value="rx-hc05">Alıcı: HC-05 (SoftwareSerial)</option>
+          <option value="rx-ble">Alıcı: ESP32 BLE (Nordic UART)</option>
+        </select>
+        <span id="hcopts" class="tools" hidden>
+          <label>HC-05 TX→ <input type="number" id="hcrx" value="10" min="0" max="99" aria-label="Arduino RX pini"></label>
+          <label>HC-05 RX← <input type="number" id="hctx" value="11" min="0" max="99" aria-label="Arduino TX pini"></label>
+          <label>Baud <select id="hcbaud"><option>9600</option><option>38400</option></select></label>
+        </span>
+      </div>
+      <pre id="code" tabindex="0" aria-label="Üretilen Arduino kodu"></pre>
+      <p class="note" id="cnote"></p>
+    </section>
+  </div>
+</main>
+
+<script>
+(() => {
+'use strict';
+/*CORE-START*/
+const DEF_NAMES = ['J1 Taban','J2 Omuz','J3 Dirsek','GR Kıskaç','J5 Bilek','J6 Ek'];
+const DEF_PINS = [3,5,6,9,10,11];
+const MAXS = 6, MAXPOSES = 200;
+const NUS = {svc:'6e400001-b5a3-f393-e0a9-e50e24dcca9e', rx:'6e400002-b5a3-f393-e0a9-e50e24dcca9e', tx:'6e400003-b5a3-f393-e0a9-e50e24dcca9e'};
+const LINK = {base:6, l1:10, l2:10, grip:5};
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const toInt = (v,d) => { const x = Math.round(Number(v)); return Number.isFinite(x) ? x : d; };
+const rad = d => d * Math.PI / 180;
+const smooth = u => u * u * (3 - 2 * u);
+function defaultServo(i){ return {name:DEF_NAMES[i], pin:DEF_PINS[i], amin:0, amax:180, pmin:544, pmax:2400, inv:false, home:90}; }
+function defaults(){ return {n:4, servos:[0,1,2,3,4,5].map(defaultServo), poses:[], interp:'ease', speed:1, loop:false}; }
+function fixServo(s,i){
+  const b = defaultServo(i); s = (s && typeof s === 'object') ? s : {};
+  let name = (typeof s.name === 'string' ? s.name.replace(/[\u0000-\u001f]/g,' ').trim().slice(0,16) : '') || b.name;
+  const pin = clamp(toInt(s.pin,b.pin),0,99);
+  let amin = clamp(toInt(s.amin,0),0,180), amax = clamp(toInt(s.amax,180),0,180);
+  if (amax - amin < 1) { amin = 0; amax = 180; }
+  let pmin = clamp(toInt(s.pmin,544),400,2600), pmax = clamp(toInt(s.pmax,2400),400,2600);
+  if (pmax - pmin < 50) { pmin = 544; pmax = 2400; }
+  return {name, pin, amin, amax, pmin, pmax, inv: s.inv === true, home: clamp(toInt(s.home,90),amin,amax)};
+}
+function fixPose(p,servos){
+  p = (p && typeof p === 'object') ? p : {};
+  const src = Array.isArray(p.a) ? p.a : [];
+  return {a: servos.map((s,i) => clamp(toInt(src[i], s.home), s.amin, s.amax)), dur: clamp(toInt(p.dur,1000),0,60000), hold: clamp(toInt(p.hold,0),0,60000)};
+}
+function sanitize(o){
+  if (!o || typeof o !== 'object' || Array.isArray(o)) throw new Error('JSON bir nesne olmalı.');
+  const n = clamp(toInt(o.n !== undefined ? o.n : (Array.isArray(o.servos) ? o.servos.length : 4), 4), 2, MAXS);
+  const servos = [0,1,2,3,4,5].map(i => fixServo(Array.isArray(o.servos) ? o.servos[i] : null, i));
+  const poses = (Array.isArray(o.poses) ? o.poses : []).slice(0, MAXPOSES).map(p => fixPose(p, servos));
+  const speed = clamp(Number(o.speed) || 1, 0.5, 2);
+  return {n, servos, poses, interp: o.interp === 'linear' ? 'linear' : 'ease', speed, loop: o.loop === true};
+}
+function exportObj(cfg){
+  return {format:'servolab', version:1, n:cfg.n, interp:cfg.interp, speed:cfg.speed, loop:cfg.loop,
+    servos: cfg.servos.slice(0,cfg.n).map(s => ({...s})),
+    poses: cfg.poses.map(p => ({a: p.a.slice(0,cfg.n), dur:p.dur, hold:p.hold}))};
+}
+const effAngle = (s,a) => { a = clamp(a, s.amin, s.amax); return s.inv ? 180 - a : a; };
+const angleToUs = (s,a) => Math.round(s.pmin + (s.pmax - s.pmin) * effAngle(s,a) / 180);
+function fk(a){
+  const a1 = a[0] ?? 90, a2 = a[1] ?? 90, a3 = a[2] ?? 90, gr = a[3] ?? 0;
+  const p1 = rad(a2), p2 = rad(a2 - (180 - a3));
+  const sh = {x:0, z:LINK.base};
+  const el = {x: LINK.l1 * Math.cos(p1), z: LINK.base + LINK.l1 * Math.sin(p1)};
+  const wr = {x: el.x + LINK.l2 * Math.cos(p2), z: el.z + LINK.l2 * Math.sin(p2)};
+  const tip = {x: wr.x + LINK.grip * Math.cos(p2), z: wr.z + LINK.grip * Math.sin(p2)};
+  const half = rad(gr / 180 * 35);
+  return {sh, el, wr, tip, p1, p2, half, open: 2 * LINK.grip * Math.sin(half), X: tip.x * Math.cos(rad(a1)), Y: tip.x * Math.sin(rad(a1))};
+}
+/* protokol */
+const fmtS = (i,a) => 'S' + (i + 1) + ':' + Math.round(a) + '\n';
+const fmtP = (arr,n) => 'P ' + arr.slice(0,n).map(v => Math.round(v)).join(',') + '\n';
+function parseLine(line,n){ /* Arduino alıcısının davranışını yansıtır */
+  line = line.replace(/[\r\n]+$/,'');
+  const c = line[0];
+  if (c === 'S') { const m = /^S(\d+):\s*(-?\d+)/.exec(line); if (!m) return null; const i = +m[1]; if (i < 1 || i > n) return null; return {t:'S', i:i-1, a:+m[2]}; }
+  if (c === 'P') { const a = line.slice(1).split(',').slice(0,n).map(s => { const v = parseInt(s,10); return Number.isNaN(v) ? 0 : v; }); return {t:'P', a}; }
+  if (c === 'H') return {t:'H'};
+  if (c === '?') return {t:'?'};
+  return null;
+}
+function chunkText(str,size){
+  const b = new TextEncoder().encode(str), out = [];
+  for (let i = 0; i < b.length; i += size) out.push(b.slice(i, i + size));
+  return out;
+}
+function makeThrottle(send,gap,n,now,setT,clrT){
+  let last = -1e9, timer = null, latest = [], dirty = new Set();
+  function flush(){
+    timer = null; if (!dirty.size) return;
+    const idx = [...dirty]; dirty.clear();
+    send(idx.length === 1 ? fmtS(idx[0], latest[idx[0]]) : fmtP(latest, typeof n === 'function' ? n() : n));
+    last = now();
+  }
+  return {
+    push(angles, changed){
+      latest = angles.slice(); changed.forEach(i => dirty.add(i));
+      const el = now() - last;
+      if (el >= gap) { if (timer) { clrT(timer); timer = null; } flush(); }
+      else if (!timer) timer = setT(flush, gap - el);
+    },
+    flushNow(){ if (timer) { clrT(timer); timer = null; } flush(); }
+  };
+}
+/* oynatma: saf adım fonksiyonu */
+function startPlayback(from,now){ return {idx:0, phase:'move', t0:now, from:from.slice(), cur:from.slice()}; }
+function stepPlayback(pb,now,poses,o){
+  for (let g = 0; g < 2000; g++) {
+    const p = poses[pb.idx], el = (now - pb.t0) * o.speed;
+    if (pb.phase === 'move') {
+      const d = Math.max(1, p.dur), u = Math.min(1, el / d), k = o.ease ? smooth(u) : u;
+      pb.cur = pb.from.map((f,i) => f + (p.a[i] - f) * k);
+      if (u < 1) return {angles:pb.cur, done:false};
+      pb.phase = 'hold'; pb.t0 += d / o.speed;
+    } else {
+      if (el < p.hold) return {angles:pb.cur, done:false};
+      const t1 = pb.t0 + p.hold / o.speed;
+      if (pb.idx + 1 < poses.length) pb.idx++;
+      else if (o.loop) pb.idx = 0;
+      else return {angles:pb.cur, done:true};
+      pb.from = pb.cur.slice(); pb.phase = 'move'; pb.t0 = t1;
+    }
+  }
+  return {angles:pb.cur, done:false};
+}
+/* kod üretimi */
+const cm = s => s.name.replace(/[\r\n]/g,' ');
+function tables(cfg){
+  const S = cfg.servos.slice(0,cfg.n), l = f => S.map(f).join(', ');
+  return '// Servolar: ' + S.map(cm).join(', ') + '\n' +
+    'const uint8_t N = ' + cfg.n + ';\n' +
+    'const uint8_t SERVO_PIN[N] = {' + l(s => s.pin) + '};\n' +
+    'const int PMIN[N] = {' + l(s => s.pmin) + '};   // darbe alt sınırı (us), attach(pin, min, max)\n' +
+    'const int PMAX[N] = {' + l(s => s.pmax) + '};   // darbe üst sınırı (us)\n' +
+    'const int AMIN[N] = {' + l(s => s.amin) + '};   // açı alt sınırı (derece), dışı kırpılır\n' +
+    'const int AMAX[N] = {' + l(s => s.amax) + '};   // açı üst sınırı (derece)\n' +
+    'const bool INV[N] = {' + l(s => s.inv ? 'true' : 'false') + '};   // true: yön ters çevrilir (180 - açı)\n' +
+    'const int HOME[N] = {' + l(s => s.home) + '};   // ev açısı (derece)\n';
+}
+const WRITE_FN =
+'float cur[N];\n\n' +
+'// Açıyı sınırlara kırpar, ters çevirir, darbe genişliğine (us) çevirip servoya yazar.\n' +
+'void writeServo(uint8_t i, float a) {\n' +
+'  if (a < AMIN[i]) a = AMIN[i];\n' +
+'  if (a > AMAX[i]) a = AMAX[i];\n' +
+'  cur[i] = a;\n' +
+'  float eff = INV[i] ? 180.0f - a : a;\n' +
+'  servo[i].writeMicroseconds(PMIN[i] + (int)((PMAX[i] - PMIN[i]) * eff / 180.0f + 0.5f));\n' +
+'}\n';
+function attachBlock(esp){
+  return (esp ? '  ESP32PWM::allocateTimer(0);\n  ESP32PWM::allocateTimer(1);\n  ESP32PWM::allocateTimer(2);\n  ESP32PWM::allocateTimer(3);\n' : '') +
+  '  for (uint8_t i = 0; i < N; i++) {\n' +
+  (esp ? '    servo[i].setPeriodHertz(50);\n' : '') +
+  '    servo[i].attach(SERVO_PIN[i], PMIN[i], PMAX[i]);\n' +
+  '    writeServo(i, HOME[i]);\n' +
+  '  }\n';
+}
+function genStandalone(cfg,esp){
+  const S = cfg.servos.slice(0,cfg.n), poses = cfg.poses.length ? cfg.poses : [{a:S.map(s => s.home), dur:1000, hold:0}];
+  const bytes = poses.length * (cfg.n * 2 + 4);
+  return '// ServoLab ile üretildi: ' + cfg.n + ' servo, ' + cfg.poses.length + ' poz.\n' +
+'// UYARI: gerçek robot kolla denenmedi. Servo gücünü ayrı kaynaktan ver (GND ortak), kolu boş alanda dene.\n' +
+(cfg.poses.length ? '' : '// Poz yok: tek satırlık ev pozu eklendi.\n') +
+(esp ? '#include <ESP32Servo.h>\n' : '#include <Servo.h>\n') + '\n' +
+tables(cfg) + '\n' +
+'// ---- Hareket ayarları ----\n' +
+'const bool EASE = ' + (cfg.interp === 'ease') + ';     // true: yumuşatılmış (smoothstep), false: doğrusal\n' +
+'const bool LOOP = ' + cfg.loop + ';     // son pozdan sonra başa dön\n' +
+'const float SPEED = ' + Number(cfg.speed).toFixed(2) + 'f;   // hız çarpanı\n\n' +
+'struct Pose { int a[N]; unsigned int dur; unsigned int hold; };   // dur: varış süresi (ms), hold: bekleme (ms)\n' +
+'// Poz tablosu RAM\'de durur (~' + bytes + ' bayt). Uno\'da çok poz için PROGMEM gerekir.\n' +
+'const Pose POSES[] = {\n' +
+poses.map((p,i) => '  {{' + p.a.slice(0,cfg.n).map(Math.round).join(', ') + '}, ' + p.dur + ', ' + p.hold + '}' + (i < poses.length - 1 ? ',' : '') + '   // ' + (i + 1)).join('\n') + '\n};\n' +
+'const uint8_t NPOSES = sizeof(POSES) / sizeof(POSES[0]);\n\n' +
+'Servo servo[N];\n' + WRITE_FN + '\n' +
+'float from[N];\nuint8_t idx = 0;\nbool holding = false;\nbool running = true;\nunsigned long t0 = 0;\n\n' +
+'void startMove(uint8_t i) {   // t0 değişmez: süreler birikerek sapmadan ilerler\n  for (uint8_t k = 0; k < N; k++) from[k] = cur[k];\n  idx = i;\n  holding = false;\n}\n\n' +
+'void setup() {\n' + attachBlock(esp) + '  delay(500);   // servolar eve gitsin\n  t0 = millis();\n  startMove(0);\n}\n\n' +
+'// Bloklamayan, millis() tabanlı doğrusal/yumuşatılmış geçiş.\n' +
+'void loop() {\n' +
+'  if (!running) return;\n' +
+'  unsigned long now = millis();\n' +
+'  float el = (now - t0) * SPEED;\n' +
+'  const Pose &p = POSES[idx];\n' +
+'  if (!holding) {\n' +
+'    float d = (p.dur > 0) ? (float)p.dur : 1.0f;\n' +
+'    float u = el / d;\n' +
+'    if (u > 1.0f) u = 1.0f;\n' +
+'    float k = EASE ? u * u * (3.0f - 2.0f * u) : u;\n' +
+'    for (uint8_t i = 0; i < N; i++) writeServo(i, from[i] + (p.a[i] - from[i]) * k);\n' +
+'    if (u >= 1.0f) { holding = true; t0 += (unsigned long)(d / SPEED); }\n' +
+'  } else if (el >= p.hold) {\n' +
+'    t0 += (unsigned long)(p.hold / SPEED);\n' +
+'    if (idx + 1 < NPOSES) startMove(idx + 1);\n' +
+'    else if (LOOP) startMove(0);\n' +
+'    else running = false;\n' +
+'  }\n' +
+'}\n';
+}
+const RX_COMMON =
+'char buf[48];\nuint8_t blen = 0;\n\n' +
+'void goHome() {\n  for (uint8_t i = 0; i < N; i++) writeServo(i, HOME[i]);\n}\n\n' +
+'// Protokol: "S<n>:<acı>", "P a,b,c,d", "H", "?"  (satır sonu \\n)\n' +
+'void handleLine(char *s) {\n' +
+'  if (s[0] == \'S\') {\n' +
+'    char *c = strchr(s, \':\');\n' +
+'    int n = atoi(s + 1);\n' +
+'    if (c && n >= 1 && n <= N) writeServo(n - 1, atoi(c + 1));\n' +
+'  } else if (s[0] == \'P\') {\n' +
+'    char *p = s + 1;\n' +
+'    for (uint8_t i = 0; i < N; i++) {\n' +
+'      writeServo(i, atoi(p));\n' +
+'      p = strchr(p, \',\');\n' +
+'      if (!p) break;\n' +
+'      p++;\n' +
+'    }\n' +
+'  } else if (s[0] == \'H\') {\n' +
+'    goHome();\n' +
+'  } else if (s[0] == \'?\') {\n' +
+'    reply();\n' +
+'  }\n' +
+'}\n\n' +
+'void feed(char ch) {\n' +
+'  if (ch == \'\\n\' || ch == \'\\r\') {\n' +
+'    if (blen > 0) { buf[blen] = 0; handleLine(buf); blen = 0; }\n' +
+'  } else if (blen < sizeof(buf) - 1) {\n' +
+'    buf[blen++] = ch;\n' +
+'  } else {\n' +
+'    blen = 0;   // çok uzun satır: at\n' +
+'  }\n' +
+'}\n';
+function genReceiver(cfg,kind,o){
+  o = o || {};
+  const head = '// ServoLab alıcısı: ' + cfg.n + ' servo. Protokol: S<n>:<acı>, P a,b,c,d, H, ?\n' +
+    '// UYARI: gerçek robot kolla ve gerçek bağlantı donanımıyla denenmedi. Servo gücünü ayrı kaynaktan ver (GND ortak).\n';
+  const libs = '#include <stdlib.h>\n#include <string.h>\n';
+  if (kind === 'rx-ble') {
+    return head + '// ESP32 Arduino çekirdeği (BLE kütüphanesi çekirdekle gelir). Nordic UART Service.\n' + libs +
+'#include <ESP32Servo.h>\n#include <BLEDevice.h>\n#include <BLEServer.h>\n#include <BLEUtils.h>\n#include <BLE2902.h>\n\n' +
+tables(cfg) + '\nServo servo[N];\n' + WRITE_FN + '\n' +
+'#define SERVICE_UUID "' + NUS.svc + '"\n#define RX_UUID      "' + NUS.rx + '"\n#define TX_UUID      "' + NUS.tx + '"\n' +
+'BLECharacteristic *pTx;\n\n' +
+'void reply() {\n  char m[24];\n  snprintf(m, sizeof(m), "SERVOLAB 1 %d\\n", N);\n  pTx->setValue((uint8_t *)m, strlen(m));\n  pTx->notify();\n}\n\n' +
+RX_COMMON + '\n' +
+'class RxCb : public BLECharacteristicCallbacks {\n' +
+'  void onWrite(BLECharacteristic *c) {\n' +
+'    auto v = c->getValue();   // uygulama satırı 20 baytlık parçalarla yazar\n' +
+'    for (size_t i = 0; i < v.length(); i++) feed((char)v[i]);\n' +
+'  }\n};\n\n' +
+'class SrvCb : public BLEServerCallbacks {\n' +
+'  void onDisconnect(BLEServer *s) { BLEDevice::startAdvertising(); }\n};\n\n' +
+'void setup() {\n' + attachBlock(true) +
+'  BLEDevice::init("ServoLab");\n' +
+'  BLEServer *srv = BLEDevice::createServer();\n' +
+'  srv->setCallbacks(new SrvCb());\n' +
+'  BLEService *svc = srv->createService(SERVICE_UUID);\n' +
+'  pTx = svc->createCharacteristic(TX_UUID, BLECharacteristic::PROPERTY_NOTIFY);\n' +
+'  pTx->addDescriptor(new BLE2902());\n' +
+'  BLECharacteristic *rx = svc->createCharacteristic(RX_UUID, BLECharacteristic::PROPERTY_WRITE | BLECharacteristic::PROPERTY_WRITE_NR);\n' +
+'  rx->setCallbacks(new RxCb());\n' +
+'  svc->start();\n' +
+'  BLEAdvertising *adv = BLEDevice::getAdvertising();\n' +
+'  adv->addServiceUUID(SERVICE_UUID);\n' +
+'  adv->setScanResponse(true);\n' +
+'  BLEDevice::startAdvertising();\n}\n\n' +
+'void loop() {\n  delay(10);   // her şey BLE geri çağrılarında olur\n}\n';
+  }
+  if (kind === 'rx-hc05') {
+    const rx = clamp(toInt(o.rx,10),0,99), tx = clamp(toInt(o.tx,11),0,99), baud = toInt(o.baud,9600);
+    return head + '// HC-05: modülün TX pini -> Arduino pin ' + rx + ', modülün RX pini <- Arduino pin ' + tx + ' (5V -> 3,3V bölücü şart).\n' + libs +
+'#include <Servo.h>\n#include <SoftwareSerial.h>\n\n' + tables(cfg) + '\nServo servo[N];\n' +
+'SoftwareSerial LINK(' + rx + ', ' + tx + ');   // RX, TX\n\n' + WRITE_FN + '\n' +
+'void reply() {\n  LINK.print("SERVOLAB 1 ");\n  LINK.println(N);\n}\n\n' + RX_COMMON + '\n' +
+'void setup() {\n' + attachBlock(false) + '  LINK.begin(' + baud + ');   // HC-05 veri modu varsayılanı 9600\n}\n\n' +
+'void loop() {\n  while (LINK.available()) feed((char)LINK.read());\n}\n';
+  }
+  return head + libs + '#include <Servo.h>\n\n' + tables(cfg) + '\nServo servo[N];\n' + WRITE_FN + '\n' +
+'void reply() {\n  Serial.print("SERVOLAB 1 ");\n  Serial.println(N);\n}\n\n' + RX_COMMON + '\n' +
+'void setup() {\n' + attachBlock(false) + '  Serial.begin(115200);   // sayfadaki baud ile aynı olmalı\n}\n\n' +
+'void loop() {\n  while (Serial.available()) feed((char)Serial.read());\n}\n';
+}
+function genCode(cfg,kind,o){
+  if (kind === 'uno') return genStandalone(cfg,false);
+  if (kind === 'esp32') return genStandalone(cfg,true);
+  return genReceiver(cfg,kind,o);
+}
+/*CORE-END*/
+
+/* ---------- Yardımcılar ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY = 'servolab.v1';
+let cfg = defaults(), angles = cfg.servos.map(s => s.home);
+const short = s => (s.name.split(/\s+/)[0] || '').slice(0,6);
+
+/* ---------- Kalıcılık ---------- */
+function load(){
+  try {
+    const raw = localStorage.getItem(KEY); if (!raw) return;
+    const o = JSON.parse(raw); cfg = sanitize(o.cfg);
+    angles = cfg.servos.map((s,i) => clamp(Number(o.angles && o.angles[i]), s.amin, s.amax));
+    angles = angles.map((v,i) => Number.isFinite(v) ? v : cfg.servos[i].home);
+  } catch (e) { cfg = defaults(); angles = cfg.servos.map(s => s.home); }
+}
+let saveT = 0;
+function save(){
+  clearTimeout(saveT);
+  saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify({cfg, angles})); } catch (e) {} }, 300);
+}
+
+/* ---------- Kaydırıcılar ---------- */
+const rows = [];
+function buildSliders(){
+  const box = $('sliders'); box.innerHTML = ''; rows.length = 0;
+  for (let i = 0; i < cfg.n; i++) {
+    const s = cfg.servos[i], d = document.createElement('div'); d.className = 'srv';
+    d.innerHTML = '<div class="nm"><span>' + esc(s.name) + '</span><small>pin ' + s.pin + ' · ' + s.amin + '–' + s.amax + '°' + (s.inv ? ' · ters' : '') + '</small></div>' +
+      '<input type="range" min="0" max="180" step="any" id="rg' + i + '" aria-label="' + esc(s.name) + ' açısı (derece)">' +
+      '<input type="number" min="0" max="180" step="1" id="nm' + i + '" aria-label="' + esc(s.name) + ' açı sayısal (derece)">' +
+      '<div class="us" id="us' + i + '" style="grid-column:1/-1;margin:0"></div>';
+    box.appendChild(d);
+    const rg = d.querySelector('input[type=range]'), nm = d.querySelector('input[type=number]');
+    rg.addEventListener('input', () => userSet(i, rg.value));
+    nm.addEventListener('input', () => { if (nm.value !== '' && !Number.isNaN(Number(nm.value))) userSet(i, nm.value, true); });
+    nm.addEventListener('change', () => updateRow(i, true));
+    rg.addEventListener('keydown', e => {
+      if (e.shiftKey && ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+        e.preventDefault(); userSet(i, angles[i] + (e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -10 : 10));
+      }
+    });
+    rows.push({rg, nm, us: d.querySelector('#us' + i)});
+  }
+  for (let i = 0; i < cfg.n; i++) updateRow(i, true);
+}
+function updateRow(i, force){
+  const r = rows[i], s = cfg.servos[i]; if (!r) return;
+  const a = angles[i];
+  r.rg.value = a;
+  r.rg.style.setProperty('--lo', (s.amin / 180 * 100) + '%'); r.rg.style.setProperty('--hi', (s.amax / 180 * 100) + '%');
+  if (force || document.activeElement !== r.nm) r.nm.value = Math.round(a * 10) / 10;
+  r.us.textContent = a.toFixed(0) + '° → ' + angleToUs(s, a) + ' µs' + (s.inv ? ' (ters: servoya ' + (180 - a).toFixed(0) + '°)' : '');
+}
+let clipMsg = '';
+function setAngle(i, v, quiet){
+  const s = cfg.servos[i], raw = Number(v); if (!Number.isFinite(raw)) return false;
+  const c = clamp(raw, s.amin, s.amax);
+  angles[i] = c; updateRow(i, quiet === true ? false : true); return c !== raw;
+}
+function userSet(i, v, fromNum){
+  stopPlay(true);
+  const clipped = setAngle(i, v, fromNum);
+  $('prog').textContent = clipped ? s_clip(i) : '';
+  after([i]);
+}
+const s_clip = i => cfg.servos[i].name + ': açı sınırına kırpıldı (' + cfg.servos[i].amin + '–' + cfg.servos[i].amax + '°).';
+function after(changed){
+  scheduleDraw(); save(); updateCode();
+  if (link.kind && $('live').checked) thr.push(angles, changed);
+}
+
+/* ---------- Kalibrasyon paneli ---------- */
+function field(i, k, label, type, extra){
+  const s = cfg.servos[i];
+  return '<label>' + label + '<input type="' + type + '" data-i="' + i + '" data-k="' + k + '" value="' + esc(s[k]) + '" ' + (extra || '') + '></label>';
+}
+function buildCals(){
+  const box = $('cals'); const open = new Set([...box.querySelectorAll('details[open]')].map(d => d.dataset.i));
+  box.innerHTML = '';
+  for (let i = 0; i < cfg.n; i++) {
+    const s = cfg.servos[i], d = document.createElement('details'); d.className = 'cal'; d.dataset.i = i;
+    if (open.has(String(i)) || (open.size === 0 && i === 0)) d.open = true;
+    d.innerHTML = '<summary>' + esc(s.name) + '</summary><div class="body"><div class="fg">' +
+      field(i,'name','Ad','text','maxlength="16"') + field(i,'pin','Arduino pini','number','min="0" max="99"') +
+      field(i,'amin','Açı min (°)','number','min="0" max="180"') + field(i,'amax','Açı max (°)','number','min="0" max="180"') +
+      field(i,'pmin','Darbe min (µs)','number','min="400" max="2600" step="10"') + field(i,'pmax','Darbe max (µs)','number','min="400" max="2600" step="10"') +
+      field(i,'home','Ev açısı (°)','number','min="0" max="180"') +
+      '<label class="chk"><input type="checkbox" data-i="' + i + '" data-k="inv"' + (s.inv ? ' checked' : '') + '> Ters çevir</label></div>' +
+      '<div class="us" id="cus' + i + '"></div><div class="warn" id="cw' + i + '"></div>' +
+      '<div class="tools"><button class="btn alt sm" type="button" data-go="amin" data-i="' + i + '">Min\'e git</button><button class="btn alt sm" type="button" data-go="home" data-i="' + i + '">Ev\'e git</button><button class="btn alt sm" type="button" data-go="amax" data-i="' + i + '">Max\'a git</button><button class="btn alt sm" type="button" data-go="reset" data-i="' + i + '">Servo.h varsayılanı (544–2400)</button></div></div>';
+    box.appendChild(d); calInfo(i);
+  }
+}
+function calInfo(i){
+  const s = cfg.servos[i], el = $('cus' + i); if (!el) return;
+  el.textContent = 'Açı → darbe: ' + s.amin + '° → ' + angleToUs(s, s.amin) + ' µs · ' + s.home + '° (ev) → ' + angleToUs(s, s.home) + ' µs · ' + s.amax + '° → ' + angleToUs(s, s.amax) + ' µs' + (s.inv ? ' · ters' : '');
+  const dup = cfg.servos.slice(0, cfg.n).filter((o, j) => j !== i && o.pin === s.pin).length;
+  $('cw' + i).textContent = dup ? 'Uyarı: aynı pin başka servoda da var.' : '';
+}
+$('cals').addEventListener('change', e => {
+  const t = e.target, i = +t.dataset.i, k = t.dataset.k; if (!k) return;
+  const s = {...cfg.servos[i]}; s[k] = t.type === 'checkbox' ? t.checked : t.value;
+  const fixed = fixServo(s, i);
+  const changedBy = k !== 'inv' && k !== 'name' && String(fixed[k]) !== String(t.value);
+  cfg.servos[i] = fixed;
+  cfg.poses.forEach(p => { p.a[i] = clamp(p.a[i], fixed.amin, fixed.amax); });
+  angles[i] = clamp(angles[i], fixed.amin, fixed.amax);
+  recal(changedBy ? k : '');
+});
+$('cals').addEventListener('click', e => {
+  const b = e.target.closest('button[data-go]'); if (!b) return;
+  const i = +b.dataset.i, s = cfg.servos[i], g = b.dataset.go;
+  if (g === 'reset') { cfg.servos[i] = fixServo({...s, pmin:544, pmax:2400}, i); recal(''); return; }
+  userSet(i, s[g]);
+});
+function recal(fixedKey){
+  buildSliders(); buildCals(); buildPoses(); scheduleDraw(); save(); updateCode();
+  if (fixedKey) $('prog').textContent = 'Değer geçersizdi ya da sınır dışıydı; en yakın geçerli değere düzeltildi (açı 0–180, min<max; darbe 400–2600 µs ve en az 50 µs aralık).';
+}
+$('nsel').addEventListener('change', () => {
+  stopPlay(true); cfg.n = +$('nsel').value; angles = angles.map((a,i) => clamp(a, cfg.servos[i].amin, cfg.servos[i].amax));
+  recal('');
+});
+$('calReset').addEventListener('click', () => { stopPlay(true); cfg.servos = defaults().servos; angles = cfg.servos.map(s => s.home); cfg.poses.forEach(p => p.a = p.a.map(v => clamp(v,0,180))); recal(''); });
+
+/* ---------- Önizleme (canvas) ---------- */
+let drawQ = false;
+function scheduleDraw(){ if (!drawQ) { drawQ = true; requestAnimationFrame(() => { drawQ = false; draw(); }); } }
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function draw(){
+  const cv = $('cv'), r = cv.getBoundingClientRect(); if (!r.width) return;
+  const dpr = window.devicePixelRatio || 1, W = Math.round(r.width * dpr), H = Math.round(r.height * dpr);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const ctx = cv.getContext('2d'), k = W / 640; ctx.setTransform(k,0,0,k,0,0); ctx.clearRect(0,0,640,400);
+  const ink = css('--ink'), mask = css('--mask'), blue = css('--blue'), gold = css('--gold'), line = css('--line'), sunk = css('--sunken'), surf = css('--surface'), warn = css('--warn');
+  const S = 10, X0 = 250, FY = 360, P = (x,z) => [X0 + x * S, FY - z * S];
+  const f = fk(angles);
+  ctx.fillStyle = sunk; ctx.fillRect(0, FY, 640, 40);
+  ctx.strokeStyle = line; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(0,FY); ctx.lineTo(640,FY); ctx.stroke();
+  ctx.strokeStyle = line; ctx.lineWidth = 1; ctx.beginPath();
+  for (let x = -25; x <= 25; x += 5) { const [px] = P(x,0); ctx.moveTo(px,FY); ctx.lineTo(px, FY + (x % 10 === 0 ? 8 : 5)); }
+  ctx.stroke();
+  ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(P(5,0)[0], FY + 22); ctx.lineTo(P(15,0)[0], FY + 22); ctx.stroke();
+  ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(P(5,0)[0], FY + 17); ctx.lineTo(P(5,0)[0], FY + 27); ctx.moveTo(P(15,0)[0], FY + 17); ctx.lineTo(P(15,0)[0], FY + 27); ctx.stroke();
+  const [bx, by] = P(-4, 6);
+  ctx.fillStyle = ink; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(bx, by, 8 * S, 6 * S, 6) : ctx.rect(bx, by, 8 * S, 6 * S); ctx.fill();
+  const seg = (a, b, col, w) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(...P(a.x,a.z)); ctx.lineTo(...P(b.x,b.z)); ctx.stroke(); };
+  seg(f.sh, f.el, mask, 16); seg(f.el, f.wr, blue, 13);
+  const gr = angles[3] !== undefined && cfg.n >= 4;
+  const half = gr ? f.half : 0;
+  [half, -half].forEach(dlt => { const a = f.p2 + dlt; seg(f.wr, {x: f.wr.x + LINK.grip * Math.cos(a), z: f.wr.z + LINK.grip * Math.sin(a)}, gold, 6); });
+  [f.sh, f.el, f.wr].forEach(p => { ctx.fillStyle = surf; ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(...P(p.x,p.z), 7, 0, 7); ctx.fill(); ctx.stroke(); });
+  const [tx, ty] = P(f.tip.x, f.tip.z), under = f.tip.z < 0;
+  ctx.strokeStyle = under ? warn : ink; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(tx - 8, ty); ctx.lineTo(tx + 8, ty); ctx.moveTo(tx, ty - 8); ctx.lineTo(tx, ty + 8); ctx.stroke();
+  /* üstten görünüm */
+  const cx = 566, cy = 82, R = 62, sc = R / 25;
+  ctx.fillStyle = surf; ctx.strokeStyle = line; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx, cy, R + 6, 0, 7); ctx.fill(); ctx.stroke();
+  const s1 = cfg.servos[0];
+  ctx.fillStyle = mask; ctx.globalAlpha = .18; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, -rad(s1.amax), -rad(s1.amin)); ctx.closePath(); ctx.fill(); ctx.globalAlpha = 1;
+  ctx.setLineDash([3,3]); ctx.strokeStyle = line; ctx.beginPath(); ctx.arc(cx, cy, R, 0, 7); ctx.moveTo(cx - R, cy); ctx.lineTo(cx + R, cy); ctx.moveTo(cx, cy - R); ctx.lineTo(cx, cy + R); ctx.stroke(); ctx.setLineDash([]);
+  const a1 = rad(angles[0]), rr = clamp(f.tip.x, -25, 25) * sc, ex = cx + Math.cos(a1) * rr, ey = cy - Math.sin(a1) * rr;
+  ctx.strokeStyle = mask; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+  ctx.fillStyle = gold; ctx.beginPath(); ctx.arc(ex, ey, 5, 0, 7); ctx.fill();
+  ctx.fillStyle = ink; ctx.beginPath(); ctx.arc(cx, cy, 5, 0, 7); ctx.fill();
+  $('fk').innerHTML = 'Uç noktası: <b>x = ' + f.tip.x.toFixed(1) + ' cm</b>, <b>z = ' + f.tip.z.toFixed(1) + ' cm</b> · J1 ' + angles[0].toFixed(0) + '° → X ' + f.X.toFixed(1) + ', Y ' + f.Y.toFixed(1) + ' cm' +
+    (cfg.n >= 4 ? ' · kıskaç açıklığı ≈ ' + f.open.toFixed(1) + ' cm' : '') + (under ? ' · <span class="warn">uç zemin altında: gerçek kol çarpar</span>' : '');
+  cv.setAttribute('aria-label', 'Robot kol yandan görünüm. Uç noktası x ' + f.tip.x.toFixed(1) + ' santimetre, z ' + f.tip.z.toFixed(1) + ' santimetre.');
+}
+window.addEventListener('resize', scheduleDraw);
+try { window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', scheduleDraw); } catch (e) {}
+if ('ResizeObserver' in window) new ResizeObserver(scheduleDraw).observe($('cv'));
+
+/* ---------- Pozlar ---------- */
+function curPose(){ return {a: cfg.servos.map((s,i) => i < cfg.n ? Math.round(angles[i]) : s.home), dur: clamp(toInt($('dDur').value,1000),0,60000), hold: clamp(toInt($('dHold').value,0),0,60000)}; }
+function addPose(){ if (cfg.poses.length >= MAXPOSES) { $('prog').textContent = 'En çok ' + MAXPOSES + ' poz.'; return; } cfg.poses.push(curPose()); buildPoses(); save(); updateCode(); $('prog').textContent = 'Poz ' + cfg.poses.length + ' eklendi.'; }
+$('addPose').addEventListener('click', addPose); $('addPose2').addEventListener('click', addPose);
+function buildPoses(){
+  const box = $('poses'); box.innerHTML = '';
+  if (!cfg.poses.length) { box.innerHTML = '<p class="hint">Henüz poz yok. Kaydırıcılarla bir konum ayarla ve "Poz ekle"ye bas, ya da hazır hareket yükle.</p>'; return; }
+  cfg.poses.forEach((p, pi) => {
+    const d = document.createElement('div'); d.className = 'pose'; d.dataset.pi = pi;
+    let ins = '';
+    for (let i = 0; i < cfg.n; i++) ins += '<label>' + esc(short(cfg.servos[i])) + '<input type="number" min="0" max="180" data-f="a" data-s="' + i + '" value="' + p.a[i] + '" aria-label="Poz ' + (pi + 1) + ' ' + esc(cfg.servos[i].name) + ' açısı"></label>';
+    ins += '<label>Süre ms<input type="number" min="0" max="60000" step="100" data-f="dur" value="' + p.dur + '" aria-label="Poz ' + (pi + 1) + ' süre (ms)"></label>' +
+           '<label>Bekle ms<input type="number" min="0" max="60000" step="100" data-f="hold" value="' + p.hold + '" aria-label="Poz ' + (pi + 1) + ' bekleme (ms)"></label>';
+    d.innerHTML = '<div class="ph"><b>Poz ' + (pi + 1) + '</b>' +
+      '<button class="btn alt sm" type="button" data-act="go" aria-label="Poz ' + (pi + 1) + ' konumuna git">Göster</button>' +
+      '<button class="btn alt sm" type="button" data-act="upd" aria-label="Poz ' + (pi + 1) + ' mevcut açılarla değiştir">Mevcutla değiştir</button>' +
+      '<button class="btn alt sm" type="button" data-act="up" aria-label="Poz ' + (pi + 1) + ' yukarı taşı">▲</button>' +
+      '<button class="btn alt sm" type="button" data-act="down" aria-label="Poz ' + (pi + 1) + ' aşağı taşı">▼</button>' +
+      '<button class="btn alt sm" type="button" data-act="dup" aria-label="Poz ' + (pi + 1) + ' kopyala">⧉</button>' +
+      '<button class="btn alt sm" type="button" data-act="del" aria-label="Poz ' + (pi + 1) + ' sil">✕</button></div><div class="pv">' + ins + '</div>';
+    box.appendChild(d);
+  });
+  markNow(-1);
+}
+function markNow(idx){ document.querySelectorAll('#poses .pose').forEach((e,i) => e.classList.toggle('now', i === idx)); }
+$('poses').addEventListener('click', e => {
+  const b = e.target.closest('button[data-act]'); if (!b) return;
+  const pi = +b.closest('.pose').dataset.pi, a = b.dataset.act, P = cfg.poses;
+  if (a === 'go') { stopPlay(true); P[pi].a.forEach((v,i) => i < cfg.n && setAngle(i, v)); after([...Array(cfg.n).keys()]); return; }
+  if (a === 'upd') { P[pi] = {...curPose(), dur: P[pi].dur, hold: P[pi].hold}; }
+  if (a === 'up' && pi > 0) [P[pi - 1], P[pi]] = [P[pi], P[pi - 1]];
+  if (a === 'down' && pi < P.length - 1) [P[pi + 1], P[pi]] = [P[pi], P[pi + 1]];
+  if (a === 'dup' && P.length < MAXPOSES) P.splice(pi + 1, 0, {a: P[pi].a.slice(), dur: P[pi].dur, hold: P[pi].hold});
+  if (a === 'del') P.splice(pi, 1);
+  buildPoses(); save(); updateCode();
+});
+$('poses').addEventListener('change', e => {
+  const t = e.target, f = t.dataset.f; if (!f) return;
+  const pi = +t.closest('.pose').dataset.pi, p = cfg.poses[pi];
+  if (f === 'a') { const i = +t.dataset.s, s = cfg.servos[i]; p.a[i] = clamp(toInt(t.value, p.a[i]), s.amin, s.amax); t.value = p.a[i]; }
+  else { p[f] = clamp(toInt(t.value, p[f]), 0, 60000); t.value = p[f]; }
+  save(); updateCode();
+});
+$('clearPoses').addEventListener('click', () => { stopPlay(true); cfg.poses = []; buildPoses(); save(); updateCode(); });
+
+/* hazır hareketler */
+const EX = {
+  selam: ['Selam ver', [[90,90,150,60,800,0],[90,90,110,60,400,0],[90,90,150,60,400,0],[90,90,110,60,400,0],[90,90,150,60,400,0],[90,90,90,90,800,0]]],
+  tut:   ['Tut ve bırak', [[90,90,90,120,800,100],[40,50,110,120,1200,0],[40,40,95,120,700,200],[40,40,95,40,500,300],[40,60,110,40,800,0],[140,60,110,40,1400,0],[140,40,95,40,700,200],[140,40,95,120,500,300],[140,60,110,120,700,0],[90,90,90,90,1200,0]]],
+  supur: ['Taban süpürme', [[30,90,90,90,1000,200],[150,90,90,90,2000,200],[90,90,90,90,1000,0]]]
+};
+Object.entries(EX).forEach(([k,v]) => $('ex').insertAdjacentHTML('beforeend', '<option value="' + k + '">' + v[0] + '</option>'));
+$('ex').addEventListener('change', () => {
+  const k = $('ex').value; if (!k) return; $('ex').value = ''; stopPlay(true);
+  cfg.poses = EX[k][1].map(r => fixPose({a: r.slice(0,4), dur: r[4], hold: r[5]}, cfg.servos));
+  buildPoses(); save(); updateCode();
+  $('prog').textContent = '"' + EX[k][0] + '" yüklendi (' + cfg.poses.length + ' poz). Açı kuralı varsayımdır; kendi kolunda farklı görünebilir.';
+});
+
+/* ---------- Oynatma ---------- */
+let pb = null, raf = 0;
+function playOpts(){ return {speed: cfg.speed, ease: cfg.interp === 'ease', loop: cfg.loop}; }
+function startPlay(){
+  if (!cfg.poses.length) { $('prog').textContent = 'Önce en az bir poz ekle.'; return; }
+  pb = startPlayback(angles.slice(0,cfg.n), performance.now());
+  $('play').disabled = true; $('stop').disabled = false; raf = requestAnimationFrame(tick);
+}
+function tick(now){
+  if (!pb) return;
+  const res = stepPlayback(pb, now, cfg.poses.map(p => ({...p, a: p.a.slice(0,cfg.n)})), playOpts());
+  const ch = [];
+  for (let i = 0; i < cfg.n; i++) { setAngle(i, res.angles[i], true); ch.push(i); }
+  $('prog').textContent = (res.done ? 'Bitti. ' : '') + 'Poz ' + (pb.idx + 1) + '/' + cfg.poses.length + ' · ' + (pb.phase === 'move' ? 'hareket' : 'bekleme');
+  markNow(res.done ? -1 : pb.idx);
+  after(ch);
+  if (res.done) stopPlay(false); else raf = requestAnimationFrame(tick);
+}
+function stopPlay(quiet){
+  if (!pb && quiet) return;
+  pb = null; cancelAnimationFrame(raf); $('play').disabled = false; $('stop').disabled = true; markNow(-1);
+  if (link.kind) thr.flushNow();
+  if (!quiet) return;
+}
+$('play').addEventListener('click', startPlay);
+$('stop').addEventListener('click', () => { stopPlay(true); $('prog').textContent = 'Durduruldu.'; });
+$('loop').addEventListener('change', () => { cfg.loop = $('loop').checked; save(); updateCode(); });
+$('spd').addEventListener('change', () => { cfg.speed = +$('spd').value; save(); updateCode(); });
+$('interp').addEventListener('change', () => { cfg.interp = $('interp').value; save(); updateCode(); });
+$('goHome').addEventListener('click', () => { stopPlay(true); cfg.servos.slice(0,cfg.n).forEach((s,i) => setAngle(i, s.home)); after([...Array(cfg.n).keys()]); });
+
+/* ---------- JSON ---------- */
+function jmsg(t, bad){ const m = $('jmsg'); m.style.display = 'block'; m.textContent = t; m.className = 'status ' + (bad ? 'err' : 'ok'); }
+const jsonText = () => JSON.stringify(exportObj(cfg), null, 2);
+$('jExp').addEventListener('click', () => { $('json').value = jsonText(); jmsg('Dışa aktarıldı (' + cfg.poses.length + ' poz).'); });
+$('jCopy').addEventListener('click', () => { $('json').value = jsonText(); copyText($('json').value).then(ok => jmsg(ok ? 'Panoya kopyalandı.' : 'Kopyalanamadı; metni elle seç.', !ok)); });
+$('jDl').addEventListener('click', () => {
+  try { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([jsonText()], {type:'application/json'})); a.download = 'servolab-hareket.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); jmsg('İndirme başlatıldı.'); }
+  catch (e) { jmsg('İndirilemedi: ' + e.message, true); }
+});
+$('jImp').addEventListener('click', () => {
+  try {
+    const o = JSON.parse($('json').value); const c = sanitize(o);
+    stopPlay(true); cfg = c; angles = cfg.servos.map(s => s.home); applyCfgToUI(); jmsg('İçe aktarıldı: ' + cfg.n + ' servo, ' + cfg.poses.length + ' poz.');
+  } catch (e) { jmsg('İçe aktarılamadı: ' + (e instanceof SyntaxError ? 'geçerli JSON değil (' + e.message + ')' : e.message), true); }
+});
+$('jFile').addEventListener('change', () => {
+  const f = $('jFile').files[0]; if (!f) return;
+  if (f.size > 2e6) { jmsg('Dosya çok büyük (en çok 2 MB).', true); return; }
+  const r = new FileReader(); r.onload = () => { $('json').value = String(r.result); jmsg('Dosya okundu; "İçe aktar"a bas.'); }; r.onerror = () => jmsg('Dosya okunamadı.', true); r.readAsText(f);
+});
+function applyCfgToUI(){
+  $('nsel').value = cfg.n; $('loop').checked = cfg.loop; $('spd').value = String(cfg.speed); $('interp').value = cfg.interp;
+  if (![...$('spd').options].some(o => o.value === $('spd').value)) { const o = new Option('×' + cfg.speed, cfg.speed); $('spd').add(o); $('spd').value = String(cfg.speed); }
+  buildSliders(); buildCals(); buildPoses(); scheduleDraw(); save(); updateCode();
+}
+
+/* ---------- Kod ---------- */
+function copyText(t){
+  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t).then(() => true, () => fb(t));
+  return Promise.resolve(fb(t));
+  function fb(x){ try { const a = document.createElement('textarea'); a.value = x; a.style.position = 'fixed'; a.style.opacity = '0'; document.body.appendChild(a); a.select(); const ok = document.execCommand('copy'); a.remove(); return ok; } catch (e) { return false; } }
+}
+function hl(src){
+  const re = /(\/\/[^\n]*)|(^#[^\n]*)|("(?:[^"\\\n]|\\.)*")|\b(const|void|int|float|bool|char|unsigned|long|uint8_t|struct|class|public|if|else|for|while|return|true|false|auto|size_t|new|define)\b|\b(\d+(?:\.\d+)?f?)\b|\b([A-Za-z_]\w*)(?=\()/gm;
+  let out = '', last = 0, m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index));
+    const cls = m[1] ? 'c' : m[2] ? 'p' : m[3] ? 's' : m[4] ? 'k' : m[5] ? 'n' : 'f';
+    out += '<span class="' + cls + '">' + esc(m[0]) + '</span>'; last = m.index + m[0].length;
+  }
+  return out + esc(src.slice(last));
+}
+let codeT = 0, lastCode = '';
+function updateCode(){
+  clearTimeout(codeT);
+  codeT = setTimeout(() => {
+    const kind = $('ckind').value; $('hcopts').hidden = kind !== 'rx-hc05';
+    lastCode = genCode(cfg, kind, {rx: $('hcrx').value, tx: $('hctx').value, baud: $('hcbaud').value});
+    $('code').innerHTML = hl(lastCode); $('lines').textContent = lastCode.split('\n').length - 1 + ' satır';
+    $('cnote').textContent = kind.startsWith('rx-') ? 'Alıcı sketch kalibrasyonu (pin, sınır, µs, ters, ev) şu anki ayarlardan alır; kalibrasyonu değiştirince kodu yeniden kopyala. Gerçek donanımla denenmedi.'
+      : 'Kod şu anki pozlardan ve kalibrasyondan üretilir; ev açılarından başlar. Gerçek robot kolla denenmedi; kolu boş alanda, düşük hızda dene.';
+  }, 120);
+}
+['ckind','hcrx','hctx','hcbaud'].forEach(id => $(id).addEventListener('change', updateCode));
+$('copy').addEventListener('click', () => copyText(lastCode).then(ok => { $('copy').textContent = ok ? 'Kopyalandı ✓' : 'Kopyalanamadı'; setTimeout(() => $('copy').textContent = 'Kopyala', 1600); }));
+
+/* ---------- Bağlantı ---------- */
+const link = {kind:'', port:null, reader:null, writer:null, dev:null, write:null, q:Promise.resolve()};
+const enc = new TextEncoder();
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const hasSerial = 'serial' in navigator, hasBle = 'bluetooth' in navigator;
+function lstat(t, cls){ const e = $('lstat'); e.textContent = t; e.className = 'status' + (cls ? ' ' + cls : ''); }
+const logBuf = []; let logT = 0;
+function log(dir, t){
+  logBuf.push(dir + ' ' + t); if (logBuf.length > 60) logBuf.shift();
+  if (!logT) logT = setTimeout(() => { logT = 0; const e = $('log'); e.textContent = logBuf.join('\n'); e.scrollTop = e.scrollHeight; }, 200);
+}
+(function support(){
+  const bits = [];
+  bits.push('Web Serial: <b>' + (hasSerial ? 'var' : 'yok') + '</b>', 'Web Bluetooth: <b>' + (hasBle ? 'var' : 'yok') + '</b>', 'Güvenli bağlam (HTTPS): <b>' + (window.isSecureContext ? 'evet' : 'hayır') + '</b>');
+  let t = bits.join(' · ');
+  if (isIOS) t += '<br><span class="warn">iOS Safari Web Bluetooth ve Web Serial desteklemez.</span> Canlı sürüş için Android\'de Chrome (BLE) ya da masaüstünde Chrome/Edge kullan. iOS için BLE destekleyen üçüncü taraf tarayıcılar olabilir; denemedim. Bu cihazda arayüz, önizleme ve kod üretimi çalışır.';
+  else if (!hasSerial && !hasBle) t += '<br><span class="warn">Bu tarayıcı iki bağlantı türünü de desteklemiyor.</span> Chrome veya Edge dene. Arayüz ve kod üretimi çalışır.';
+  else if (!hasSerial) t += '<br>USB için masaüstü Chrome/Edge gerekir; bu tarayıcıda yalnızca BLE olabilir.';
+  else if (!hasBle) t += '<br>BLE için Chrome/Edge gerekir (Firefox ve Safari desteklemez).';
+  if (!window.isSecureContext) t += '<br><span class="warn">Sayfa HTTPS ya da localhost üzerinden açılmadığı için bağlantı API\'leri kapalı.</span>';
+  $('supp').innerHTML = t;
+  $('bSerial').disabled = !hasSerial; $('bBle').disabled = !hasBle;
+})();
+const thr = makeThrottle(line => { sendRaw(line); }, 50, () => cfg.n, () => performance.now(), (f,ms) => setTimeout(f,ms), t => clearTimeout(t));
+function sendRaw(str){
+  if (!link.kind) return;
+  const chunks = link.kind === 'ble' ? chunkText(str, 20) : [enc.encode(str)];
+  log('TX', str.replace(/\n$/,''));
+  link.q = link.q.then(async () => { for (const c of chunks) await link.write(c); }).catch(e => lost('Yazma hatası: ' + (e && e.message || e)));
+}
+function setConnected(on, label){
+  ['bDisc','sendP','sendH','sendQ','sendRaw'].forEach(id => $(id).disabled = !on);
+  $('bSerial').disabled = on || !hasSerial; $('bBle').disabled = on || !hasBle;
+  if (on) lstat('Bağlı: ' + label + '. İlk harekette yalnızca oynattığın servo(lar) gönderilir; "Tüm açıları gönder" hepsini gönderir.', 'ok');
+}
+function lost(why){
+  if (!link.kind) return; const k = link.kind; link.kind = ''; link.write = null;
+  try { if (link.writer) link.writer.releaseLock(); } catch (e) {} link.writer = null;
+  setConnected(false); lstat('Bağlantı koptu (' + (k === 'ble' ? 'BLE' : 'USB') + '): ' + why, 'err'); log('SYS', 'bağlantı koptu: ' + why);
+}
+function explain(e, what){
+  const n = e && e.name, m = e && e.message || String(e);
+  if (n === 'NotFoundError') return what + ': cihaz/port seçilmedi (pencere kapatıldı ya da uygun cihaz bulunamadı). BLE\'de cihaz Nordic UART servisini yayınlamıyorsa "Tüm cihazları listele"yi dene.';
+  if (n === 'NotAllowedError' || n === 'SecurityError') return what + ': izin verilmedi ya da engellendi (' + m + '). Sayfa HTTPS olmalı; izin istemini kabul et.';
+  if (n === 'NetworkError') return what + ': bağlanılamadı (cihaz kapalı, menzil dışı, başka uygulamaya bağlı ya da UART servisi yok): ' + m;
+  if (n === 'InvalidStateError') return what + ': port zaten açık ya da başka bir program kullanıyor: ' + m;
+  return what + ' hatası: ' + m;
+}
+async function readSerial(port){
+  const dec = new TextDecoder(); let buf = '';
+  try {
+    link.reader = port.readable.getReader();
+    for (;;) { const {value, done} = await link.reader.read(); if (done) break; buf += dec.decode(value, {stream:true}); let k; while ((k = buf.indexOf('\n')) >= 0) { log('RX', buf.slice(0,k).trim()); buf = buf.slice(k + 1); } }
+  } catch (e) { lost('okuma hatası: ' + (e && e.message || e)); }
+  try { link.reader && link.reader.releaseLock(); } catch (e) {} link.reader = null;
+}
+$('bSerial').addEventListener('click', async () => {
+  if (!hasSerial) return;
+  try {
+    lstat('Port seçiliyor…');
+    const port = await navigator.serial.requestPort();
+    await port.open({baudRate: +$('baud').value});
+    link.kind = 'serial'; link.port = port; link.writer = port.writable.getWriter(); link.write = c => link.writer.write(c);
+    setConnected(true, 'USB seri ' + $('baud').value + ' baud'); log('SYS', 'USB bağlandı'); readSerial(port);
+  } catch (e) { lstat(explain(e, 'USB bağlantısı'), 'err'); log('SYS', String(e)); }
+});
+if (hasSerial) navigator.serial.addEventListener('disconnect', e => { if (link.port && e.target === link.port) { link.port = null; lost('USB kablosu çıkarıldı'); } });
+$('bBle').addEventListener('click', async () => {
+  if (!hasBle) return;
+  try {
+    lstat('BLE cihazı seçiliyor…');
+    const opt = $('bleAll').checked ? {acceptAllDevices:true, optionalServices:[NUS.svc]} : {filters:[{services:[NUS.svc]}]};
+    const dev = await navigator.bluetooth.requestDevice(opt);
+    dev.addEventListener('gattserverdisconnected', () => lost('cihaz bağlantıyı kesti ya da menzil dışına çıktı'));
+    lstat('Bağlanılıyor: ' + (dev.name || 'adsız cihaz') + '…');
+    const srv = await dev.gatt.connect(), svc = await srv.getPrimaryService(NUS.svc), rx = await svc.getCharacteristic(NUS.rx);
+    link.dev = dev; link.kind = 'ble';
+    link.write = c => rx.writeValueWithoutResponse ? rx.writeValueWithoutResponse(c) : rx.writeValue(c);
+    try { const tx = await svc.getCharacteristic(NUS.tx); await tx.startNotifications(); let b = ''; const dec = new TextDecoder();
+      tx.addEventListener('characteristicvaluechanged', ev => { b += dec.decode(ev.target.value); let k; while ((k = b.indexOf('\n')) >= 0) { log('RX', b.slice(0,k).trim()); b = b.slice(k + 1); } }); } catch (e) { log('SYS', 'bildirim kanalı açılamadı (gönderme çalışır)'); }
+    setConnected(true, 'BLE ' + (dev.name || 'cihaz')); log('SYS', 'BLE bağlandı');
+  } catch (e) { lstat(explain(e, 'BLE bağlantısı'), 'err'); log('SYS', String(e)); }
+});
+$('bDisc').addEventListener('click', async () => {
+  const k = link.kind; thr.flushNow(); await link.q.catch(() => {}); link.kind = ''; link.write = null;
+  try {
+    if (k === 'serial') { if (link.reader) await link.reader.cancel(); if (link.writer) { link.writer.releaseLock(); link.writer = null; } await link.port.close(); link.port = null; }
+    if (k === 'ble' && link.dev && link.dev.gatt.connected) link.dev.gatt.disconnect();
+  } catch (e) { log('SYS', 'kapatma: ' + e.message); }
+  setConnected(false); lstat('Bağlantı kesildi.'); log('SYS', 'bağlantı kesildi');
+});
+$('sendP').addEventListener('click', () => sendRaw(fmtP(angles, cfg.n)));
+$('sendH').addEventListener('click', () => sendRaw('H\n'));
+$('sendQ').addEventListener('click', () => sendRaw('?\n'));
+$('sendRaw').addEventListener('click', () => { const v = $('raw').value.trim(); if (v) sendRaw(v + '\n'); });
+$('raw').addEventListener('keydown', e => { if (e.key === 'Enter') $('sendRaw').click(); });
+
+/* ---------- Çevrimdışı (PWA) ---------- */
+(async function offline(){
+  const chip = $('offl');
+  if (!('serviceWorker' in navigator) || !('caches' in window)) { chip.textContent = 'Çevrimdışı: bu tarayıcıda yok'; return; }
+  try {
+    await navigator.serviceWorker.register('sw.js'); await navigator.serviceWorker.ready;
+    const c = await caches.open('servolab-v1'), keys = await c.keys();
+    const hasIndex = keys.some(r => /\/servolab\/(index\.html)?$/.test(new URL(r.url).pathname));
+    if (hasIndex) { chip.textContent = 'Çevrimdışı hazır (' + keys.length + ' dosya)'; chip.classList.add('ok'); }
+    else chip.textContent = 'Çevrimdışı: önbellek dolmadı';
+  } catch (e) { chip.textContent = 'Çevrimdışı: kullanılamıyor' + (location.protocol === 'file:' ? ' (file://)' : ''); }
+})();
+
+/* ---------- Başlat ---------- */
+load();
+$('nsel').value = cfg.n; $('loop').checked = cfg.loop; $('interp').value = cfg.interp;
+if (![...$('spd').options].some(o => +o.value === cfg.speed)) $('spd').add(new Option('×' + cfg.speed, cfg.speed));
+$('spd').value = String(cfg.speed);
+buildSliders(); buildCals(); buildPoses(); updateCode(); draw();
+})();
+</script>
+</body>
+</html>

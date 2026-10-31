@@ -1,0 +1,16 @@
+{
+  "name": "PinHarita",
+  "short_name": "PinHarita",
+  "description": "Kart pin haritası ve çakışma denetimi",
+  "lang": "tr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F1F5F1",
+  "theme_color": "#1C6A4C",
+  "icons": [
+    { "src": "../assets/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "../assets/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "../assets/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
