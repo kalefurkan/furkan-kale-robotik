@@ -1,0 +1,96 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "2 × A4988 step motor sürücü",
+  "2 × step motor (NEMA 17, 200 adım/tur; breadboard dışında)",
+  "1 × servo motor (SG90, gripper)",
+  "1 × analog joystick",
+  "1 × ayarlanabilir güç kaynağı (12 V'a ayarlı; gerçekte 12 V adaptör, en az 2 A)",
+  "Robot kol şasisi: taban, omuz ve gripper mekaniği (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (32 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: iki A4988'in VDD ucu, joystick VCC ve servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: A4988 GND uçları, joystick GND, servo GND ve güç kaynağının − ucu"
+  ],
+  [
+   "D2",
+   "Taban A4988 STEP"
+  ],
+  [
+   "D3",
+   "Taban A4988 DIR"
+  ],
+  [
+   "D4",
+   "Omuz A4988 STEP"
+  ],
+  [
+   "D5",
+   "Omuz A4988 DIR"
+  ],
+  [
+   "A0",
+   "Joystick VRx (taban)"
+  ],
+  [
+   "A1",
+   "Joystick VRy (omuz)"
+  ],
+  [
+   "D7",
+   "Joystick SW (buton)"
+  ],
+  [
+   "D9",
+   "Servo (gripper) sinyali"
+  ]
+ ],
+ "img": "assets/devre/3-eksenli-robot-kol.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve 12 V güç kaynağı kapalı olsun. Motorları güç açıkken sürücüden çıkarma.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu üstteki artı (+) rayına (T+), − ucunu alttaki eksi (−) rayına kablola.",
+  "Taban A4988'i j4–j11 deliklerine (alt sıra: VMOT, GND, 2B, 2A, 1A, 1B, VDD, GND) tak; üst sırası (EN, MS1, MS2, MS3, RST, SLP, STEP, DIR) aynı sütunlarda e4–e11'e oturur. RST ile SLP'yi kısa kabloyla birleştir (a8 → a9).",
+  "Taban kabloları: D2 → a10 (STEP), D3 → a11 (DIR), f10 → artı rayı (VDD), f4 → üstteki artı rayı (VMOT, 12 V), f5 → eksi rayı (GND). Motor (breadboard dışında, takılı değil): bobin A uçları g8 (1A) ve g9 (1B), bobin B uçları g7 (2A) ve g6 (2B).",
+  "Omuz A4988'i aynı şekilde j14–j21 sütunlarına tak: a18 → a19 (RST–SLP), D4 → a20 (STEP), D5 → a21 (DIR), f20 → artı rayı (VDD), f14 → üstteki artı rayı (VMOT), f15 → eksi rayı (GND); motor bobinleri g18, g19 (A) ve g17, g16 (B).",
+  "Joystick'i a23 (GND), a24 (VCC), a25 (VRx), a26 (VRy), a27 (SW) deliklerine tak: e24 → artı rayı, e23 → eksi rayı, A0 → e25, A1 → e26, D7 → e27.",
+  "Servoyu a28 (SIG), a29 (VCC), a30 (GND) deliklerine tak: D9 → e28, e29 → artı rayı, e30 → eksi rayı.",
+  "Gerçek kolda her A4988'in VMOT-GND arasına 100 µF kapasitör tak (simülatörde yoktur), Vref'i ayarla ve kolun hareket sınırlarını mekanik olarak (tampon) koru.",
+  "Kodu yükle (simülatörde çalıştır): joystick'i sağa iterek taban motorunun adım sayısını artır, yukarı-aşağı iterek omuzu çevir; joystick butonuna basınca servo gripper'ı kapatır, tekrar basınca açar."
+ ],
+ "code": "// 3 eksenli robot kol: taban ve omuz step motorlari (A4988) + gripper servosu, joystick ile kontrol\n// Joystick X = taban donusu, Y = omuz, joystick butonu = gripper ac/kapat\n#include <AccelStepper.h>\n#include <Servo.h>\n\nAccelStepper taban(AccelStepper::DRIVER, 2, 3);   // STEP D2, DIR D3\nAccelStepper omuz(AccelStepper::DRIVER, 4, 5);    // STEP D4, DIR D5\nServo gripper;\n\nconst int VRX = A0;\nconst int VRY = A1;\nconst int SW = 7;                 // joystick butonu (INPUT_PULLUP)\nconst int SERVO_PIN = 9;\nconst int GRIPPER_ACIK = 20;\nconst int GRIPPER_KAPALI = 70;\nconst int OLU_BOLGE = 80;         // merkez etrafinda (512) hareketsiz bolge\nconst float MAKS_HIZ = 400;       // adim/saniye\n\nbool kapali = false;\nbool butonOnceki = false;\nunsigned long sonYaz = 0;\n\nfloat hizHesapla(int ham) {       // joystick degerini -MAKS_HIZ..+MAKS_HIZ hiza cevir\n  int fark = ham - 512;\n  if (abs(fark) < OLU_BOLGE) {\n    return 0;\n  }\n  return MAKS_HIZ * fark / 512.0;\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(SW, INPUT_PULLUP);\n  taban.setMaxSpeed(MAKS_HIZ);\n  omuz.setMaxSpeed(MAKS_HIZ);\n  gripper.attach(SERVO_PIN);\n  gripper.write(GRIPPER_ACIK);\n  Serial.println(\"Robot kol hazir\");\n}\n\nvoid loop() {\n  taban.setSpeed(hizHesapla(analogRead(VRX)));\n  omuz.setSpeed(hizHesapla(analogRead(VRY)));\n  taban.runSpeed();\n  omuz.runSpeed();\n\n  bool basili = (digitalRead(SW) == LOW);\n  if (basili && !butonOnceki) {            // yalniz basma anında bir kez\n    kapali = !kapali;\n    gripper.write(kapali ? GRIPPER_KAPALI : GRIPPER_ACIK);\n    Serial.println(kapali ? \"Gripper: KAPALI\" : \"Gripper: ACIK\");\n  }\n  butonOnceki = basili;\n\n  if (millis() - sonYaz >= 1000) {         // saniyede bir konum yaz\n    sonYaz = millis();\n    Serial.print(\"taban=\");\n    Serial.print(taban.currentPosition());\n    Serial.print(\" omuz=\");\n    Serial.println(omuz.currentPosition());\n  }\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Joystick'in her ekseni 0–1023 arası bir analog değer verir; orta nokta yaklaşık 512'dir. hizHesapla() bu değerden 512'yi çıkarır, fark 80'den küçükse (ölü bölge) hız 0 yapar, değilse farkı −400…+400 adım/saniye arasına ölçekler; işaret yönü belirler. Her turda setSpeed() ile hız verilir ve runSpeed() gerekiyorsa tek adım atar; iki motor aynı döngüde sırayla çağrıldığından birlikte hareket eder (AccelStepper bekleme yapmaz). Joystick butonu INPUT_PULLUP ile okunur, basılınca LOW olur; butonOnceki değişkeni sayesinde yalnızca basma anında (basılı tutarken değil) gripper durumu ters çevrilir: servo 20° (açık) ile 70° (kapalı) arasında gider. Konumlar her saniye Seri Monitör'e yazılır; motorun konumu AccelStepper'in saydığı adımdır, gerçek açı değildir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Robot kol hazir\" yazıldı ve servo 20°'de (gripper açık) kaldı. Joystick orta konumdayken (ölü bölge) motorlar dönmedi (taban=0 omuz=0). 1,5. saniyede joystick X tam sağa alındı: taban 400 adım/sn hızla ilerledi (2. saniyede taban=195, 3. saniyede taban=563). 3. saniyede X ortaya, Y tam aşağıya (0) alınınca omuz geriye döndü (4. saniyede omuz=-383, 5. saniyede omuz=-563). 5,5. saniyede joystick butonuna basılınca \"Gripper: KAPALI\" yazıldı ve servo 70°'ye gitti. 7. saniyede X tam sola alınınca taban geri döndü (8. saniyede taban=180, 9. saniyede 0). 9,5. saniyede ikinci basışta \"Gripper: ACIK\" yazıldı ve servo 20°'ye döndü. Adım sayıları Seri Monitör'de yazılan değerlerdir. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde kolun mekaniği, ağırlığı, tork ve yük altında adım kaybı yoktur; motorların konumu yalnızca sürücünün saydığı adımdır. Omuz ekseni gerçek kolda ağırlık etkisiyle motor kapalıyken düşer; A4988 ile motor boştayken tutma torku vardır ama kapatılırsa kol düşer. Sınır anahtarı, referans (home) ve hareket sınırı yoktur: kod kolu sınırsız döndürür; gerçek kolda mekanik sınırlar ve yazılım sınırları eklenmelidir. Joystick modeli gürültüsüzdür. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki AccelStepper.h onların dışındadır, bu yüzden sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Güç ve GND",
+   "Motor beslemesi (12 V) ayrıdır ve ortak GND şarttır; güç açıkken motoru sürücüden çıkarma; VMOT-GND arasına kapasitör tak; sürücü ve motor ısınır. Mekanik güvenlik: hareketli kola ve gripper'a parmağını yaklaştırma, kol sınırlarına çarparsa motoru hemen durdur; kolun taşıyabileceğinden ağır yük kaldırma. Adaptörü kısa devre yapma; kablolar ısınırsa enerjiyi hemen kes. Servo ve motorlar birlikte yüksek akım çekebilir: servoyu 5V'dan Arduino'ya yük bindirmeyecek şekilde (ayrı 5 V kaynakla, GND ortak) beslemek daha güvenlidir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "RST ve SLP'yi birleştirmemek (motor dönmez); bobin çiftlerini karıştırmak (motor titrer); joystick'te ölü bölge bırakmamak (kol kendi kendine kayar); butonu her turda toggle etmek (gripper titreşir); delay() kullanıp step darbelerini aksatmak; VMOT kapasitörünü unutmak."
+  ],
+  [
+   "Dene",
+   "Ölü bölgeyi (OLU_BOLGE) 20 ve 200 yap, kolun hareket etmeye başladığı joystick konumunun değişmesini gözle; MAKS_HIZ'ı değiştir; gripper için üçüncü bir ara konum (45°) ekle."
+  ]
+ ],
+ "title": "87. 3 Eksenli Robot Kol"
+}

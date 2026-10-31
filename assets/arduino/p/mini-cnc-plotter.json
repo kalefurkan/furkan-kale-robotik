@@ -1,0 +1,83 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "2 × A4988 step motor sürücü",
+  "2 × step motor (NEMA 17, 200 adım/tur; breadboard dışında)",
+  "1 × servo motor (SG90, kalem kaldırıcı)",
+  "1 × ayarlanabilir güç kaynağı (12 V'a ayarlı; gerçekte 12 V adaptör, en az 2 A)",
+  "Plotter şasisi: 2 doğrusal eksen (kayış ya da vidalı mil), kalem tutucu ve kâğıt zemini (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (27 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: iki A4988'in VDD ucu ve servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: A4988 GND uçları, servo GND ve güç kaynağının − ucu"
+  ],
+  [
+   "D2",
+   "X ekseni A4988 STEP"
+  ],
+  [
+   "D3",
+   "X ekseni A4988 DIR"
+  ],
+  [
+   "D4",
+   "Y ekseni A4988 STEP"
+  ],
+  [
+   "D5",
+   "Y ekseni A4988 DIR"
+  ],
+  [
+   "D9",
+   "Servo (kalem) sinyali"
+  ]
+ ],
+ "img": "assets/devre/mini-cnc-plotter.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve 12 V güç kaynağı kapalı olsun. Sürücüler enerji varken motor bağlantısı sökülürse bozulur: motorları takmadan ya da çıkarmadan önce gücü kes.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu üstteki artı (+) rayına (T+), − ucunu alttaki eksi (−) rayına kablola.",
+  "X ekseni A4988'i j4–j11 deliklerine (alt sıra: VMOT, GND, 2B, 2A, 1A, 1B, VDD, GND) tak; modülün üst sırası (EN, MS1, MS2, MS3, RST, SLP, STEP, DIR) breadboard'un üst yarısında aynı sütunlara (e4–e11) oturur. RST ile SLP'yi kısa kabloyla birleştir (a8 → a9); yoksa sürücü çalışmaz.",
+  "X ekseni kabloları: D2 → a10 (STEP), D3 → a11 (DIR), f10 → artı rayı (VDD, 5V), f4 → üstteki artı rayı (VMOT, 12 V), f5 → eksi rayı (GND). EN, MS1, MS2, MS3 boş kalır (sürücü etkin, tam adım).",
+  "X motoru (breadboard dışında, takılı değil): bobin A'nın uçlarını g8 (1A) ve g9 (1B), bobin B'nin uçlarını g7 (2A) ve g6 (2B) deliklerine kablola.",
+  "Y ekseni için aynısını j14–j21 sütunlarında yap: a18 → a19 (RST–SLP), D4 → a20 (STEP), D5 → a21 (DIR), f20 → artı rayı (VDD), f14 → üstteki artı rayı (VMOT), f15 → eksi rayı (GND); motor bobinleri g18, g19 (A) ve g17, g16 (B).",
+  "Servoyu a24 (SIG), a25 (VCC), a26 (GND) deliklerine tak. D9 → e24, e25 → artı rayı, e26 → eksi rayı.",
+  "Gerçek makinede her A4988'in VMOT ve GND uçları arasına en az 100 µF'lık bir kapasitör tak (simülatörde kapasitör yoktur), Vref'i motorun akımına göre ayarla ve sürücüye soğutucu yapıştır.",
+  "Kodu yükle (simülatörde çalıştır): \"Plotter hazir\" yazıldıktan sonra kalem iner, sırayla \"Nokta 1\" … \"Nokta 5\" yazılır ve çizim biter. Motor konumları sürücü ve motor üzerinde görünür."
+ ],
+ "code": "// Mini CNC plotter: 2 adet A4988 + step motor (X ve Y ekseni) + kalem kaldiran servo\n// Kare ve capraz cizgi cizer. Cizgilerin duz olmasi icin iki eksen ayni anda varir (hizlar mesafeyle orantili).\n#include <AccelStepper.h>\n#include <Servo.h>\n\nAccelStepper xEkseni(AccelStepper::DRIVER, 2, 3);   // STEP = D2, DIR = D3\nAccelStepper yEkseni(AccelStepper::DRIVER, 4, 5);   // STEP = D4, DIR = D5\nServo kalem;\n\nconst int SERVO_PIN = 9;\nconst int KALEM_YUKARI = 90;          // kalem kagittan ayrik\nconst int KALEM_ASAGI = 30;           // kalem kagitta\nconst int ADIM_MM = 10;               // 1 mm = 10 adim (ornek: 1,8 derece motor + 20 disli GT2 kasnak, tam adim)\nconst float HIZ = 400;                // adim/saniye (en uzun eksen icin)\n\n// cizim: (x, y) noktalari mm cinsinden; ilk nokta baslangic, sonuncusu bitis\nconst int N = 6;\nconst int PX[6] = {0, 20, 20, 0, 0, 20};\nconst int PY[6] = {0, 0, 20, 20, 0, 20};\n\nvoid git(int xmm, int ymm) {\n  long hx = (long)xmm * ADIM_MM;\n  long hy = (long)ymm * ADIM_MM;\n  long dx = abs(hx - xEkseni.currentPosition());\n  long dy = abs(hy - yEkseni.currentPosition());\n  long enUzun = max(dx, dy);\n  if (enUzun == 0) {\n    return;\n  }\n  xEkseni.moveTo(hx);\n  yEkseni.moveTo(hy);\n  xEkseni.setSpeed(hx >= xEkseni.currentPosition() ? HIZ * dx / enUzun : -HIZ * dx / enUzun);\n  yEkseni.setSpeed(hy >= yEkseni.currentPosition() ? HIZ * dy / enUzun : -HIZ * dy / enUzun);\n  while (xEkseni.distanceToGo() != 0 || yEkseni.distanceToGo() != 0) {\n    xEkseni.runSpeedToPosition();     // sabit hizla hedefe, varinca durur\n    yEkseni.runSpeedToPosition();\n  }\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  xEkseni.setMaxSpeed(1000);\n  yEkseni.setMaxSpeed(1000);\n  kalem.attach(SERVO_PIN);\n  kalem.write(KALEM_YUKARI);\n  delay(500);\n  Serial.println(\"Plotter hazir\");\n\n  for (int i = 0; i < N; i++) {\n    git(PX[i], PY[i]);\n    Serial.print(\"Nokta \");\n    Serial.print(i);\n    Serial.print(\": x=\");\n    Serial.print(xEkseni.currentPosition() / ADIM_MM);\n    Serial.print(\" mm y=\");\n    Serial.print(yEkseni.currentPosition() / ADIM_MM);\n    Serial.println(\" mm\");\n    if (i == 0) {\n      kalem.write(KALEM_ASAGI);        // baslangic noktasina varinca kalemi indir\n      delay(300);\n    }\n  }\n  kalem.write(KALEM_YUKARI);\n  Serial.println(\"Cizim bitti\");\n}\n\nvoid loop() {\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "A4988 her STEP darbesinin yükselen kenarında motoru bir adım döndürür; DIR pini yönü seçer. AccelStepper::DRIVER kipinde kütüphane yalnızca STEP ve DIR pinlerini sürer. git(x, y) hedefi milimetreden adıma çevirir (1 mm = 10 adım), her eksenin gideceği mesafeyi bulur ve en uzun eksene HIZ (400 adım/sn) verir; kısa eksenin hızı mesafe oranıyla küçültülür. Böylece iki eksen aynı anda varır ve çizgi eğri değil düz olur. setSpeed() ile işaretli hız verilir, runSpeedToPosition() her çağrıda gerekiyorsa tek adım atar ve hedefe varınca durur; döngü iki eksen de bitene kadar bu çağrıları tekrarlar. Kalem yukarıdayken (90°) başlangıç noktasına gidilir, sonra servo kalemi indirir (30°) ve PX/PY dizisindeki noktalar sırayla çizilir: kare ve bir köşegen. Çizim sonunda kalem tekrar kalkar. MS1–MS3 boş bırakıldığından sürücü tam adımda çalışır; daha ince hareket için bu uçlar 5V'a bağlanır ve ADIM_MM değeri mikroadıma göre büyütülür."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Plotter hazir\" yazıldı ve servo kalem yukarıda (90°) kaldı. 0,5. saniyede \"Nokta 0: x=0 mm y=0 mm\", servo 30°'ye indi. Sonra \"Nokta 1: x=20 mm y=0 mm\" (yaklaşık 1,3 s), \"Nokta 2: x=20 mm y=20 mm\", \"Nokta 3: x=0 mm y=20 mm\", \"Nokta 4: x=0 mm y=0 mm\" ve köşegen için \"Nokta 5: x=20 mm y=20 mm\" yazıldı; her kenar yaklaşık yarım saniye sürdü (200 adım, 400 adım/sn). Çizim 3,3. saniyede bitti, servo tekrar 90°'ye kalktı. Her iki A4988 de 600 STEP darbesi saydı ve her iki step motorun konumu son noktada 200 adım = 1 tur (360°) gösterdi. Köşegende iki eksenin aynı anda hareket ettiği sonuç konumlarından görüldü. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatör yalnızca darbe sayar: gerçek çizgi, kâğıt, kalem, kayış gerilmesi, mekanik boşluk, adım kaçırma ve hız sınırı yoktur. Gerçek step motor 400 adım/sn'de bile yük altında adım kaçırabilir; A4988 Vref ayarı, ivmelenme, titreşim ve ısınma modellenmez. Sketch sabit hız kullanır (ivme yok), bu yüzden yüksek hızda ya da ağır yükte köşelerde kayma olabilir. Eksen uç anahtarları (limit switch) ve başlangıç (home) yoktur: plotter her açılışta kalemin durduğu yeri (0, 0) sayar. Çizimler G-kod yerine koda gömülü noktalardan gelir. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki AccelStepper.h onların dışındadır, bu yüzden sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Güç ve GND",
+   "Motor beslemesi (VMOT, 12 V) mantık beslemesinden (VDD, 5 V) ayrıdır ve Arduino'dan alınmaz; ortak GND şarttır. Güç açıkken motoru sürücüden çıkarma: sürücü bozulabilir. A4988'i VMOT üzerinde kapasitörsüz kullanma (gerilim sıçraması sürücüyü yakar). Sürücü ve motor ısınır: dokunmadan önce soğumasını bekle, sürücüye soğutucu tak. Hareketli eksene ve kayışa parmağını sıkıştırma. Adaptörü kısa devre yapma; kablolar ısınırsa enerjiyi hemen kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "RST ve SLP'yi birleştirmemek (motor hiç dönmez); bobin çiftlerini karıştırmak (motor titrer, dönmez; 1A/1B bir bobin, 2A/2B öteki); VDD'yi 5V'a bağlamayı unutmak; ortak GND yapmamak; Vref'i ayarlamamak; iki eksen için aynı STEP pinini kullanmak; kısa kenarda hızı mesafeyle orantılamayıp eğri çizgi çizmek."
+  ],
+  [
+   "Dene",
+   "Kare boyunu PX ve PY dizilerinde 30 mm yap; HIZ'ı 800 yapıp çizim süresine bak; MS1'i 5V'a bağlayıp (yarım adım) ADIM_MM'yi 20 yap ve aynı karenin kaç darbeye çıktığına bak; noktalara bir üçgen ekle."
+  ]
+ ],
+ "title": "85. Mini CNC Plotter"
+}

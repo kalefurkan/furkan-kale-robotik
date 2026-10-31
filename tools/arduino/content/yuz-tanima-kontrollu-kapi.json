@@ -1,0 +1,64 @@
+{
+ "sketch": "yuz_kapi_esp32",
+ "d": "ESP32-CAM'in hazır \"CameraWebServer\" örneğindeki yüz tanıma özelliği bir kişiyi tanıdığında servo bir kapıyı açar. GERÇEKÇİ KAPSAM: yüz tanımanın kendisi (modeller, kayıt, eşleştirme) Arduino IDE'nin örnek sketch'indedir ve bu projede yazılmadı; bu projede yazılan kısım, tanıma sonucunu servo kapıya bağlayan koddur (servo sürme, açık kalma süresi, test komutu). Kodun yüz tanıma yapmadığını, yalnızca örneğe eklenen bir sekme olduğunu bilerek çalış. ESP32-CAM simülatörde ÇALIŞTIRILAMAZ; devre MakersHub'da kurulur ve denetlenir; kod ve yüz tanıma gerçek donanımda doğrulanmadı.",
+ "parts": [
+  "Arduino Uno ve USB kablosu (bu devrede yalnızca 5 V ve GND kaynağı olarak çizilir; ESP32-CAM kodu Uno'ya yüklenmez)",
+  "Breadboard",
+  "1 × ESP32-CAM (AI-Thinker, OV2640, PSRAM'li; breadboard dışında)",
+  "1 × servo motor (SG90, kapı kolu)",
+  "Programlama için FTDI/USB-seri adaptör (devre görüntüsünde yoktur) ve kapı maketi (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (7 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: ESP32-CAM 5V ve servo VCC (gerçekte 5 V güç kaynağı; Uno yalnızca bu kaynağı temsil eder)"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: ESP32-CAM GND ve servo GND"
+  ],
+  [
+   "ESP32-CAM IO13",
+   "Servo sinyali"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın. ESP32-CAM'e en az 500 mA verebilen bir 5 V kaynak gerekir; Uno burada yalnızca bu 5 V kaynağını temsil eder.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "ESP32-CAM breadboard dışındadır ve takılı değildir: 5V ucu → artı rayı, GND ucu → eksi rayı.",
+  "Servoyu a4 (SIG), a5 (VCC), a6 (GND) deliklerine tak. ESP32-CAM IO13 → e4 (sinyal), e5 → artı rayı, e6 → eksi rayı.",
+  "Yazılım (simülatörde yapılamaz): Arduino IDE'de ESP32 kart paketini (2.0.x) kur, Dosya > Örnekler > ESP32 > Camera > CameraWebServer'ı aç, AI Thinker kartını seçip PSRAM'i etkinleştir. Bu projenin kodunu örneğe yeni sekme olarak ekle ve kodun başındaki üç adımı uygula.",
+  "Örneğin web arayüzünde \"Face Recognition\"ı aç, \"Enroll Face\" ile kapıyı açabilecek kişilerin yüzünü kaydet, sonra tanımayı dene. Kod yükleme: FTDI adaptörüyle, IO0 → GND (yükleme sırasında).",
+  "Güvenlik: yüz tanıma kimlik doğrulama değildir; fotoğrafla ya da ekrandaki yüzle kandırılabilir. Gerçek kapı kilidi olarak kullanma, yalnızca maket kapıda dene."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Yüz tanıma, CameraWebServer örneğinin app_httpd.cpp dosyasındaki Espressif yüz tanıma kütüphanesi tarafından yapılır: kamera görüntüsünde yüz bulunur (algılama), yüzün sayısal bir özeti çıkarılır ve web arayüzünden kaydedilmiş yüzlerle karşılaştırılır; eşleşme olursa örnek Seri Monitör'e \"Match Face ID\" yazar. Bu projedeki kod yalnızca üç işlev ekler: kapiBaslat() servoyu ESP32Servo ile hazırlar ve kapıyı kapalı konuma getirir; kapiAc() yüz eşleşmesi bulunduğunda çağrılır, servoyu 90°'ye döndürür ve zamanı kaydeder; kapiKontrol() her turda çalışır, beş saniye eşleşme gelmezse kapıyı kapatır ve Seri Monitör'den 'a' harfi gelirse yüz tanımadan servo kolunu denemek için kapiAc()'ı çağırır. kapiAc()'ın örneğe nasıl bağlanacağı kodun başındaki yorumda anlatılır; bu bağlama adımı örnek sürümüne göre elle yapılır. Servo ve kamera aynı LEDC zamanlayıcısını kullanmasın diye ESP32PWM::allocateTimer(2) çağrılır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde ESP32-CAM \"güç var · çalıştırılamaz\" durumundadır: 5V ucu Uno'nun 5 V'una bağlıyken 3V3 çıkışı verir. MakersHub doğrulayıcısı hiçbir hata ya da uyarı vermedi: ESP32-CAM'in 5V ve GND uçları besleme denetimini geçti, IO13 5 V'a bağlı değil, servo 5 V ile beslenir. Kamera, yüz algılama/tanıma ve servo hareketi gözlenemedi. Gerçek donanımda doğrulanmadı."
+  ],
+  [
+   "Simülatör sınırı",
+   "ESP32-CAM, kamera ve yüz tanıma simülatörde ÇALIŞTIRILAMAZ; kodun hiçbir kısmı, CameraWebServer ile bağlantısı ve yüz tanıma doğruluğu simülatörde denenmedi. Yüz tanıma yalnızca PSRAM'li AI-Thinker kartta ve ESP32 Arduino çekirdeğinin 2.0.x sürümlerindeki örnekte bulunur; 3.x sürümlerinde kaldırılmış olabilir (doğrulanmadı). Doğruluk ışığa, açıya ve yüz sayısına bağlıdır; kaydedilen yüz sayısı sınırlıdır (örnekte birkaç tane); fotoğrafla kandırılabilir. app_httpd.cpp'deki satırlar sürüme göre değişir, bağlama adımı kendi sürümünde elle yapılmalıdır. Bu proje bir güvenlik ürünü değil, yüz tanıma çıktısını bir servoya bağlamayı gösteren bir öğrenme modelidir. ESP32 sketch'i (Arduino-ESP32 çekirdeği) simülatörde ÇALIŞTIRILAMAZ: simülatör ESP32'yi yalnızca çizer, besleme ve gerilim seviyesini denetler. Sitedeki kod gerçek donanımda doğrulanmadı; Arduino IDE'ye ESP32 kart paketi (Espressif) kurulup kendi kartında denenmelidir. Sitedeki 'Derle' hizmeti AVR (Uno) içindir; ESP32 başlıklarını (WiFi.h, esp_camera.h vb.) tanımaz ve bu sketch'te hata verir. Kodu Arduino IDE'de ESP32 kart seçerek derle."
+  ],
+  [
+   "Güç ve GND",
+   "ESP32-CAM 5 V ile beslenir ve yüz tanıma sırasında 300–500 mA'in üstüne çıkar: yetersiz beslemede kart sıfırlanır; ayrı 5 V kaynak, kısa kablo ve ortak GND kullan. Servo da akım çeker, ayrı yeterli güç kaynağıyla besle. GPIO'lar 3,3 V mantıklıdır. Hareketli kapı koluna parmağını yaklaştırma. Gizlilik: yüz verisi kişisel veridir; yalnızca izin veren kişilerin yüzünü kaydet, kaydı sakla ve paylaşma; kamerayı başkasının mahremiyetini ihlal edecek yere yöneltme."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "CameraWebServer örneğini PSRAM kapalı derlemek (yüz tanıma çalışmaz); bağlama adımını (kapiAc çağrısı) atlamak (kapı hiç açılmaz); IO13'ün SD kart hattıyla çakışması (SD kullanılmıyorsa sorun olmaz); yetersiz 5 V; yüz tanımanın fotoğrafla kandırılabileceğini unutmak; IO0'ı yüklemeden sonra GND'den ayırmamak."
+  ],
+  [
+   "Dene",
+   "Önce Seri Monitör'den 'a' yazarak yalnızca servo kolunu dene; sonra yüz tanıma bağlantısını ekle; açık kalma süresini 10 saniye yap; kapı her açıldığında Seri Monitör'e sayaç yazdıran bir satır ekle."
+  ]
+ ],
+ "free": [
+  "cam1"
+ ]
+}

@@ -1,0 +1,62 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu (bu devrede yalnızca 5 V ve GND kaynağı olarak çizilir; ESP32-CAM kodu Uno'ya yüklenmez)",
+  "Breadboard",
+  "1 × ESP32-CAM (AI-Thinker, OV2640, PSRAM'li; breadboard dışında)",
+  "1 × servo motor (SG90, kapı kolu)",
+  "Programlama için FTDI/USB-seri adaptör (devre görüntüsünde yoktur) ve kapı maketi (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (7 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: ESP32-CAM 5V ve servo VCC (gerçekte 5 V güç kaynağı; Uno yalnızca bu kaynağı temsil eder)"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: ESP32-CAM GND ve servo GND"
+  ],
+  [
+   "ESP32-CAM IO13",
+   "Servo sinyali"
+  ]
+ ],
+ "img": "assets/devre/yuz-tanima-kontrollu-kapi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın. ESP32-CAM'e en az 500 mA verebilen bir 5 V kaynak gerekir; Uno burada yalnızca bu 5 V kaynağını temsil eder.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "ESP32-CAM breadboard dışındadır ve takılı değildir: 5V ucu → artı rayı, GND ucu → eksi rayı.",
+  "Servoyu a4 (SIG), a5 (VCC), a6 (GND) deliklerine tak. ESP32-CAM IO13 → e4 (sinyal), e5 → artı rayı, e6 → eksi rayı.",
+  "Yazılım (simülatörde yapılamaz): Arduino IDE'de ESP32 kart paketini (2.0.x) kur, Dosya > Örnekler > ESP32 > Camera > CameraWebServer'ı aç, AI Thinker kartını seçip PSRAM'i etkinleştir. Bu projenin kodunu örneğe yeni sekme olarak ekle ve kodun başındaki üç adımı uygula.",
+  "Örneğin web arayüzünde \"Face Recognition\"ı aç, \"Enroll Face\" ile kapıyı açabilecek kişilerin yüzünü kaydet, sonra tanımayı dene. Kod yükleme: FTDI adaptörüyle, IO0 → GND (yükleme sırasında).",
+  "Güvenlik: yüz tanıma kimlik doğrulama değildir; fotoğrafla ya da ekrandaki yüzle kandırılabilir. Gerçek kapı kilidi olarak kullanma, yalnızca maket kapıda dene."
+ ],
+ "code": "// Yuz tanima kontrollu kapi - SERVO KAPI KODU (ESP32-CAM). SIMULATORDE CALISTIRILAMAZ; gercek donanimda dogrulanmadi.\n//\n// KAPSAM VE SINIRLAR: Bu dosya YUZ TANIMA yapmaz. Yuz tanima, Arduino IDE'nin hazir \"CameraWebServer\" ornegindedir\n// (Dosya > Ornekler > ESP32 > Camera > CameraWebServer; ESP32 cekirdegi 2.0.x, kart \"AI Thinker ESP32-CAM\", PSRAM etkin).\n// Ornekte web arayuzunden \"Face Recognition\" acilir ve \"Enroll Face\" ile yuzler kaydedilir. Bu dosya o ornege YENI BIR SEKME olarak eklenir\n// ve servo kapiyi acar. Yuz tanima sonucu ornegin kendi kodundan gelir; biz yalnizca sonucu servoya baglariz.\n//\n// BAGLAMA ADIMLARI (CameraWebServer ornegine):\n//  1) Bu dosyayi ornegin klasorune yeni sekme olarak ekle (ornegin kapi.ino); Servo icin \"ESP32Servo\" kutuphanesini kur.\n//  2) CameraWebServer.ino icindeki setup() sonunda kapiBaslat(); , loop() icinde kapiKontrol(); cagir.\n//  3) app_httpd.cpp icinde yuz tanima sonucunun yazdirildigi yeri bul (esleme bulununca \"Match Face ID\" yazan satir)\n//     ve eslesme (matched_id >= 0) kolunda kapiAc(); cagir. Dosyanin basina: extern void kapiAc();\n//     Satirlar ornek surumune gore degisebilir; bu adim kendi surumunde elle yapilir.\n//  Cekirdek 3.x surumlerinde ornekteki yuz tanima bolumu kaldirilmis olabilir; bu durumda 2.0.x cekirdegi kullan.\n#include <ESP32Servo.h>\n\nconst int SERVO_PIN = 13;                 // devrede servo sinyali IO13\nconst int KAPALI_ACI = 0;\nconst int ACIK_ACI = 90;\nconst unsigned long ACIK_SURE = 5000;     // tanima sonrasi kapi bu kadar acik kalir\n\nServo kapi;\nbool kapiAcikMi = false;\nunsigned long kapiAcilma = 0;\n\nvoid kapiBaslat() {\n  ESP32PWM::allocateTimer(2);             // kamera XCLK'si LEDC zamanlayici 0'i kullanir; servo icin baska zamanlayici ayir\n  kapi.setPeriodHertz(50);\n  kapi.attach(SERVO_PIN, 500, 2400);\n  kapi.write(KAPALI_ACI);\n  Serial.println(\"Kapi hazir: yuz tanima eslesmesi bekleniyor (deneme icin Seri Monitor'e 'a' yaz)\");\n}\n\nvoid kapiAc() {                           // yuz tanima eslesmesi bulununca cagrilir\n  if (!kapiAcikMi) {\n    Serial.println(\"Taninan yuz: kapi aciliyor\");\n    kapi.write(ACIK_ACI);\n    kapiAcikMi = true;\n  }\n  kapiAcilma = millis();                  // eslesme surerse kapi acik kalir\n}\n\nvoid kapiKontrol() {                      // loop() icinde surekli cagrilir\n  if (Serial.available() > 0) {\n    char c = Serial.read();\n    if (c == 'a') {\n      kapiAc();                           // yuz tanima olmadan servo kolunu denemek icin\n    }\n  }\n  if (kapiAcikMi && millis() - kapiAcilma > ACIK_SURE) {\n    kapi.write(KAPALI_ACI);\n    kapiAcikMi = false;\n    Serial.println(\"Kapi kapandi\");\n  }\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Yüz tanıma, CameraWebServer örneğinin app_httpd.cpp dosyasındaki Espressif yüz tanıma kütüphanesi tarafından yapılır: kamera görüntüsünde yüz bulunur (algılama), yüzün sayısal bir özeti çıkarılır ve web arayüzünden kaydedilmiş yüzlerle karşılaştırılır; eşleşme olursa örnek Seri Monitör'e \"Match Face ID\" yazar. Bu projedeki kod yalnızca üç işlev ekler: kapiBaslat() servoyu ESP32Servo ile hazırlar ve kapıyı kapalı konuma getirir; kapiAc() yüz eşleşmesi bulunduğunda çağrılır, servoyu 90°'ye döndürür ve zamanı kaydeder; kapiKontrol() her turda çalışır, beş saniye eşleşme gelmezse kapıyı kapatır ve Seri Monitör'den 'a' harfi gelirse yüz tanımadan servo kolunu denemek için kapiAc()'ı çağırır. kapiAc()'ın örneğe nasıl bağlanacağı kodun başındaki yorumda anlatılır; bu bağlama adımı örnek sürümüne göre elle yapılır. Servo ve kamera aynı LEDC zamanlayıcısını kullanmasın diye ESP32PWM::allocateTimer(2) çağrılır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde ESP32-CAM \"güç var · çalıştırılamaz\" durumundadır: 5V ucu Uno'nun 5 V'una bağlıyken 3V3 çıkışı verir. MakersHub doğrulayıcısı hiçbir hata ya da uyarı vermedi: ESP32-CAM'in 5V ve GND uçları besleme denetimini geçti, IO13 5 V'a bağlı değil, servo 5 V ile beslenir. Kamera, yüz algılama/tanıma ve servo hareketi gözlenemedi. Gerçek donanımda doğrulanmadı."
+  ],
+  [
+   "Simülatör sınırı",
+   "ESP32-CAM, kamera ve yüz tanıma simülatörde ÇALIŞTIRILAMAZ; kodun hiçbir kısmı, CameraWebServer ile bağlantısı ve yüz tanıma doğruluğu simülatörde denenmedi. Yüz tanıma yalnızca PSRAM'li AI-Thinker kartta ve ESP32 Arduino çekirdeğinin 2.0.x sürümlerindeki örnekte bulunur; 3.x sürümlerinde kaldırılmış olabilir (doğrulanmadı). Doğruluk ışığa, açıya ve yüz sayısına bağlıdır; kaydedilen yüz sayısı sınırlıdır (örnekte birkaç tane); fotoğrafla kandırılabilir. app_httpd.cpp'deki satırlar sürüme göre değişir, bağlama adımı kendi sürümünde elle yapılmalıdır. Bu proje bir güvenlik ürünü değil, yüz tanıma çıktısını bir servoya bağlamayı gösteren bir öğrenme modelidir. ESP32 sketch'i (Arduino-ESP32 çekirdeği) simülatörde ÇALIŞTIRILAMAZ: simülatör ESP32'yi yalnızca çizer, besleme ve gerilim seviyesini denetler. Sitedeki kod gerçek donanımda doğrulanmadı; Arduino IDE'ye ESP32 kart paketi (Espressif) kurulup kendi kartında denenmelidir. Sitedeki 'Derle' hizmeti AVR (Uno) içindir; ESP32 başlıklarını (WiFi.h, esp_camera.h vb.) tanımaz ve bu sketch'te hata verir. Kodu Arduino IDE'de ESP32 kart seçerek derle."
+  ],
+  [
+   "Güç ve GND",
+   "ESP32-CAM 5 V ile beslenir ve yüz tanıma sırasında 300–500 mA'in üstüne çıkar: yetersiz beslemede kart sıfırlanır; ayrı 5 V kaynak, kısa kablo ve ortak GND kullan. Servo da akım çeker, ayrı yeterli güç kaynağıyla besle. GPIO'lar 3,3 V mantıklıdır. Hareketli kapı koluna parmağını yaklaştırma. Gizlilik: yüz verisi kişisel veridir; yalnızca izin veren kişilerin yüzünü kaydet, kaydı sakla ve paylaşma; kamerayı başkasının mahremiyetini ihlal edecek yere yöneltme."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "CameraWebServer örneğini PSRAM kapalı derlemek (yüz tanıma çalışmaz); bağlama adımını (kapiAc çağrısı) atlamak (kapı hiç açılmaz); IO13'ün SD kart hattıyla çakışması (SD kullanılmıyorsa sorun olmaz); yetersiz 5 V; yüz tanımanın fotoğrafla kandırılabileceğini unutmak; IO0'ı yüklemeden sonra GND'den ayırmamak."
+  ],
+  [
+   "Dene",
+   "Önce Seri Monitör'den 'a' yazarak yalnızca servo kolunu dene; sonra yüz tanıma bağlantısını ekle; açık kalma süresini 10 saniye yap; kapı her açıldığında Seri Monitör'e sayaç yazdıran bir satır ekle."
+  ]
+ ],
+ "title": "90. Yüz Tanıma Kontrollü Kapı"
+}

@@ -1,0 +1,98 @@
+{
+ "sketch": "ses_robot",
+ "d": "Bir ses tanıma modülü söylenen komutu tanıyıp numarasını seri hattan gönderir; Arduino bu numarayı okuyup L298N ile iki motoru sürer: 1 ileri, 2 geri, 3 sola dön, 4 sağa dön, 5 dur. Yeni komut gelmezse robot üç saniye sonra kendiliğinden durur (güvenlik). SoftwareSerial ile ikinci seri hat kurmayı, gelen karakteri sayıya çevirmeyi ve motor komutlarını güvenli (zaman aşımlı) yönetmeyi öğrenirsin. Simülatörde ses yoktur: komutu modülün arayüzündeki \"Söyle\" düğmesi gönderir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × ses tanıma modülü (seri çıkışlı; simülatörde basit protokol)",
+  "1 × L298N motor sürücü",
+  "2 × DC motor (robotun sol ve sağ tekerleği)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (20 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: L298N 5V ucu ve diğer modüllerin VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: L298N GND ve diğer modüllerin GND'si"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ],
+  [
+   "D2",
+   "Ses modülü TX (Arduino'nun RX'i)"
+  ],
+  [
+   "D3",
+   "Ses modülü RX (Arduino'nun TX'i)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "L298N ve motorlar için ortak kurulum: L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola. Motorların ve Arduino'nun GND'si ortak olmalı: d5 → eksi rayı. e6 → artı rayı: bu bağlantıyla L298N'in mantık devresi Arduino'nun 5V'unu kullanır; kartın üzerindeki 5V jumper'ını çıkar.",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Motorlar (breadboard dışında, takılı değil): sol motor için e13 → motor A, e14 → motor B (OUT1, OUT2); sağ motor için e15 → motor A, e16 → motor B (OUT3, OUT4).",
+  "Ses modülünü a20 (VCC), a21 (GND), a22 (TX), a23 (RX) deliklerine tak. e20 → artı rayı, e21 → eksi rayı. D2 → e22 (modül TX), D3 → e23 (modül RX).",
+  "Gerçek robotta mikrofonu gövdenin motor sesinden uzak bir yerine koy; komutlar önceden modüle eğitilmelidir (modülün kendi kayıt yöntemiyle).",
+  "Kodu yükle (simülatörde çalıştır): ses modülünü seç, komut kimliğini 1 yapıp \"Söyle\"ye bas: Seri Monitör'de \"Komut 1: ileri\" yazılır ve motorlar ileri döner. 3 (sola), 4 (sağa), 2 (geri) ve 5 (dur) komutlarını da dene; 3 saniye komut vermezsen robot durur."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Ses tanıma modülü eğitilmiş bir komutu duyunca seri hattan o komutun numarasını yollar. Bu projedeki modül, simülatöre özgü basit bir protokol kullanır: ASCII rakam ve satır sonu, 9600 baud. loop() SoftwareSerial'dan gelen her karakteri okur; rakam değilse (satır sonu gibi) atlar, rakamsa c - '0' ile sayıya çevirir. komut 1–4 ise motor(sol, sag) ile uygun yönlerde sürülür (sola dönmek için sol motor geri, sağ motor ileri), 5 ise ya da tanınmayan bir sayıysa motorlar durur. Her hareket komutunda zaman damgası alınır; KOMUT_SURESI (3 saniye) içinde yeni komut gelmezse robot kendiliğinden durur: ses tanıma hata yapabilir, mikrofon kopabilir; robotun sonsuza dek gitmemesi için bu güvenlik şarttır. Gerçek ses tanıma modülleri (örneğin Elechouse VR3) farklı çerçeveli bir protokol ve kendi kütüphanesini kullanır; bu sketch onlarla doğrudan çalışmaz, yalnızca fikri gösterir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Ses kontrollu robot hazir\" yazıldı. 1. saniyede komut 1 gelince \"Komut 1: ileri\" yazıldı ve iki motor ileri döndü (yaklaşık %44 hız). 2,5. saniyede \"Komut 3: sola don\" yazıldı: sol motor geriye, sağ motor ileriye döndü. 4. saniyede \"Komut 4: saga don\" (sol ileri, sağ geri). 5,5. saniyede \"Komut 2: geri\" yazıldı ve iki motor geri döndü. 7. saniyede \"Komut 5: dur\" yazıldı ve motorlar durdu. 8. saniyede komut 1 ile robot yeniden ileri gitti; yeni komut gelmediği için 11. saniyede \"Zaman asimi: dur\" yazıldı ve motorlar durdu. 13. saniyede tanımsız komut 8 için \"Komut 8: taninmayan komut: dur\" yazıldı. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde gerçek ses, mikrofon, eğitim, gürültü ve tanıma hatası yoktur; komut numarası arayüzdeki düğmeyle gönderilir ve her seferinde doğru gelir. Gerçekte yanlış tanıma, komutun hiç tanınmaması ve gürültüde rastgele tetiklenme olur; bu yüzden zaman aşımı ve acil durdurma önemlidir. Modül simülatöre özgü protokol kullanır, gerçek VR3'ün çerçeveleri ya da VoiceRecognitionV3 kütüphanesi bu kodda yoktur. Robot hareket etmez; yalnızca motor komutları gözlenir. Sketch yalnızca SoftwareSerial.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Güç ve GND",
+   "Motorları Arduino'nun 5V pininden besleme: motorlar yüzlerce mA çeker. Motor gücü ayrı güç kaynağından (pil kutusu) gelir; L298N'in GND'si Arduino GND'sine mutlaka bağlanmalı, yoksa IN/EN sinyalleri anlamsız olur. L298N yaklaşık 2 V düşürür; motor beslemesini motorun istediği gerilimden yaklaşık 2 V yüksek seç. L298N'in dahili serbest dönüş diyotları vardır, ayrıca diyot eklenmez. Güvenlik: pil kutusunu kısa devre yapma (artı ve eksi uçları birbirine değmesin); lityum/Li-ion pil kullanıyorsan yetişkin gözetiminde, koruma devreli paketle çalış; kablolar ısınırsa hemen enerjiyi kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Modülün TX ucunu Arduino TX'ine bağlamak (çapraz olmalı: modül TX → Arduino RX); baud hızını modülle uyuşturmamak; motor sürücü GND'sini Arduino GND'sine bağlamamak; zaman aşımı koymamak (komut kaçırılınca robot kontrolsüz gider); komut numaralarını eğitimde farklı sırayla kaydedip kodda başka anlam vermek."
+  ],
+  [
+   "Dene",
+   "Komut 6'ya \"yavaş ileri\" (HIZ yarısı) anlamı ver; KOMUT_SURESI'ni 1 saniyeye düşür; robotun hangi komutu aldığını Seri Monitör yerine LED'lerle göster."
+  ]
+ ],
+ "free": [
+  "psu1",
+  "m1",
+  "m2"
+ ]
+}

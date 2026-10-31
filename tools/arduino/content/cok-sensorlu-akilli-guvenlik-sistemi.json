@@ -1,0 +1,92 @@
+{
+ "sketch": "guvenlik_esp32",
+ "d": "ESP32-CAM tabanlı bir güvenlik sistemi: sistem \"kurulu\" iken PIR hareket görürse kamera bir fotoğraf çeker ve Wi-Fi ile bir sunucuya gönderir; yetkili bir RFID kartı okutulunca sistem kurulur ya da devre dışı kalır. PIR, RFID (RC522) ve kamerayı tek ESP32-CAM'de birleştirmeyi, kartın sınırlı GPIO'larını dağıtmayı (RC522 için özel SPI pinleri) ve JPEG fotoğrafı HTTP ile göndermeyi öğrenirsin. ESP32-CAM simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir; kod gerçek donanımda doğrulanmadı.",
+ "parts": [
+  "Arduino Uno ve USB kablosu (bu devrede yalnızca 5 V ve GND kaynağı olarak çizilir; ESP32-CAM kodu Uno'ya yüklenmez)",
+  "Breadboard",
+  "1 × ESP32-CAM (AI-Thinker, OV2640; breadboard dışında)",
+  "1 × PIR hareket sensörü (HC-SR501)",
+  "1 × RC522 RFID okuyucu modülü",
+  "1 × 10 kΩ direnç (PIR çıkış bölücüsü)",
+  "1 × 20 kΩ direnç (PIR çıkış bölücüsü)",
+  "RFID kartı ve etiketi (devre dışı mekanik parça: devre görüntüsünde yoktur); programlama için FTDI/USB-seri adaptör (devre görüntüsünde yoktur)",
+  "Jumper kablolar (16 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: ESP32-CAM 5V ve PIR VCC (gerçekte 5 V güç kaynağı; Uno yalnızca bu kaynağı temsil eder)"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: ESP32-CAM GND, RC522 GND, PIR GND ve bölücü direnci"
+  ],
+  [
+   "ESP32-CAM 3,3 V çıkışı",
+   "Üstteki artı (+) rayı: RC522 3V3 (RC522 yalnızca 3,3 V ile beslenir)"
+  ],
+  [
+   "ESP32-CAM IO2",
+   "RC522 RST"
+  ],
+  [
+   "ESP32-CAM IO12",
+   "RC522 MISO"
+  ],
+  [
+   "ESP32-CAM IO13",
+   "RC522 MOSI"
+  ],
+  [
+   "ESP32-CAM IO14",
+   "RC522 SCK"
+  ],
+  [
+   "ESP32-CAM IO15",
+   "RC522 SDA (SS)"
+  ],
+  [
+   "ESP32-CAM IO16",
+   "PIR OUT bölücüsünün orta noktası"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın. ESP32-CAM'e en az 500 mA verebilen bir 5 V kaynak gerekir; Uno burada yalnızca bu 5 V kaynağını temsil eder.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "ESP32-CAM breadboard dışındadır ve takılı değildir: 5V ucu → alttaki artı rayı, GND ucu → eksi rayı, 3V3 ucu → üstteki artı rayı (3,3 V).",
+  "RC522'yi a4 (3V3), a5 (RST), a6 (GND), a7 (MISO), a8 (MOSI), a9 (SCK), a10 (SDA) deliklerine tak. e4 → üstteki artı rayı (3,3 V), e6 → eksi rayı. ESP32-CAM IO2 → e5 (RST), IO12 → e7 (MISO), IO13 → e8 (MOSI), IO14 → e9 (SCK), IO15 → e10 (SDA).",
+  "PIR'ı a16 (VCC), a17 (OUT), a18 (GND) deliklerine tak. e16 → alttaki artı rayı (5 V), e18 → eksi rayı. Çıkış bölücüsü: 10 kΩ direnci d13 ile d17 arasına (d17, OUT ile aynı sütun), 20 kΩ direnci dikey olarak e13 ile h13 arasına tak, j13 → eksi rayı; bölücünün orta noktası (a13) → ESP32-CAM IO16.",
+  "Kod yükleme: IO2, IO12, IO15 ve IO16 açılış/yükleme pinleridir; yüklerken RC522 ve PIR kablolarını çıkar, FTDI adaptörüyle IO0 → GND yaparak yükle, sonra IO0'ı ayır ve kabloları geri tak.",
+  "Gerçek sistemde kamerayı ve PIR'ı korunacak alana, RFID okuyucuyu kapı yanına yerleştir. Gizlilik: yalnızca kendi mülkünü izle, çekilen fotoğrafları güvenli bir sunucuda sakla ve başkalarının mahremiyetini ihlal etme.",
+  "Kodu Arduino IDE'de \"AI Thinker ESP32-CAM\" kartıyla yükle, PSRAM'i devre dışı bırak, \"MFRC522\" kütüphanesini kur, Wi-Fi adı, parola ve sunucu adresini değiştir. Simülatörde bu kod ÇALIŞTIRILAMAZ; yalnızca devre görüntüsü ve besleme denetimi yapılır."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "ESP32-CAM'de kamera kendi pinlerini kullanır; geriye IO2, IO4, IO12–IO16 kalır. RC522 SPI ile bağlanır ama kartın varsayılan SPI pinleri kamera ve SD ile çakıştığından SPI.begin(14, 12, 13, 15) ile özel pinler seçilir: SCK IO14, MISO IO12, MOSI IO13, SS IO15; RST IO2. PIR çıkışı IO16'ya (PSRAM kapalıyken serbest) bölücü üzerinden bağlanır. PIR, 5 V ile beslenir; çıkışı genellikle 3,3 V olsa da 10 kΩ + 20 kΩ bölücü ESP32 girişini korur. loop() iki iş yapar: (1) RFID: yeni bir kart varsa UID'nin ilk dört baytı YETKILI ile karşılaştırılır; yetkiliyse kurulu durumu tersine çevrilir (aynı karttan tekrar tekrar okumayı engellemek için 1,5 saniye beklenir), yetkisizse yok sayılır. (2) PIR: sistem kuruluysa ve PIR HIGH ise (en fazla 10 saniyede bir) fotoGonder() kameradan bir JPEG kare alır, Seri Monitör'e boyutunu yazar ve HTTPClient ile sunucuya POST eder (Content-Type: image/jpeg). Wi-Fi yoksa foto yalnızca alınır, gönderilemediği yazılır. Sunucu tarafı bu projede yazılmadı."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde ESP32-CAM \"güç var · çalıştırılamaz\" durumundadır: 5V ucu Uno'nun 5 V'una bağlıyken 3V3 çıkışı verir. MakersHub doğrulayıcısı hiçbir hata ya da uyarı vermedi: RC522 3,3 V ile beslenir (5 V'a bağlı değil), PIR 5 V ile beslenir ve çıkışı bölücü üzerinden ESP32-CAM girişine gider, ortak GND var. Kamera, PIR, RFID okuma, fotoğraf gönderme ve Wi-Fi gözlenemedi; Uno ile ayrıca denenen bir kısım yoktur. Gerçek donanımda doğrulanmadı."
+  ],
+  [
+   "Simülatör sınırı",
+   "ESP32-CAM, kamera, Wi-Fi ve ESP32 üzerindeki RC522 kullanımı simülatörde ÇALIŞTIRILAMAZ; kodun hiçbir kısmı denenmedi. Simülatörün RC522 modeli yalnızca Uno'nun SPI pinleriyle çalışır; ESP32'nin özel SPI pinleri simülatörde denenemez. IO12 ve IO15 açılış pinleridir: RC522 çıkışı açılışta yanlış seviyede olursa kart başlamayabilir; sorun olursa IO12'yi RC522'den ayrı bir pine taşı. PIR 1 dakika ısınır ve sürekli aktifleşebilir. Bu sistem gerçek bir alarm değildir: sertifikalı güvenlik sistemi yerine kullanılamaz. Sunucu tarafı yazılmadı. RFID kartlar kolay kopyalanabilir; güvenlik amaçlı tek başına yeterli değildir. ESP32 sketch'i (Arduino-ESP32 çekirdeği) simülatörde ÇALIŞTIRILAMAZ: simülatör ESP32'yi yalnızca çizer, besleme ve gerilim seviyesini denetler. Sitedeki kod gerçek donanımda doğrulanmadı; Arduino IDE'ye ESP32 kart paketi (Espressif) kurulup kendi kartında denenmelidir. Sitedeki 'Derle' hizmeti AVR (Uno) içindir; ESP32 başlıklarını (WiFi.h, esp_camera.h vb.) tanımaz ve bu sketch'te hata verir. Kodu Arduino IDE'de ESP32 kart seçerek derle."
+  ],
+  [
+   "Güç ve GND",
+   "ESP32-CAM kamera ve Wi-Fi ile birlikte 300–500 mA'in üstüne çıkar: ayrı, yeterli akımlı 5 V kaynak ve ortak GND kullan, yetersiz beslemede kart sıfırlanır. RC522 yalnızca 3,3 V ile beslenir: 5 V'a bağlarsan bozulur. PIR çıkışını bölücüsüz ESP32'ye bağlama. GPIO'lar 3,3 V mantıklıdır. Gizlilik ve yasalar: kamerayı yalnızca kendi alanında ve ilgili kişileri bilgilendirerek kullan; çekilen görüntüler kişisel veridir. Gerçek bir güvenlik ya da yangın/hırsız alarmı yerine kullanma."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "IO2, IO12, IO15 kablolarını takılı bırakıp kod yüklemek (yükleme başarısız olur); RC522'yi 5 V ile beslemek; SPI.begin'de varsayılan pinleri kullanmak (kamera ile çakışır); PIR'ı ısınmadan denemek (sürekli tetiklenir); PSRAM'i kapatmayıp IO16'yı kullanmak; yetkili kartın UID'sini koda yazmayı unutmak."
+  ],
+  [
+   "Dene",
+   "UID'yi kendi kartınla değiştir; foto aralığını 30 saniyeye çıkar; sistemin kuruldu/devre dışı durumunu bir LED ya da buzzer ile göster (boş bir GPIO bulmak ödevdir)."
+  ]
+ ],
+ "free": [
+  "cam1"
+ ]
+}

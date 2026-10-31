@@ -1,0 +1,79 @@
+{
+ "sketch": "hava_agi_esp32",
+ "d": "ESP32 bir MQ-135 (hava kalitesi) ve bir MQ-2 (gaz ve duman) sensörünü okur, değerleri 10 saniyede bir Wi-Fi üzerinden bir sunucuya JSON olarak gönderir; birden fazla düğüm aynı sunucuya kendi adıyla gönderirse bir hava kalitesi ağı oluşur. MQ sensörlerinin 5 V'luk çıkışlarını ESP32'nin 3,3 V'luk girişine gerilim bölücüyle bağlamayı, ESP32'nin ADC'sini okumayı ve Wi-Fi ile HTTP POST göndermeyi öğrenirsin. ESP32 simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir; kod gerçek donanımda doğrulanmadı.",
+ "parts": [
+  "Arduino Uno yoktur: bu projede mikrodenetleyici ESP32'dir",
+  "Breadboard",
+  "1 × ESP32 DevKit (30 pin; breadboard dışında, USB ile beslenir)",
+  "1 × MQ-135 hava kalitesi sensör modülü",
+  "1 × MQ-2 gaz/duman sensör modülü",
+  "4 × 10 kΩ direnç (gerilim bölücü)",
+  "4 × 20 kΩ direnç (gerilim bölücü)",
+  "Jumper kablolar (14 adet)"
+ ],
+ "wiring": [
+  [
+   "ESP32 VIN",
+   "Alttaki artı (+) rayı (5 V): MQ-135 VCC ve MQ-2 VCC (ısıtıcıları 5 V ister)"
+  ],
+  [
+   "ESP32 GND",
+   "Alttaki eksi (−) rayı: iki sensörün GND'si ve bölücülerin alt uçları"
+  ],
+  [
+   "ESP32 IO34",
+   "MQ-135 AO (gerilim bölücü orta noktası)"
+  ],
+  [
+   "ESP32 IO32",
+   "MQ-135 DO (gerilim bölücü orta noktası)"
+  ],
+  [
+   "ESP32 IO35",
+   "MQ-2 AO (gerilim bölücü orta noktası)"
+  ],
+  [
+   "ESP32 IO33",
+   "MQ-2 DO (gerilim bölücü orta noktası)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: ESP32'nin USB kablosu takılı olmasın.",
+  "ESP32 breadboard dışındadır ve takılı değildir; kart USB ile beslenir. ESP32 GND → alttaki eksi (−) rayı, ESP32 VIN → alttaki artı (+) rayı (5 V).",
+  "MQ-135'i a8 (VCC), a9 (GND), a10 (AO), a11 (DO) deliklerine tak. e8 → artı rayı, e9 → eksi rayı.",
+  "MQ-135 AO bölücüsü: 10 kΩ direnci d6 ile d10 arasına (d10, AO ile aynı sütun), 20 kΩ direnci dikey olarak e6 ile h6 arasına tak; j6 → eksi rayı; a6 → ESP32 IO34. MQ-135 DO bölücüsü: 10 kΩ direnci c7 ile c11 arasına, 20 kΩ direnci dikey e7 ile h7 arasına tak; j7 → eksi rayı; a7 → ESP32 IO32.",
+  "MQ-2'yi a22 (VCC), a23 (GND), a24 (AO), a25 (DO) deliklerine tak. e22 → artı rayı, e23 → eksi rayı.",
+  "MQ-2 AO bölücüsü: 10 kΩ direnci d20 ile d24 arasına, 20 kΩ direnci dikey e20 ile h20 arasına tak; j20 → eksi rayı; a20 → ESP32 IO35. MQ-2 DO bölücüsü: 10 kΩ direnci c21 ile c25 arasına, 20 kΩ direnci dikey e21 ile h21 arasına tak; j21 → eksi rayı; a21 → ESP32 IO33.",
+  "Gerçek düğümde sensörleri hava akışı olan, kutunun dışına açılan bir yere koy; MQ sensörleri ilk çalıştırmada uzun süre ısınmalı (üretici 24 saat önerir).",
+  "Kodu Arduino IDE'de \"ESP32 Dev Module\" seçerek yükle; Wi-Fi adı, parola ve sunucu adresini kendine göre değiştir. Simülatörde bu kod ÇALIŞTIRILAMAZ; yalnızca devre görüntüsü ve seviye denetimi yapılır."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "MQ sensörleri bir ısıtıcı ve gaz ile direnci değişen bir algılama katmanı içerir; modüllerde AO (analog çıkış, gaz arttıkça gerilim yükselir) ve DO (dijital çıkış, eşik aşılınca LOW) bulunur. Isıtıcı 5 V ister, bu yüzden sensörler ESP32'nin VIN'inden (5 V) beslenir ve çıkışları 5 V'a kadar çıkabilir. ESP32 GPIO ve ADC girişleri 3,3 V'u aşmamalıdır: her çıkış 10 kΩ + 20 kΩ'luk gerilim bölücüyle 5 V × 20/30 ≈ 3,3 V'a indirilir; kodda BOLUCU = 1,5 ile gerilim eski değerine çevrilir. sensorGerilimi() ADC'nin kalibrasyonlu mV değerini (analogReadMilliVolts) 16 okuma ortalamasıyla alır. seviye() gerilimi iyi/orta/kötü olarak yorumlar; bu eşikler kalibrasyonsuzdur ve her sensörde farklı olabilir. loop() her 10 saniyede bir JSON gövde oluşturur, Seri Monitör'e yazar ve HTTPClient ile sunucuya POST eder; Wi-Fi koparsa yeniden bağlanır. IO34 ve IO35 yalnızca giriş pinleridir, ADC1 kanalındadır (Wi-Fi açıkken de okunur)."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde ESP32 \"güç var · çalıştırılamaz\" durumundadır: USB beslemesiyle VIN ≈ 5 V ve 3V3 ≈ 3,3 V verir. MakersHub doğrulayıcısı hiçbir hata ya da uyarı vermedi: ESP32 GPIO uçları sensör çıkışlarına doğrudan değil, gerilim bölücülerin orta noktasına bağlı (bölücüsüz bağlantı \"ESP_SENSOR_5V\" uyarısı verirdi), MQ sensörleri 5 V ile beslenir, ortak GND var. Devre görüntüsünde 4 adet 10 kΩ ve 4 adet 20 kΩ direnç yer alır ve her sensör uçları breadboard'a takılıdır. MQ okumaları, Wi-Fi, HTTP gönderme ve Seri Monitör çıktısı gözlenemedi; Uno ile doğrulanabilir ayrı bir kısım yoktur (ESP32'nin ADC'si, Wi-Fi ve bölücü katsayısı yalnızca ESP32'de anlamlıdır). Gerçek donanımda doğrulanmadı."
+  ],
+  [
+   "Simülatör sınırı",
+   "ESP32, Wi-Fi, HTTPClient ve ADC kalibrasyonu simülatörde ÇALIŞTIRILAMAZ. Simülatördeki MQ sensörleri yalnızca log-doğrusal bir model verir; gerçek MQ sensörleri ısınma süresi, sıcaklık/nem ve çapraz duyarlılık nedeniyle kalibrasyonsuz ppm vermez: bu kod ppm değil, göreli bir gerilim yorumu verir ve güvenlik amaçlı (gerçek gaz kaçağı alarmı) kullanılmamalıdır. Sunucu tarafı (verileri alıp saklayan program) bu projede yazılmadı; kendi sunucunu kurman gerekir. Birden çok düğümden oluşan bir ağın kendisi (ESP-NOW, mesh) bu kodda yoktur: ağ, her düğümün aynı sunucuya göndermesiyle sağlanır. ESP32 sketch'i (Arduino-ESP32 çekirdeği) simülatörde ÇALIŞTIRILAMAZ: simülatör ESP32'yi yalnızca çizer, besleme ve gerilim seviyesini denetler. Sitedeki kod gerçek donanımda doğrulanmadı; Arduino IDE'ye ESP32 kart paketi (Espressif) kurulup kendi kartında denenmelidir. Sitedeki 'Derle' hizmeti AVR (Uno) içindir; ESP32 başlıklarını (WiFi.h, esp_camera.h vb.) tanımaz ve bu sketch'te hata verir. Kodu Arduino IDE'de ESP32 kart seçerek derle."
+  ],
+  [
+   "Güç ve GND",
+   "MQ sensörlerinin ısıtıcıları yaklaşık 150 mA çeker ve ısınır: dokunma, yanıcı gaz varlığında ya da kapalı kutuda kullanma. ESP32 GPIO'ları 3,3 V mantıklıdır: MQ çıkışlarını bölücüsüz ESP32 pinine bağlama; 5 V pin bozulur. Sensörleri ESP32'nin 3V3 çıkışından besleme: ısıtıcı yetersiz ısınır ve 3V3 pini bu akımı veremez. Tüm GND'ler ortak olmalıdır. Güvenlik: bu düğüm gerçek gaz alarmı değildir; yangın ya da gaz kaçağına karşı sertifikalı dedektör kullan."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "MQ çıkışını bölücüsüz ESP32'ye bağlamak; ADC2 pinlerini (IO4, IO12–15, IO25–27) Wi-Fi açıkken analog okumak (çalışmaz; bu yüzden IO34/35 seçildi); sensörleri ısınmadan okumak (değerler sürekli kayar); MQ sensörünü kalibrasyonsuz ppm sanmak; Wi-Fi parolasını ya da sunucu adresini yanlış yazmak."
+  ],
+  [
+   "Dene",
+   "BOLUCU değerini ve eşikleri kendi sensörüne göre kalibre et (temiz havada ölçüp sıfır noktası al); gönderme aralığını 30 saniyeye çıkar; sunucu yanıtı alınamazsa verileri bellekte biriktirip sonra göndermeyi ekle."
+  ]
+ ],
+ "free": [
+  "esp1"
+ ]
+}

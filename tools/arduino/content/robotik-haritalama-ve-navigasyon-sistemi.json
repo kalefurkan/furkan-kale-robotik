@@ -1,0 +1,124 @@
+{
+ "sketch": "harita_robot",
+ "d": "Robot ileri giderken konumunu enkoderli motorlardan (yol) ve MPU6050 jiroskobundan (yön) hesaplar; TFmini LiDAR önündeki mesafeyi ölçer. Mesafe 40 cm'den kısa olunca robot durur, engelin yerini (x, y) haritaya yazar, 90° sola döner ve devam eder; üç engelden sonra bulunan noktalar Seri Monitör'e harita olarak yazılır. UART ile LiDAR çerçevesi okumayı, odometri (yol ve yön toplayarak konum bulma) ve engel noktasını koordinata çevirmeyi öğrenirsin. Simülatörde LiDAR mesafesi ve jiroskop hızı kaydırıcıdan verilir; dönen LiDAR ve nokta bulutu yoktur.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × TFmini-S LiDAR (tek noktalı, UART)",
+  "1 × MPU6050 ivmeölçer + jiroskop modülü (GY-521)",
+  "2 × enkoderli DC motor (tur başına 220 tik)",
+  "1 × L298N motor sürücü",
+  "1 × ayarlanabilir güç kaynağı (8 V'a ayarlı; gerçekte 2 × 18650 ya da 6 × AA pil)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur); 65 mm çaplı tekerlekler",
+  "Jumper kablolar (32 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: L298N 5V ucu ve diğer modüllerin VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: L298N GND ve diğer modüllerin GND'si"
+  ],
+  [
+   "D2",
+   "Sol enkoder A çıkışı (kesme pini)"
+  ],
+  [
+   "D3",
+   "Sağ enkoder A çıkışı (kesme pini)"
+  ],
+  [
+   "D4",
+   "Sol enkoder B çıkışı (yön)"
+  ],
+  [
+   "D11",
+   "Sağ enkoder B çıkışı (yön)"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ],
+  [
+   "D12",
+   "TFmini TX (Arduino'nun RX'i)"
+  ],
+  [
+   "D13",
+   "TFmini RX (Arduino'nun TX'i)"
+  ],
+  [
+   "A4",
+   "MPU6050 SDA"
+  ],
+  [
+   "A5",
+   "MPU6050 SCL"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "L298N ve motorlar için ortak kurulum: L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola; d5 → eksi rayı (GND ortak). e6 → artı rayı (mantık beslemesi Arduino 5V'undan; kartın 5V jumper'ını çıkar).",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Enkoderli motorlar (breadboard dışında, takılı değil): sol motor için e13 → M1, e14 → M2 (OUT1, OUT2); sağ motor için e15 → M1, e16 → M2 (OUT3, OUT4). Motorların VCC uçlarını artı rayına, GND uçlarını eksi rayına bağla. Enkoder sinyalleri: sol A → D2, sol B → D4; sağ A → D3, sağ B → D11 (A çıkışları kesme pini D2 ve D3'e gitmeli).",
+  "MPU6050'yi a20 (VCC), a21 (GND), a22 (SCL), a23 (SDA) deliklerine tak, AD0'ı boş bırak. e20 → artı rayı, e21 → eksi rayı, A5 → e22, A4 → e23.",
+  "TFmini LiDAR'ı a26 (VCC), a27 (GND), a28 (TX), a29 (RX) deliklerine tak. e26 → artı rayı, e27 → eksi rayı, D12 → e28 (LiDAR TX), D13 → e29 (LiDAR RX). TFmini-S 5 V ile beslenir ve gerçek modül 115200 baud ile gelir; Uno'nun SoftwareSerial'i bu hızda güvenilmez, bu yüzden modülü bir kez 9600 baud'a ayarlamak gerekir (üreticinin komutuyla); simülatörde LiDAR 9600 baud'a ayarlıdır.",
+  "Gerçek robotta LiDAR'ı önde, yatay düzlemde, engel yüksekliğinde sabitle; MPU6050'yi şasiye sağlam monte et.",
+  "Kodu yükle (simülatörde çalıştır): robot 1 saniye sonra ilerler. LiDAR mesafesini 35 cm'ye çekince robot durur ve engeli haritaya yazar; jiroskop Z hızını 90 °/s yaparak sola dönüşü gerçekleştir, sonra mesafeyi tekrar uzağa çek."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Robot üç şeyi aynı anda izler. (1) lidarOku(): TFmini saniyede 100 kez 9 baytlık çerçeve yollar (0x59 0x59, mesafe alçak/yüksek bayt cm, sinyal gücü, sıcaklık, toplam sağlama). Fonksiyon çerçeveyi bulur, ilk 8 baytın toplamının düşük baytını son baytla karşılaştırır ve doğruysa mesafeyi alır. (2) konumGuncelle(): jiroskobun Z hızı zamanla çarpılıp toplanır (yön); iki enkoderin tik ortalaması 0,93 mm ile çarpılarak yol bulunur ve x += yol·cos(yön), y += yol·sin(yön) ile konum güncellenir (odometri). (3) Mesafe 40 cm'den kısaysa motorlar durur, engelin konumu robotun konumuna mesafenin yönde izdüşümü eklenerek bulunur ve haritaX, haritaY dizilerine yazılır; sonra solaDon90() jiroskop açısı 90° artana kadar yerinde döner, LiDAR tamponu temizlenir ve ilerlemeye devam edilir. Üçüncü engelden sonra harita (engel noktaları, mm) yazdırılır ve robot durur. Bu bir SLAM değildir: konum hatası zamanla birikir ve harita yalnızca engel noktalarının bir listesidir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Haritalama robotu hazir\" yazıldı; 1. saniyede iki motor %73 hızla ilerledi. 3,5. saniyede LiDAR mesafesi 35 cm yapılınca robot durdu ve \"Engel 1: robot x=1247 y=0 mm, yon=0, mesafe=35 cm -> nokta (1597, 0)\" yazıldı (enkoderler 1247 mm yol saydı). Jiroskop 90 °/s verilince robot yerinde sola döndü (sol motor geri, sağ motor ileri) ve yaklaşık 4,7. saniyede durdu; mesafe 120 cm'e çekilince ilerlemeye devam etti. 8. saniyede ikinci engel: \"Engel 2: robot x=1242 y=1503 mm, yon=90 ... nokta (1241, 1803)\"; ikinci dönüşten sonra 12. saniyede \"Engel 3: robot x=-10 y=1495 mm, yon=180 ... nokta (-260, 1494)\" yazıldı ve harita yazdırıldı: (1597, 0), (1241, 1803), (-260, 1494). Robot durdu. Yön 90° ve 180° olarak doğru toplandı; yol ise motor dönüşünden gelen enkoder sayımıdır. Mesafe ve jiroskop değerleri elle verildiği için engelin gerçek konumu ile eşleşmesi doğrulanmadı. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde robot hareket ettiğinde LiDAR görüşü değişmez: engel mesafesi kaydırıcıdan verilir, jiroskop dönüş hızı da motorlardan bağımsız elle verilir; bu yüzden dönüşün gerçekten 90° olup olmadığı, harita hataları ve kayma denenemez. TFmini-S tek noktalı bir LiDAR'dır (önündeki tek ışının mesafesini verir); dönen LiDAR (RPLidar), nokta bulutu ve gerçek haritalama (SLAM) yoktur. Gerçek tekerlek kayması, jiroskop sapması (drift) ve enkoder hataları konumu birkaç metrede ciddi bozar; kod bunları düzeltmez. Gerçek TFmini 115200 baud ile gelir; Uno'da SoftwareSerial ile okumak için 9600'e ayarlamak gerekir, bu kod 9600'ü varsayar. Parlak ya da şeffaf yüzeyler ve güneş ışığı LiDAR ölçümünü bozar. Sketch Wire.h ve SoftwareSerial.h kullanır; bu başlıklar gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Güç ve GND",
+   "Motorları Arduino'nun 5V pininden besleme: motorlar yüzlerce mA çeker. Motor gücü ayrı güç kaynağından (pil kutusu) gelir; L298N'in GND'si Arduino GND'sine mutlaka bağlanmalı, yoksa IN/EN sinyalleri anlamsız olur. L298N yaklaşık 2 V düşürür; motor beslemesini motorun istediği gerilimden yaklaşık 2 V yüksek seç. L298N'in dahili serbest dönüş diyotları vardır, ayrıca diyot eklenmez. Güvenlik: pil kutusunu kısa devre yapma (artı ve eksi uçları birbirine değmesin); lityum/Li-ion pil kullanıyorsan yetişkin gözetiminde, koruma devreli paketle çalış; kablolar ısınırsa hemen enerjiyi kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TFmini TX/RX'i çapraz bağlamamak; baud hızını (9600) modülle uyuşturmamak; LiDAR'ı 3,3 V sanıp yanlış beslemek (TFmini-S 5 V ister); enkoder A çıkışlarını kesme pini olmayan pinlere bağlamak; jiroskop açısını (dönüş sırasında) toplamayı unutmak; dönüşte biriken enkoder tiklerini yola saymak; sert yüzeyde ve yumuşak yüzeyde farklı mesafe çıkacağını unutmak."
+  ],
+  [
+   "Dene",
+   "ENGEL_CM eşiğini 60 yap ve engele daha uzaktan durmasını gözle; MAKS_ENGEL'i 5 yapıp harita dizilerini büyüt; her engel noktasını Seri Monitör'e \"x,y\" olarak ayrıca yazdırıp bir tablo programında çizdir."
+  ]
+ ],
+ "free": [
+  "psu1",
+  "m1",
+  "m2"
+ ]
+}

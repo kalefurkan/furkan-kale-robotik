@@ -1,0 +1,104 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × NEO-6M GPS modülü",
+  "1 × HMC5883L pusula modülü (GY-271)",
+  "1 × L298N motor sürücü",
+  "2 × DC motor (robotun sol ve sağ tekerleği)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (24 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: L298N 5V ucu ve diğer modüllerin VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: L298N GND ve diğer modüllerin GND'si"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ],
+  [
+   "D2",
+   "NEO-6M TX (Arduino'nun RX'i)"
+  ],
+  [
+   "D3",
+   "NEO-6M RX (Arduino'nun TX'i; sketch GPS'e veri göndermez)"
+  ],
+  [
+   "A5",
+   "HMC5883L SCL (I2C saat)"
+  ],
+  [
+   "A4",
+   "HMC5883L SDA (I2C veri)"
+  ]
+ ],
+ "img": "assets/devre/gps-destekli-otonom-arac.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "L298N ve motorlar için ortak kurulum: L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola. Motorların ve Arduino'nun GND'si ortak olmalı: d5 → eksi rayı. e6 → artı rayı: bu bağlantıyla L298N'in mantık devresi Arduino'nun 5V'unu kullanır; kartın üzerindeki 5V jumper'ını çıkar.",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Motorlar (breadboard dışında, takılı değil): sol motor için e13 → motor A, e14 → motor B (OUT1, OUT2); sağ motor için e15 → motor A, e16 → motor B (OUT3, OUT4).",
+  "NEO-6M'i a20 (VCC), a21 (GND), a22 (TX), a23 (RX) deliklerine tak. e20 → artı rayı, e21 → eksi rayı. GPS sinyalleri: D2 → e22 (GPS TX), D3 → e23 (GPS RX).",
+  "HMC5883L'yi a26 (VCC), a27 (GND), a28 (SCL), a29 (SDA) deliklerine tak. e26 → artı rayı, e27 → eksi rayı. I2C: A5 → e28 (SCL), A4 → e29 (SDA).",
+  "Gerçek araçta pusulayı motorlardan, motor kablolarından ve metal gövdeden en az 10 cm uzağa, düz bir yere monte et; GPS anteni gökyüzünü görmeli (iç mekanda konum bulunmaz).",
+  "Kodu yükle (simülatörde çalıştır): ilk saniyede \"Konum yok\" yazılır, GPS konumu geldiğinde araç hedefe dönmeye başlar. HMC5883L'in yön kaydırıcısını hedef yönüne (yaklaşık 29°) getirince araç \"ileri\" gider; GPS konumunu hedefe yaklaştırınca durur."
+ ],
+ "code": "// GPS destekli otonom arac: NEO-6M (konum) + HMC5883L (pusula) + L298N (iki motor)\n// Aracin yonu pusuladan, hedefe giden yon (kerteriz) GPS konumundan hesaplanir; arac hedefe dogru doner ve gider.\n#include <SoftwareSerial.h>\n#include <TinyGPS++.h>\n#include <Wire.h>\n\nSoftwareSerial gpsSerial(2, 3);   // RX = D2 (NEO-6M TX'ten gelir), TX = D3\nTinyGPSPlus gps;\n\nconst int HMC_ADRES = 0x1E;       // HMC5883L I2C adresi\nconst int ENA = 5, ENB = 6;       // motor hizlari (PWM)\nconst int IN1 = 7, IN2 = 8;       // sol motor yonu\nconst int IN3 = 9, IN4 = 10;      // sag motor yonu\n\nconst double HEDEF_ENLEM = 41.0090;    // hedef nokta (derece)\nconst double HEDEF_BOYLAM = 28.9790;\nconst double VARIS_M = 5.0;            // hedefe bu kadar metre kala dur\nconst int HIZ = 170;                   // 0-255\nconst int YON_TOLERANS = 15;           // derece\n\nunsigned long sonKarar = 0;\nbool vardi = false;\n\n// Pusuladan arac yonu (0-360 derece, 0 = manyetik kuzey)\nint aracYonu() {\n  Wire.beginTransmission(HMC_ADRES);\n  Wire.write(0x03);\n  Wire.endTransmission();\n  Wire.requestFrom(HMC_ADRES, 6);\n  if (Wire.available() < 6) {\n    return -1;\n  }\n  int xh = Wire.read();\n  int xl = Wire.read();\n  int zh = Wire.read();             // sira: X, Z, Y\n  int zl = Wire.read();\n  int yh = Wire.read();\n  int yl = Wire.read();\n  int x = (xh << 8) | xl;\n  int y = (yh << 8) | yl;\n  float aci = degrees(atan2(y, x));\n  if (aci < 0) {\n    aci = aci + 360;\n  }\n  return (int)(aci + 0.5) % 360;\n}\n\nvoid motor(int sol, int sag) {      // -255..255: eksi = geri\n  digitalWrite(IN1, sol > 0);\n  digitalWrite(IN2, sol < 0);\n  digitalWrite(IN3, sag > 0);\n  digitalWrite(IN4, sag < 0);\n  analogWrite(ENA, abs(sol));\n  analogWrite(ENB, abs(sag));\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  gpsSerial.begin(9600);\n  Wire.begin();\n  Wire.beginTransmission(HMC_ADRES);\n  Wire.write(0x02);                 // mod register'i\n  Wire.write(0x00);                 // surekli olcum\n  Wire.endTransmission();\n  pinMode(IN1, OUTPUT);\n  pinMode(IN2, OUTPUT);\n  pinMode(IN3, OUTPUT);\n  pinMode(IN4, OUTPUT);\n  pinMode(ENA, OUTPUT);\n  pinMode(ENB, OUTPUT);\n  motor(0, 0);\n  Serial.println(\"GPS arac hazir\");\n}\n\nvoid loop() {\n  while (gpsSerial.available() > 0) {\n    gps.encode(gpsSerial.read());\n  }\n  if (millis() - sonKarar < 500) {\n    return;                         // yarim saniyede bir karar ver\n  }\n  sonKarar = millis();\n\n  if (!gps.location.isValid() || gps.location.age() > 3000) {\n    motor(0, 0);\n    Serial.println(\"Konum yok: arac duruyor\");\n    return;\n  }\n  int yon = aracYonu();\n  if (yon < 0) {\n    motor(0, 0);\n    Serial.println(\"Pusula yok: arac duruyor\");\n    return;\n  }\n\n  // Kucuk mesafelerde duz yaklasim: kuzey ve dogu farklari metre cinsinden\n  double enlem = gps.location.lat();\n  double boylam = gps.location.lng();\n  double kuzey = (HEDEF_ENLEM - enlem) * 111320.0;\n  double dogu = (HEDEF_BOYLAM - boylam) * 111320.0 * cos(radians(enlem));\n  double mesafe = sqrt(kuzey * kuzey + dogu * dogu);\n  int kerteriz = (int)degrees(atan2(dogu, kuzey));   // hedefe giden yon\n  if (kerteriz < 0) {\n    kerteriz = kerteriz + 360;\n  }\n  int fark = kerteriz - yon;                          // -180..180 arasina getir\n  if (fark > 180) {\n    fark = fark - 360;\n  }\n  if (fark < -180) {\n    fark = fark + 360;\n  }\n\n  Serial.print(\"mesafe=\");\n  Serial.print(mesafe, 0);\n  Serial.print(\" m kerteriz=\");\n  Serial.print(kerteriz);\n  Serial.print(\" yon=\");\n  Serial.print(yon);\n  Serial.print(\" -> \");\n\n  if (mesafe < VARIS_M) {\n    motor(0, 0);\n    if (!vardi) {\n      vardi = true;\n    }\n    Serial.println(\"HEDEFE VARILDI\");\n  } else if (fark > YON_TOLERANS) {\n    motor(HIZ, -HIZ);               // saga don (yerinde)\n    Serial.println(\"saga don\");\n  } else if (fark < -YON_TOLERANS) {\n    motor(-HIZ, HIZ);               // sola don\n    Serial.println(\"sola don\");\n  } else {\n    motor(HIZ, HIZ);                // ileri\n    Serial.println(\"ileri\");\n  }\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "NEO-6M her saniye NMEA cümleleri yollar; TinyGPS++ bunları ayrıştırıp enlem ve boylamı verir. HMC5883L'in x ve y manyetik alan değerlerinden atan2 ile aracın baktığı yön (0° kuzey, 90° doğu) bulunur. Hedefe uzaklık kuzey ve doğu farklarından hesaplanır: 1 derece enlem yaklaşık 111320 m, boylam farkı enlemin kosinüsüyle küçültülür. Pisagor ile mesafe, atan2(doğu, kuzey) ile hedefe giden yön (kerteriz) çıkar. Fark = kerteriz − araç yönü, −180 ile 180 arasına getirilir: fark +15°'den büyükse araç yerinde sağa döner (sol motor ileri, sağ motor geri), −15°'den küçükse sola döner, aradaysa ileri gider. Mesafe 5 m'den azsa motorlar durur. Karar yarım saniyede bir verilir; geri kalan zamanda GPS karakterleri tampondan okunur."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"GPS arac hazir\" yazıldı. İlk 1,5 saniye GPS cümlesi gelmediği için \"Konum yok: arac duruyor\" yazıldı ve motorlar durdu. Sonra mesafe=102 m, kerteriz=29, yön=0 görüldü: fark +29° olduğu için \"saga don\" yazıldı (sol motor ileri, sağ motor geri, motor çıkışı yaklaşık %41). 6. saniyede pusula 30°'ye alınınca \"ileri\" yazıldı ve iki motor ileri çalıştı. 10. saniyede GPS konumu hedefe yaklaştırılınca mesafe=21 m oldu. 12,5. saniyede pusula 110°'ye alınınca fark −73° oldu ve \"sola don\" yazıldı. 14. saniyede konum hedefe 1 m kalınca \"HEDEFE VARILDI\" yazıldı ve motorlar durdu; pusula sonradan 345° olsa da araç durmaya devam etti. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Araç simülatörde gerçekten dönmez ya da ilerlemez: konum ve yön kaydırıcıdan verilir, motorların hareketi bunları değiştirmez; bu yüzden kapalı çevrim yönelme, titreme (osilasyon) ve gerçek dönüş süresi denenemez. GPS modeli gürültüsüzdür; gerçek GPS birkaç metre sapar (5 m varış eşiği bu yüzden seçildi) ve açık havada bile ilk konumu dakikalar sonra bulabilir. HMC5883L'in kalibrasyonu (sert/yumuşak demir), eğim telafisi ve manyetik sapma (deklinasyon) yoktur; sketch ham x/y'den yön hesaplar, gerçek pusula bu kadar basit kullanılmaz. Kart üzerindeki eksen yönleri modüle göre değişir. TinyGPS++ kütüphanesinin kendi mesafe ve yön fonksiyonları kullanılmadı; küçük mesafeler için düz yaklaşım yazıldı. Uno'da double 4 bayttır (yaklaşık 7 basamak): enlem farkında yaklaşık 1 m'lik yuvarlama hatası olur. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki TinyGPS++.h onların dışındadır, bu yüzden sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Güç ve GND",
+   "Motorları Arduino'nun 5V pininden besleme: motorlar yüzlerce mA çeker. Motor gücü ayrı güç kaynağından (pil kutusu) gelir; L298N'in GND'si Arduino GND'sine mutlaka bağlanmalı, yoksa IN/EN sinyalleri anlamsız olur. L298N yaklaşık 2 V düşürür; motor beslemesini motorun istediği gerilimden yaklaşık 2 V yüksek seç. L298N'in dahili serbest dönüş diyotları vardır, ayrıca diyot eklenmez. Güvenlik: pil kutusunu kısa devre yapma (artı ve eksi uçları birbirine değmesin); lityum/Li-ion pil kullanıyorsan yetişkin gözetiminde, koruma devreli paketle çalış; kablolar ısınırsa hemen enerjiyi kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "GPS TX'ini Arduino TX'ine bağlamak (çapraz olmalı); iç mekanda GPS denemek; pusulayı motora yakın takmak; fark açısını −180..180'e getirmeyi unutmak (araç kısa yol yerine uzun yoldan döner); varış eşiğini GPS hatasından küçük seçmek (araç hedefin etrafında döner durur); loop() içinde uzun delay() kullanmak (GPS tamponu taşar); motor yönü ters bağlıysa sağ/sol karışır."
+  ],
+  [
+   "Dene",
+   "Hedef koordinatlarını kendi çevrendeki bir noktaya göre değiştir ve mesafenin nasıl değiştiğine bak; varış eşiğini 2 m ve 15 m yap; YON_TOLERANS'ı 5° ve 30° yapıp \"ileri\" ile dönme kararlarının ne zaman değiştiğini gözle; hedef listesi (dizi) ekleyip araca iki noktayı sırayla gezdir."
+  ]
+ ],
+ "title": "81. GPS Destekli Otonom Araç"
+}

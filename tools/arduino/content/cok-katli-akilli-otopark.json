@@ -1,0 +1,123 @@
+{
+ "sketch": "otopark",
+ "d": "Otoparkın her katında bir HC-SR04 ultrasonik sensör park yerinin dolu olup olmadığını ölçer; LCD üç katın durumunu (D: dolu, B: boş) ve boş kat sayısını gösterir. Giriş butonuna basılınca boş kat varsa servo bariyer 3 saniye açılır, otopark doluysa kapalı kalır. Birden çok ultrasonik sensörü okumayı, dizilerle tekrar eden işi kısaltmayı, LCD'yi yalnızca durum değişince güncellemeyi ve servo bariyeri öğrenirsin. Simülatörde araç yerine sensörlerin mesafe kaydırıcıları kullanılır.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "3 × HC-SR04 ultrasonik mesafe sensörü (her kat için bir tane)",
+  "1 × servo motor (SG90, bariyer kolu; breadboard dışında)",
+  "1 × buton (giriş / bilet butonu)",
+  "Otopark maketi: 3 kat, park yerleri ve bariyer kolu (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (31 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D6",
+   "Kat 1 HC-SR04 TRIG"
+  ],
+  [
+   "D7",
+   "Kat 1 HC-SR04 ECHO"
+  ],
+  [
+   "D8",
+   "Kat 2 HC-SR04 TRIG"
+  ],
+  [
+   "D10",
+   "Kat 2 HC-SR04 ECHO"
+  ],
+  [
+   "A1",
+   "Kat 3 HC-SR04 TRIG (analog pin dijital çıkış olarak)"
+  ],
+  [
+   "A0",
+   "Kat 3 HC-SR04 ECHO (analog pin dijital giriş olarak)"
+  ],
+  [
+   "D13",
+   "Giriş butonu"
+  ],
+  [
+   "D9",
+   "Servo (bariyer) sinyali"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "Kat 1 sensörünü a17 (VCC), a18 (TRIG), a19 (ECHO), a20 (GND) deliklerine tak: e17 → artı rayı, e20 → eksi rayı, D6 → e18, D7 → e19.",
+  "Kat 2 sensörünü a21 (VCC), a22 (TRIG), a23 (ECHO), a24 (GND) deliklerine tak: e21 → artı rayı, e24 → eksi rayı, D8 → e22, D10 → e23.",
+  "Kat 3 sensörünü a25 (VCC), a26 (TRIG), a27 (ECHO), a28 (GND) deliklerine tak: e25 → artı rayı, e28 → eksi rayı, A1 → e26, A0 → e27.",
+  "Butonu g26 ve g28 deliklerine tak (breadboard'un alt yarısı): D13 → j26, j28 → eksi rayı.",
+  "Servo breadboard dışında, takılı değil: VCC → artı rayı, GND → eksi rayı, sinyal → D9. Servo kolunu bariyer olarak monte et.",
+  "Kodu yükle (simülatörde çalıştır): LCD'de \"K1:B K2:D K3:B\" ve \"Bos kat: 2\" görünür. Butona basınca servo 90°'ye döner. İki sensörü daha yakın ayarlayıp (15 cm'nin altı) tüm katları doldurunca \"OTOPARK DOLU\" yazar ve buton bariyeri açmaz."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "TRIG ve ECHO pin numaraları TRIG[] ve ECHO[] dizilerinde tutulur; mesafeOlc(k) k. katın sensörüne 10 µs'lik darbe verir, pulseIn() ile yankı süresini ölçer ve süreyi 0,0343 cm/µs ile çarpıp ikiye böler (ses gidip döner). Mesafe 15 cm'den kısaysa kat dolu sayılır. Sensörler arasında 30 ms beklenir: ultrasonik darbeler birbirinin yankısını bozmasın. Durum 3 bitlik bir sayıda tutulur; ekran ve Seri Monitör yalnızca durum değişince güncellenir (LCD'nin gereksiz yenilenmesi titremeye yol açar). Butona (INPUT_PULLUP, basılınca LOW) basılınca boş kat sayısına bakılır: varsa servo 90° açılır, 3 saniye sonra 0°'ye kapanır; yoksa \"Giris yok\" yazılır ve bariyer kapalı kalır. Üçüncü sensör için D pinleri yetmediğinden A1 (TRIG) ve A0 (ECHO) pinleri dijital olarak kullanılır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Otopark hazir\" yazıldı; kat 2 sensörü 10 cm, diğerleri 100 cm olduğu için LCD'de \"K1:B K2:D K3:B\" ve \"Bos kat: 2\" göründü. 3. saniyede butona basılınca \"Giris serbest: bariyer acik\" yazıldı ve servo 90°'ye döndü; 3 saniye sonra \"Bariyer kapandi\" yazıldı ve servo 0°'ye geri geldi. 8. saniyede kat 1 ve kat 3 sensörleri 8 ve 9 cm yapılınca LCD \"K1:D K2:D K3:D\" ve \"OTOPARK DOLU\" gösterdi (\"Bos kat: 0\"). 10. saniyede butona basılınca \"Giris yok: otopark dolu\" yazıldı ve servo kıpırdamadı. 13. saniyede kat 2 sensörü 100 cm yapılınca \"Bos kat: 1\" oldu ve 15. saniyedeki basışta bariyer yeniden açıldı. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde araç, park yeri ve bariyer mekaniği yoktur; mesafe kaydırıcıdan verilir. Gerçek HC-SR04 yumuşak yüzeylerde (kumaş, eğik araç tavanı) yankıyı zayıf ya da yanlış verir; 15 cm eşiği maketine göre denemeyle ayarlanmalıdır. Bu sistem her katta yalnızca tek bir park yerini izler; gerçek otoparkta her yere ayrı sensör ya da kamera gerekir. Girişte tek butonla bariyer açıp aracın gerçekten içeri girdiğini saymak yoktur (araç sayacı eklemek ödevdir). Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki LiquidCrystal.h onların dışındadır, bu yüzden sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Güç ve GND",
+   "Üç HC-SR04 ve servo USB'den beslenebilir; servo kolu bir engele çarparsa akım yükselir ve Arduino sıfırlanabilir. Tüm GND'ler ortak olmalı. Ultrasonik sensörleri aynı yöne bakar şekilde yan yana koyma: birbirinin yankısını duyar. Hareketli bariyer koluna parmağını yaklaştırma."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TRIG ve ECHO'yu karıştırmak (mesafe hep 999 çıkar); sensörleri arka arkaya beklemeden ölçmek (yankılar karışır); pulseIn'e zaman aşımı vermemek (sensör bağlı değilse program bekler); LCD'yi her turda silip yazmak (titreme); butonda pull-up unutup pini havada bırakmak; servo ve sensör GND'lerini ortak yapmamak."
+  ],
+  [
+   "Dene",
+   "DOLU_CM eşiğini 8 ve 25 yap, aynı mesafede kat durumunun nasıl değiştiğine bak; bariyerin açık kalma süresini 1 saniyeye düşür; dolu kat sayısını Seri Monitör'e yazdıran ve doluluk %'sini LCD'ye ekleyen bir satır ekle."
+  ]
+ ],
+ "free": [
+  "sv1"
+ ]
+}

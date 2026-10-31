@@ -769,7 +769,8 @@
    "t": "GPS Destekli Otonom Araç",
    "comps": "GPS, pusula, motor sürücü",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "d": "NEO-6M GPS aracın konumunu, HMC5883L pusula aracın baktığı yönü verir; kod hedef noktaya giden yönü (kerteriz) hesaplar, aracı hedefe doğru çevirir, ileri sürer ve hedefe 5 metre kala durdurur. NMEA ayrıştırma (TinyGPS++), I2C pusula okuma, enlem/boylam farkından mesafe ve yön bulma ile L298N ile iki motoru yönlendirmeyi öğrenirsin. Simülatörde konum ve yön kaydırıcılardan verilir; araç fiziksel olarak hareket etmez."
   },
   {
    "n": 82,
@@ -777,7 +778,8 @@
    "t": "Otonom Depo Robotu",
    "comps": "IR sensör, RFID, motorlar",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "d": "5 kanallı IR dizisi robotu yerdeki siyah çizgide tutar; çizgi üzerindeki RFID etiketleri (istasyonlar) RC522 ile okunur. Robot hedef istasyonda (Raf 2) durup yükünü bırakır, yanlış raftan geçer, Çıkış etiketinde görevini bitirir. Çizgi izlemeyi, RFID UID eşlemeyi, SPI kullanımını ve analog pinleri dijital giriş olarak kullanmayı öğrenirsin. Simülatörde çizgi konumu IR dizisinin, etiket de RC522'nin kaydırıcı ve düğmeleriyle verilir; robot gerçekte ilerlemez."
   },
   {
    "n": 83,
@@ -785,7 +787,8 @@
    "t": "Akıllı Tarım Robotu",
    "comps": "Nem sensörü, motorlar, pompa",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "d": "Tekerlekli robot bitki sırası boyunca ilerler, her bitkinin yanında durup toprak nem sensörüyle nemi ölçer; toprak kuruysa transistörle sürülen mini pompayı iki saniye çalıştırır, nemliyse geçer. Sürücüyle motor kontrolünü, analog sensörü yüzdeye çevirmeyi, pompayı transistör ve ters diyotla güvenle sürmeyi ve durum makinesi mantığını öğrenirsin. Simülatörde nem değeri sensörün kaydırıcısıyla verilir; robot ve su gerçek değildir."
   },
   {
    "n": 84,
@@ -793,7 +796,8 @@
    "t": "Çok Katlı Akıllı Otopark",
    "comps": "Ultrasonik sensörler, servo, LCD",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "d": "Otoparkın her katında bir HC-SR04 ultrasonik sensör park yerinin dolu olup olmadığını ölçer; LCD üç katın durumunu (D: dolu, B: boş) ve boş kat sayısını gösterir. Giriş butonuna basılınca boş kat varsa servo bariyer 3 saniye açılır, otopark doluysa kapalı kalır. Birden çok ultrasonik sensörü okumayı, dizilerle tekrar eden işi kısaltmayı, LCD'yi yalnızca durum değişince güncellemeyi ve servo bariyeri öğrenirsin. Simülatörde araç yerine sensörlerin mesafe kaydırıcıları kullanılır."
   },
   {
    "n": 85,
@@ -801,7 +805,8 @@
    "t": "Mini CNC Plotter",
    "comps": "2 step motor, A4988, servo",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "d": "İki A4988 sürücüsü iki step motoru (X ve Y ekseni) sürer; servo kalemi kaldırıp indirir. Kod AccelStepper kütüphanesiyle iki ekseni aynı anda hedefe götürerek 20 mm'lik bir kare ve çapraz bir çizgi çizer. STEP/DIR ile adım motoru sürmeyi, adım sayısı ile milimetre dönüşümünü ve iki eksenin hızını mesafeyle orantılayarak düz çizgi elde etmeyi öğrenirsin. Simülatörde motorların konumu (adım ve derece) görünür; kâğıt ve kalem yoktur."
   },
   {
    "n": 86,
@@ -809,7 +814,8 @@
    "t": "Lazer Gravür Makinesi",
    "comps": "Step motorlar, lazer modülü, sürücüler",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "d": "İki A4988 sürücüsü iki step motoru (X ve Y ekseni) sürer; kırmızı lazer modülü hareket eden eksenin üzerindedir ve yalnızca hareket sırasında açılır. Kod AccelStepper ile iki ekseni aynı anda hedefe götürerek 20 mm'lik bir kare ve çapraz bir çizgiyi işaretler; lazer açılmadan önce üç saniyelik bir güvenlik geri sayımı vardır. STEP/DIR ile adım motoru sürmeyi, lazeri dijital çıkışla açıp kapamayı ve güvenlik düşüncesiyle yazılım tasarlamayı öğrenirsin. Simülatörde lazer yalnızca açık/kapalı gösterilir; yüzey, ısı ve gravür yoktur. GÜVENLİK: gerçek lazer ışını göze kalıcı zarar verir; Güç ve GND notuna bak."
   },
   {
    "n": 87,
@@ -817,7 +823,8 @@
    "t": "3 Eksenli Robot Kol",
    "comps": "Step motorlar, servo, joystick",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "d": "Joystick üç eksenli bir robot kolu yönetir: joystick'in X yönü taban step motorunu (kolun sağa-sola dönmesi), Y yönü omuz step motorunu (kolun yukarı-aşağı hareketi) sürer; joystick'in butonu gripper servosunu açıp kapatır. Step motoru A4988 ile sürmeyi, joystick değerini ölü bölgeyle hıza çevirmeyi ve buton basma anını (kenar) yakalamayı öğrenirsin. Simülatörde joystick değerleri ve butonu arayüzden verilir; mekanik kol yoktur."
   },
   {
    "n": 88,
@@ -825,7 +832,9 @@
    "t": "Nesne Takip Eden Robot",
    "comps": "Kamera modülü, motorlar",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "Bu projede OV7670 kamera modülü bir ESP32'ye bağlanır; ESP32 kareyi yakalar, kırmızı piksellerin yatay ortalamasını bulur ve nesne solda, ortada ya da sağdaysa L298N ile iki motoru ona doğru çevirir. DEVRE VE MANTIK ANLATIMIDIR: ESP32 ve OV7670 simülatörde çalıştırılamaz (yalnızca görüntü, pin ve besleme denetimi yapılır), kod gerçek donanımda doğrulanmadı. 16 sinyal hatlı kamera bağlantısını, 3,3 V kuralını, kamera sürücüsüyle kare yakalamayı ve basit renk tabanlı nesne bulmayı öğrenirsin."
   },
   {
    "n": 89,
@@ -833,7 +842,9 @@
    "t": "Görüntü İşlemeli Akıllı Kapı",
    "comps": "ESP32-CAM, servo",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "ESP32-CAM kamerası iki ardışık görüntüyü karşılaştırır; yeterince piksel değişmişse (biri yaklaşmış demektir) bir servo kapıyı beş saniye açar. Bu bir hareket algılamadır: kişiyi tanımaz, kimlik doğrulamaz. Kamerayı bir kütüphaneyle başlatmayı, gri tonlu görüntüde kare farkı bulmayı ve servoyu ESP32'de ESP32Servo ile sürmeyi öğrenirsin. ESP32-CAM simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir; kod gerçek donanımda doğrulanmadı."
   },
   {
    "n": 90,
@@ -841,7 +852,9 @@
    "t": "Yüz Tanıma Kontrollü Kapı",
    "comps": "ESP32-CAM, servo",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "ESP32-CAM'in hazır \"CameraWebServer\" örneğindeki yüz tanıma özelliği bir kişiyi tanıdığında servo bir kapıyı açar. GERÇEKÇİ KAPSAM: yüz tanımanın kendisi (modeller, kayıt, eşleştirme) Arduino IDE'nin örnek sketch'indedir ve bu projede yazılmadı; bu projede yazılan kısım, tanıma sonucunu servo kapıya bağlayan koddur (servo sürme, açık kalma süresi, test komutu). Kodun yüz tanıma yapmadığını, yalnızca örneğe eklenen bir sekme olduğunu bilerek çalış. ESP32-CAM simülatörde ÇALIŞTIRILAMAZ; devre MakersHub'da kurulur ve denetlenir; kod ve yüz tanıma gerçek donanımda doğrulanmadı."
   },
   {
    "n": 91,
@@ -849,7 +862,8 @@
    "t": "Sesle Kontrol Edilen Robot",
    "comps": "Ses tanıma modülü, motor sürücü",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "d": "Bir ses tanıma modülü söylenen komutu tanıyıp numarasını seri hattan gönderir; Arduino bu numarayı okuyup L298N ile iki motoru sürer: 1 ileri, 2 geri, 3 sola dön, 4 sağa dön, 5 dur. Yeni komut gelmezse robot üç saniye sonra kendiliğinden durur (güvenlik). SoftwareSerial ile ikinci seri hat kurmayı, gelen karakteri sayıya çevirmeyi ve motor komutlarını güvenli (zaman aşımlı) yönetmeyi öğrenirsin. Simülatörde ses yoktur: komutu modülün arayüzündeki \"Söyle\" düğmesi gönderir."
   },
   {
    "n": 92,
@@ -857,7 +871,9 @@
    "t": "Akıllı Ev Enerji Yönetimi",
    "comps": "ESP32, enerji sensörleri, röle",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "ESP32 bir ACS712 akım sensörüyle evin toplam akımını ölçer ve 4 kanallı röle modülüyle dört yükü (lamba) yönetir. Toplam akım sınırı aşılırsa en az önemli yük (en büyük numara) otomatik kapatılır; yükler ayrıca ESP32'nin Wi-Fi web sayfasından elle açılıp kapatılır. ESP32'nin 3,3 V kuralını (5 V'luk sensör çıkışını gerilim bölücüyle 3,3 V'a indirmeyi), akım ölçmeyi ve yük atmayı öğrenirsin. ESP32 simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir, akım ve yük atma mantığı ayrıca Uno üzerinde denenir."
   },
   {
    "n": 93,
@@ -865,7 +881,9 @@
    "t": "Kablosuz Hava Kalitesi Ağı",
    "comps": "ESP32, MQ sensörleri, Wi-Fi",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "ESP32 bir MQ-135 (hava kalitesi) ve bir MQ-2 (gaz ve duman) sensörünü okur, değerleri 10 saniyede bir Wi-Fi üzerinden bir sunucuya JSON olarak gönderir; birden fazla düğüm aynı sunucuya kendi adıyla gönderirse bir hava kalitesi ağı oluşur. MQ sensörlerinin 5 V'luk çıkışlarını ESP32'nin 3,3 V'luk girişine gerilim bölücüyle bağlamayı, ESP32'nin ADC'sini okumayı ve Wi-Fi ile HTTP POST göndermeyi öğrenirsin. ESP32 simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir; kod gerçek donanımda doğrulanmadı."
   },
   {
    "n": 94,
@@ -873,7 +891,8 @@
    "t": "Akıllı Yangın Söndürme Robotu",
    "comps": "Alev sensörleri, pompa, motorlar",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "d": "Üç alev sensörü (sol, orta, sağ) robotun önünde alev arar. Alev solda ya da sağdaysa robot o tarafa döner; ortadaysa ileri gider ve alev çok yakınlaşınca (orta sensörün analog değeri eşiğin altına inince) durup üç saniye boyunca transistörle sürülen su pompasını çalıştırır. Alev sensörünün dijital ve analog çıkışını birlikte kullanmayı, yönelme mantığını ve pompayı transistör ve ters diyotla sürmeyi öğrenirsin. Simülatörde alev, sensörün kaydırıcısıyla verilir; gerçek ateş ve su yoktur. GÜVENLİK: bu bir oyuncak model içindir, gerçek yangına müdahale etmez."
   },
   {
    "n": 95,
@@ -881,7 +900,9 @@
    "t": "Otonom Yangın Algılama Aracı",
    "comps": "ESP32-CAM, alev sensörü, motorlar",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "ESP32-CAM'li tekerlekli araç kısa adımlarla ilerler; her adımdan sonra durup alev sensörüne ve kameraya bakar. Alev sensörü alev görürse ya da kamera karesinde çok parlak bir alan varsa araç durur ve \"yangın şüphesi\" uyarısı verir. Kameradaki parlak alan sayımı yalnızca kaba bir ipucudur; yangın tanıma değildir. Kamerayı ve alev sensörünü birlikte kullanmayı, ESP32-CAM'in sınırlı GPIO pinlerini paylaştırmayı ve motorları L298N ile sürmeyi öğrenirsin. ESP32-CAM simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir; kod gerçek donanımda doğrulanmadı."
   },
   {
    "n": 96,
@@ -889,7 +910,9 @@
    "t": "Mini Hava İstasyonu ve Veri Sunucusu",
    "comps": "ESP32, BME280, SD kart",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "ESP32 bir BME280 ile sıcaklık, nem ve basıncı ölçer, değerleri bir SD karta CSV olarak kaydeder ve kendi web sunucusunda gösterir: tarayıcıdan ESP32'nin adresini açınca anlık değerler, \"/kayit\" adresinde SD kart kaydı görünür. I2C sensör okumayı, SD karta dosya yazmayı ve ESP32'nin gömülü web sunucusunu (WebServer) öğrenirsin. ESP32 simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir, BME280 + SD kayıt mantığı ise ayrıca Uno üzerinde denenir; Wi-Fi ve web sunucusu denenemez."
   },
   {
    "n": 97,
@@ -897,7 +920,9 @@
    "t": "Çok Sensörlü Akıllı Güvenlik Sistemi",
    "comps": "PIR, RFID, kamera, ESP32",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "ESP32-CAM tabanlı bir güvenlik sistemi: sistem \"kurulu\" iken PIR hareket görürse kamera bir fotoğraf çeker ve Wi-Fi ile bir sunucuya gönderir; yetkili bir RFID kartı okutulunca sistem kurulur ya da devre dışı kalır. PIR, RFID (RC522) ve kamerayı tek ESP32-CAM'de birleştirmeyi, kartın sınırlı GPIO'larını dağıtmayı (RC522 için özel SPI pinleri) ve JPEG fotoğrafı HTTP ile göndermeyi öğrenirsin. ESP32-CAM simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir; kod gerçek donanımda doğrulanmadı."
   },
   {
    "n": 98,
@@ -905,7 +930,9 @@
    "t": "IoT Kontrollü Akıllı Laboratuvar",
    "comps": "ESP32, röleler, sensörler",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "ESP32 bir laboratuvarın sıcaklık ve nemini (DHT22), ışığını (LDR) ve hareketini (PIR) izler; 4 kanallı röle modülüyle dört cihazı yönetir: ışık karanlıkta ve hareket varken otomatik yanar, fan sıcaklık 28 °C'yi geçince açılır, cihazlar ayrıca Wi-Fi web sayfasından elle de kumanda edilir. ESP32'nin 3,3 V kuralını (PIR çıkışını bölücüyle), analog giriş okumayı, histerezisli (iki eşikli) kontrolü ve gömülü web sunucusunu öğrenirsin. ESP32 simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir; kod gerçek donanımda doğrulanmadı."
   },
   {
    "n": 99,
@@ -913,7 +940,8 @@
    "t": "Robotik Haritalama ve Navigasyon Sistemi",
    "comps": "LiDAR, enkoder, IMU, motorlar",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "d": "Robot ileri giderken konumunu enkoderli motorlardan (yol) ve MPU6050 jiroskobundan (yön) hesaplar; TFmini LiDAR önündeki mesafeyi ölçer. Mesafe 40 cm'den kısa olunca robot durur, engelin yerini (x, y) haritaya yazar, 90° sola döner ve devam eder; üç engelden sonra bulunan noktalar Seri Monitör'e harita olarak yazılır. UART ile LiDAR çerçevesi okumayı, odometri (yol ve yön toplayarak konum bulma) ve engel noktasını koordinata çevirmeyi öğrenirsin. Simülatörde LiDAR mesafesi ve jiroskop hızı kaydırıcıdan verilir; dönen LiDAR ve nokta bulutu yoktur."
   },
   {
    "n": 100,
@@ -921,7 +949,9 @@
    "t": "Otonom Akıllı Robot Platformu",
    "comps": "ESP32, LiDAR, kamera, IMU, motor sürücüler",
    "lv": 5,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "Seviye 5'in bütünleşik projesi: ESP32 DevKit ana denetleyici olarak bir TFmini LiDAR'dan engel mesafesini, bir MPU6050'den dönüş açısını ve bir ESP32-CAM kamera kartından nesne konumunu alır; L298N ile iki motoru sürer. Öncelik sırası: önünde engel varsa dur ve 90° dön, kamera bir nesne bildiriyorsa ona doğru git, hiçbiri yoksa ileri git. Birden çok sensörü öncelikle birleştirmeyi (davranış katmanları), ESP32'de donanım UART'ları (Serial1, Serial2) kullanmayı ve 3,3 V / 5 V seviyelerini dengelemeyi öğrenirsin. ESP32 ve ESP32-CAM simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir; kod gerçek donanımda doğrulanmadı. ESP32-CAM'in kendi programı bu projede yazılmadı."
   },
   {
    "n": null,

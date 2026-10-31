@@ -1,0 +1,81 @@
+{
+ "parts": [
+  "Arduino Uno yoktur: bu projede mikrodenetleyici ESP32'dir",
+  "Breadboard",
+  "1 × ESP32 DevKit (30 pin; breadboard dışında, USB ile beslenir)",
+  "1 × BME280 sıcaklık/nem/basınç sensörü (I2C)",
+  "1 × SD kart modülü (SPI, 3,3 V mantıklı)",
+  "Jumper kablolar (12 adet)"
+ ],
+ "wiring": [
+  [
+   "ESP32 3V3",
+   "Üstteki artı (+) rayı (3,3 V): BME280 VCC ve SD modülü VCC"
+  ],
+  [
+   "ESP32 GND",
+   "Alttaki eksi (−) rayı: BME280 GND ve SD modülü GND"
+  ],
+  [
+   "ESP32 IO21",
+   "BME280 SDA (I2C veri)"
+  ],
+  [
+   "ESP32 IO22",
+   "BME280 SCL (I2C saat)"
+  ],
+  [
+   "ESP32 IO19",
+   "SD modülü MISO"
+  ],
+  [
+   "ESP32 IO23",
+   "SD modülü MOSI"
+  ],
+  [
+   "ESP32 IO18",
+   "SD modülü SCK"
+  ],
+  [
+   "ESP32 IO5",
+   "SD modülü CS"
+  ]
+ ],
+ "img": "assets/devre/mini-hava-istasyonu-ve-veri-sunucusu.png",
+ "steps": [
+  "Devreyi enerjisiz kur: ESP32'nin USB kablosu takılı olmasın.",
+  "ESP32 breadboard dışındadır ve takılı değildir; kart USB ile beslenir. ESP32 GND → alttaki eksi (−) rayı, ESP32 3V3 → üstteki artı (+) rayı (3,3 V).",
+  "BME280'i a4 (VCC), a5 (GND), a6 (SCL), a7 (SDA) deliklerine tak. e4 → üstteki artı rayı (3,3 V), e5 → eksi rayı. I2C: IO22 → e6 (SCL), IO21 → e7 (SDA).",
+  "SD kart modülünü a12 (GND), a13 (VCC), a14 (MISO), a15 (MOSI), a16 (SCK), a17 (CS) deliklerine tak. e12 → eksi rayı, e13 → üstteki artı rayı (3,3 V). SPI: IO19 → e14 (MISO), IO23 → e15 (MOSI), IO18 → e16 (SCK), IO5 → e17 (CS). Kartı FAT32 biçimlendir ve modüle tak.",
+  "Not: bazı SD modülleri 5 V ile beslenir (üzerinde regülatör ve seviye çevirici vardır); bu devrede 3,3 V ile beslenen, 3,3 V mantıklı bir modül gösterilir. Kendi modülünün etiketine bak.",
+  "Kodu Arduino IDE'de \"ESP32 Dev Module\" seçerek yükle; \"Adafruit BME280 Library\" ve \"Adafruit Unified Sensor\" kütüphanelerini kur; Wi-Fi adı ve parolayı değiştir. Simülatörde bu kod ÇALIŞTIRILAMAZ; yalnızca devre görüntüsü ve seviye denetimi yapılır."
+ ],
+ "code": "// Mini hava istasyonu ve veri sunucusu (ESP32). SIMULATORDE CALISTIRILAMAZ; gercek donanimda dogrulanmadi.\n// BME280 sicaklik, nem ve basinci olcer; ESP32 degerleri SD karta CSV olarak kaydeder ve kendi web sayfasinda gosterir.\n// Gerekli: Arduino IDE + \"esp32\" kart paketi (Espressif) + \"Adafruit BME280 Library\" (ve Adafruit Unified Sensor) kutuphaneleri.\n#include <WiFi.h>\n#include <WebServer.h>\n#include <Wire.h>\n#include <SPI.h>\n#include <SD.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_BME280.h>\n\nconst char *AG_ADI = \"AG_ADINIZ\";            // kendi Wi-Fi agina gore degistir\nconst char *PAROLA = \"PAROLANIZ\";\n\nconst int SD_CS = 5;                          // SD modulu: CS IO5, MOSI IO23, MISO IO19, SCK IO18 (ESP32'nin varsayilan SPI pinleri)\nconst unsigned long KAYIT_ARASI = 60000;      // 1 dakikada bir kayit\n\nAdafruit_BME280 bme;                          // I2C: SDA = IO21, SCL = IO22\nWebServer sunucu(80);\nfloat sicaklik = 0, nem = 0, basinc = 0;\nbool sdVar = false;\nunsigned long sonKayit = 0;\n\nvoid olc() {\n  sicaklik = bme.readTemperature();\n  nem = bme.readHumidity();\n  basinc = bme.readPressure() / 100.0F;       // Pa -> hPa\n}\n\nvoid sdyeYaz() {\n  if (!sdVar) {\n    return;\n  }\n  File dosya = SD.open(\"/olcum.csv\", FILE_APPEND);\n  if (dosya) {\n    dosya.print(millis() / 1000);\n    dosya.print(\";\");\n    dosya.print(sicaklik, 1);\n    dosya.print(\";\");\n    dosya.print(nem, 0);\n    dosya.print(\";\");\n    dosya.println(basinc, 0);\n    dosya.close();                            // close() veriyi karta kesin yazar\n  }\n}\n\nvoid anaSayfa() {\n  olc();\n  String s = \"<html><head><meta charset='utf-8'><meta http-equiv='refresh' content='5'></head><body>\";\n  s += \"<h2>Mini hava istasyonu</h2><p>Sicaklik: \";\n  s += String(sicaklik, 1);\n  s += \" C</p><p>Nem: %\";\n  s += String(nem, 0);\n  s += \"</p><p>Basinc: \";\n  s += String(basinc, 0);\n  s += \" hPa</p><p><a href='/kayit'>SD kart kaydi (CSV)</a></p></body></html>\";\n  sunucu.send(200, \"text/html\", s);\n}\n\nvoid kayitSayfasi() {\n  if (!sdVar) {\n    sunucu.send(200, \"text/plain\", \"SD kart yok\");\n    return;\n  }\n  File dosya = SD.open(\"/olcum.csv\");\n  if (!dosya) {\n    sunucu.send(200, \"text/plain\", \"Kayit yok\");\n    return;\n  }\n  sunucu.streamFile(dosya, \"text/plain\");     // dosyayi tarayiciya gonder\n  dosya.close();\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  Wire.begin(21, 22);\n  if (!bme.begin(0x76)) {                     // bazi modullerde adres 0x77'dir\n    Serial.println(\"BME280 bulunamadi: baglantilari ve adresi kontrol et\");\n    while (true) { delay(1000); }\n  }\n  sdVar = SD.begin(SD_CS);\n  if (sdVar) {\n    File dosya = SD.open(\"/olcum.csv\", FILE_APPEND);\n    if (dosya) {\n      dosya.println(\"sure_sn;sicaklik;nem;basinc\");\n      dosya.close();\n    }\n  }\n  Serial.println(sdVar ? \"SD kart hazir\" : \"SD kart yok: yalniz web sayfasi calisir\");\n  WiFi.mode(WIFI_STA);\n  WiFi.begin(AG_ADI, PAROLA);\n  unsigned long t0 = millis();\n  while (WiFi.status() != WL_CONNECTED && millis() - t0 < 15000) {\n    delay(500);\n  }\n  Serial.print(\"Adres: \");\n  Serial.println(WiFi.localIP().toString());\n  sunucu.on(\"/\", anaSayfa);\n  sunucu.on(\"/kayit\", kayitSayfasi);\n  sunucu.begin();\n}\n\nvoid loop() {\n  sunucu.handleClient();\n  if (millis() - sonKayit >= KAYIT_ARASI) {\n    sonKayit = millis();\n    olc();\n    sdyeYaz();\n    Serial.print(\"Kayit: \");\n    Serial.print(sicaklik, 1);\n    Serial.println(\" C\");\n  }\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "BME280 I2C ile bağlanır: ESP32'de varsayılan I2C pinleri SDA = IO21 ve SCL = IO22'dir (Wire.begin(21, 22) ile açıkça yazıldı). bme.begin(0x76) sensörü adresiyle başlatır (bazı modüller 0x77 kullanır); olc() sıcaklığı, nemi ve basıncı (Pa'yı hPa'ya çevirerek) okur. SD kart ESP32'nin varsayılan SPI pinleriyle bağlanır: MOSI IO23, MISO IO19, SCK IO18 ve CS IO5; SD.begin(5) kartı başlatır. Her dakika bir kez sdyeYaz() \"/olcum.csv\" dosyasına bir satır ekler (sure_sn;sicaklik;nem;basinc), close() verinin karta yazılmasını garanti eder. WebServer.h ile ESP32 bir web sunucusu olur: \"/\" sayfası anlık değerleri gösterir ve 5 saniyede bir kendini yeniler, \"/kayit\" sayfası streamFile() ile SD kartın CSV dosyasını tarayıcıya gönderir. Wi-Fi'ye 15 saniye içinde bağlanılamazsa sunucu yine başlar ama erişilemez. Sketch SD kart yoksa (sdVar = false) yalnız web sayfasıyla çalışır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde ESP32 \"güç var · çalıştırılamaz\" durumundadır (USB beslemesiyle 3V3 ≈ 3,3 V verir). MakersHub doğrulayıcısı hiçbir hata ya da uyarı vermedi: BME280 ve SD modülü 3,3 V ile beslenir, I2C ve SPI uçları ESP32 GPIO'larına bağlı, ortak GND var. Uno ile doğrulanan kısım (BME280 + SD kayıt mantığı; Uno'da BME280 A4/A5, SD CS D4 ve SPI D11–D13): açılışta \"Istasyon hazir\" yazıldı; ilk kayıtta \"Kayit 1: 22.5 C\" yazıldı ve CSV'ye satır eklendi. BME280 kaydırıcısı 3. saniyede 26 °C / %45 / 1008 hPa yapılınca \"Kayit 3: 26.0 C\" yazıldı. Dört kayıttan sonra dosya geri okundu ve \"sure_sn;sicaklik;nem;basinc\" başlığı ile \"0;22.5;52;1013\", \"2;22.5;52;1013\", \"4;26.0;45;1008\", \"6;26.0;45;1008\" satırları Seri Monitör'de görüldü. Wi-Fi, web sayfaları, ESP32'nin SPI/I2C sürücüleri ve gerçek SD kart gözlenemedi. Gerçek donanımda doğrulanmadı."
+  ],
+  [
+   "Simülatör sınırı",
+   "ESP32, Wi-Fi ve WebServer simülatörde ÇALIŞTIRILAMAZ. Uno ile doğrulanan kısım yalnızca BME280 okuma ve SD'ye CSV yazma mantığıdır: Uno'da SD kütüphanesi 8.3 dosya adı ve /dizinsiz yol kullanır (OLCUM.CSV), ESP32'de uzun ad ve \"/\" ile başlayan yol gerekir; simülatördeki SD bellekte tutulur ve simülasyon bitince silinir. BME280 modeli gürültüsüz ve kaydırıcıdan tamsayı değer verir. Gerçek kartlarda SD kart biçimi (FAT32), kart hızı ve temas sorunları yaygındır; güç kesilirken dosya bozulabilir (close() çağrılmazsa veri kaybolur). Web sayfası şifresiz ve kimlik doğrulamasızdır, yalnızca yerel ağda kullanılmalıdır. ESP32 sketch'i (Arduino-ESP32 çekirdeği) simülatörde ÇALIŞTIRILAMAZ: simülatör ESP32'yi yalnızca çizer, besleme ve gerilim seviyesini denetler. Sitedeki kod gerçek donanımda doğrulanmadı; Arduino IDE'ye ESP32 kart paketi (Espressif) kurulup kendi kartında denenmelidir. Sitedeki 'Derle' hizmeti AVR (Uno) içindir; ESP32 başlıklarını (WiFi.h, esp_camera.h vb.) tanımaz ve bu sketch'te hata verir. Kodu Arduino IDE'de ESP32 kart seçerek derle."
+  ],
+  [
+   "Güç ve GND",
+   "SD kart ve BME280 3,3 V ile beslenir; ESP32'nin 3V3 pini yaklaşık 600 mA verebilir ama SD kart yazarken ve Wi-Fi'da anlık akım yükselir: kararsızlık olursa ayrı bir 3,3 V regülatör kullan. Bazı SD modülleri 5 V ister ve dahili seviye çeviriciye sahiptir; bunu modülün etiketinden kontrol et. Tüm GND'ler ortak olmalıdır. Kartı güç açıkken çıkarma: dosya bozulabilir. Bu istasyonu dışarıda kullanırsan elektronik parçaları yağmurdan koru (kapalı, havalandırmalı kutu)."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "I2C adresini (0x76 yerine 0x77) yanlış seçmek; SDA ve SCL'yi ters bağlamak; SD kartı FAT32 yapmamak; CS pinini kodla devre arasında farklı seçmek; dosyayı close() ile kapatmamak; SD modülünü 5 V ile beslemeden 3,3 V mantıklı pine 5 V sinyal vermek; sıcaklık ölçerken sensörü ESP32'nin ısındığı kutuya koymak (okuma yüksek çıkar)."
+  ],
+  [
+   "Dene",
+   "Kayıt aralığını 10 saniyeye indir ve dosyanın büyümesine bak; sayfaya basıncı gösteren bir grafik (JavaScript ile) ekle; kaydı CSV yerine her gün yeni bir dosyaya yaz."
+  ]
+ ],
+ "title": "96. Mini Hava İstasyonu ve Veri Sunucusu"
+}

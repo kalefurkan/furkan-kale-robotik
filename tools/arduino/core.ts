@@ -24,7 +24,9 @@ for (const p of __PROJECTS__) {
   const b = new Builder(p.builder ?? {});
   p.build(b);
   const sketch = readFileSync(`${__ROOT__}/sketches/${p.sketch}.ino`, "utf8");
-  const doc = b.doc(sketch);
+  // ESP32 projeleri: simülatör bu kodu çalıştıramaz; editörde yalnızca açıklayıcı boş bir taslak durur
+  const ESP_STUB = "// Bu projenin ESP32 kodu sitedeki Kod bölümündedir.\n// ESP32 simulatorde CALISTIRILAMAZ: burada yalnizca devre gorulur (besleme, pin ve seviye denetimi).\nvoid setup() {}\nvoid loop() {}\n";
+  const doc = b.doc(p.esp32 ? ESP_STUB : sketch);
   writeFileSync(`${OUT}/docs/${p.id}.json`, JSON.stringify(doc));
   shootAll[p.id] = p.shoot ?? {};
   writeFileSync(shootPath, JSON.stringify(shootAll));
@@ -83,14 +85,20 @@ for (const p of __PROJECTS__) {
     for (const m of nl.members) for (const k of m) netOf.set(k, m);
     const has = (k: string, re: RegExp | ((k: string) => boolean)) => (netOf.get(k) ?? [k]).some((x) => (typeof re === "function" ? re(x) : re.test(x)));
     const typeById = new Map<string, string>(circuit.components.map((c: any) => [c.id, c.type]));
-    const isMcuPin = (k: string) => /^uno\.(D\d+|A\d)$/.test(k);
-    const isPlus = (k: string) => { const [id, pn] = k.split("."); const t = typeById.get(id); return k === "uno.5V" || ((t === "psu" || t === "battery9v") && pn === "P") || (t === "relay" && ["NO", "NC", "COM"].includes(pn)); };
-    const isGnd = (k: string) => { const [id, pn] = k.split("."); const t = typeById.get(id); return /^uno\.GND\d?$/.test(k) || ((t === "psu" || t === "battery9v") && pn === "N"); };
+    const isMcuPin = (k: string) => /^uno\.(D\d+|A\d)$/.test(k) || /^(esp32|esp32cam)\.IO\d+$/.test(k);
+    const isPlus = (k: string) => { const [id, pn] = k.split("."); const t = typeById.get(id); return k === "uno.5V" || (t === "esp32" && pn === "VIN") || (t === "esp32cam" && pn === "5V") || ((t === "psu" || t === "battery9v") && pn === "P") || (t === "relay" && ["NO", "NC", "COM"].includes(pn)); };
+    const isGnd = (k: string) => { const [id, pn] = k.split("."); const t = typeById.get(id); return /^uno\.GND\d?$/.test(k) || ((t === "esp32" || t === "esp32cam") && /^GND\d?$/.test(pn)) || ((t === "psu" || t === "battery9v") && pn === "N"); };
     for (const c of circuit.components) {
       if (c.type === "servo") {
-        if (!has(`${c.id}.VCC`, (k) => k === "uno.5V")) powerIssues.push(`${c.id}: VCC 5V'a bağlı değil`);
-        if (!has(`${c.id}.GND`, /^uno\.GND\d?$/)) powerIssues.push(`${c.id}: GND Arduino GND'ye bağlı değil`);
+        if (!has(`${c.id}.VCC`, (k) => k === "uno.5V" || k === "esp32.VIN" || k === "esp32cam.5V" || /^psu\d*\.P$/.test(k))) powerIssues.push(`${c.id}: VCC 5V'a bağlı değil`);
+        if (!has(`${c.id}.GND`, isGnd)) powerIssues.push(`${c.id}: GND Arduino GND'ye bağlı değil`);
         if (has(`${c.id}.VCC`, isMcuPin) || has(`${c.id}.GND`, isMcuPin)) powerIssues.push(`${c.id}: besleme ucu bir veri pinine bağlı`);
+      }
+      if (c.type === "a4988") {
+        if (!has(`${c.id}.VMOT`, (k) => typeById.get(k.split(".")[0]) === "psu" && k.endsWith(".P"))) powerIssues.push(`${c.id}: VMOT ayrı güç kaynağının + ucuna bağlı değil`);
+        if (!has(`${c.id}.GND`, (k) => typeById.get(k.split(".")[0]) === "psu" && k.endsWith(".N"))) powerIssues.push(`${c.id}: motor GND'si güç kaynağının − ucuna bağlı değil`);
+        if (!has(`${c.id}.GND`, isGnd) || !has(`${c.id}.GND2`, isGnd)) powerIssues.push(`${c.id}: GND ucu mikrodenetleyici GND'siyle ortak değil`);
+        if (!has(`${c.id}.VDD`, (k) => k === "uno.5V" || k === "uno.3V3" || /^esp32\.3V3$/.test(k))) powerIssues.push(`${c.id}: VDD mantık beslemesine bağlı değil`);
       }
       if (c.type === "dcmotor" || c.type === "bulb") for (const pn of ["A", "B"]) if (has(`${c.id}.${pn}`, isMcuPin)) powerIssues.push(`${c.id}.${pn}: motor ucu doğrudan Arduino veri pinine bağlı`);
       if (c.type === "relay") for (const pn of ["C1", "C2"]) if (has(`${c.id}.${pn}`, isMcuPin)) powerIssues.push(`${c.id}.${pn}: röle bobini doğrudan Arduino veri pinine bağlı (sürücü transistör gerekir)`);
@@ -111,7 +119,7 @@ for (const p of __PROJECTS__) {
   }
 
   // ---- simülasyon ----
-  const s = new SimulationSession(sketch, circuit);
+  const s = new SimulationSession(p.esp32 ? ESP_STUB : sketch, circuit);
   const events = [...(p.sim.events ?? [])].sort((a, b) => a.t - b.t);
   const step = p.sim.sampleMs ?? 20;
   const serialAt: { t: number; text: string }[] = [];
@@ -149,7 +157,7 @@ for (const p of __PROJECTS__) {
   const lcd: Record<string, string[]> = {};
   last?.lcds.forEach((l: any, id: string) => (lcd[id] = l.rows));
   const facts = {
-    id: p.id, counts, resistors, wires: circuit.wires.length, components: circuit.components.length,
+    id: p.id, esp32: !!p.esp32, hasUno: circuit.components.some((x: any) => x.type === "uno"), counts, resistors, wires: circuit.wires.length, components: circuit.components.length,
     unoPins: [...unoPins].sort(), powerIssues, endpointDup, holeClash, unplugged, nets,
     validator: { errors: v.errors.map((i) => i.message), warnings: v.warnings.map((i) => i.message) },
     runtime: { error: s.error, diagnostics: s.diagnostics.map((d) => `${d.severity}: ${d.message} (${d.line})`), warnings: [...warnings], shorted, overcurrent, lcdProblem },

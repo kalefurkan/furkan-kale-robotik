@@ -1,0 +1,101 @@
+{
+ "sketch": "robot_platformu_esp32",
+ "d": "Seviye 5'in bütünleşik projesi: ESP32 DevKit ana denetleyici olarak bir TFmini LiDAR'dan engel mesafesini, bir MPU6050'den dönüş açısını ve bir ESP32-CAM kamera kartından nesne konumunu alır; L298N ile iki motoru sürer. Öncelik sırası: önünde engel varsa dur ve 90° dön, kamera bir nesne bildiriyorsa ona doğru git, hiçbiri yoksa ileri git. Birden çok sensörü öncelikle birleştirmeyi (davranış katmanları), ESP32'de donanım UART'ları (Serial1, Serial2) kullanmayı ve 3,3 V / 5 V seviyelerini dengelemeyi öğrenirsin. ESP32 ve ESP32-CAM simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir; kod gerçek donanımda doğrulanmadı. ESP32-CAM'in kendi programı bu projede yazılmadı.",
+ "parts": [
+  "Arduino Uno yoktur: bu projede ana mikrodenetleyici ESP32 DevKit'tir",
+  "Breadboard",
+  "1 × ESP32 DevKit (30 pin; breadboard dışında, USB ile beslenir)",
+  "1 × ESP32-CAM (AI-Thinker; breadboard dışında; kamera kartı, UART ile ana karta bağlı)",
+  "1 × TFmini-S LiDAR (tek noktalı, UART)",
+  "1 × MPU6050 ivmeölçer + jiroskop modülü (GY-521)",
+  "1 × 10 kΩ direnç (LiDAR TX gerilim bölücüsü)",
+  "1 × 20 kΩ direnç (LiDAR TX gerilim bölücüsü)",
+  "1 × L298N motor sürücü (iki motor için tek sürücü; dört motorlu şasi için ikinci bir sürücü eklenebilir)",
+  "2 × DC motor (robotun sol ve sağ tekerleği; breadboard dışında)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu; breadboard dışında)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur); programlama için FTDI/USB-seri adaptör (devre görüntüsünde yoktur)",
+  "Jumper kablolar (28 adet)"
+ ],
+ "wiring": [
+  [
+   "ESP32 3V3",
+   "Üstteki artı (+) rayı (3,3 V): MPU6050 VCC"
+  ],
+  [
+   "ESP32 VIN",
+   "Alttaki artı (+) rayı (5 V): TFmini VCC, L298N 5V (mantık) ve ESP32-CAM 5V"
+  ],
+  [
+   "ESP32 GND",
+   "Alttaki eksi (−) rayı: tüm modüllerin GND'si ve bölücü direnci"
+  ],
+  [
+   "ESP32 IO21 / IO22",
+   "MPU6050 SDA / SCL"
+  ],
+  [
+   "ESP32 IO16",
+   "TFmini TX (gerilim bölücü orta noktası; Serial2 RX)"
+  ],
+  [
+   "ESP32 IO17",
+   "TFmini RX (Serial2 TX)"
+  ],
+  [
+   "ESP32 IO25",
+   "ESP32-CAM U0T (Serial1 RX)"
+  ],
+  [
+   "ESP32 IO26",
+   "ESP32-CAM U0R (Serial1 TX)"
+  ],
+  [
+   "ESP32 IO27, IO14, IO32, IO33",
+   "L298N IN1, IN2, IN3, IN4"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: ESP32'nin USB kablosu ve 6 V kaynak takılı olmasın.",
+  "ESP32 DevKit ve ESP32-CAM breadboard dışındadır ve takılı değildir; DevKit USB ile beslenir. DevKit GND → alttaki eksi (−) rayı, VIN → alttaki artı (+) rayı (5 V), 3V3 → üstteki artı (+) rayı (3,3 V).",
+  "MPU6050'yi a4 (VCC), a5 (GND), a6 (SCL), a7 (SDA) deliklerine tak (AD0 a8'e düşer, boş bırak). e4 → üstteki artı rayı (3,3 V), e5 → eksi rayı. I2C: IO22 → e6 (SCL), IO21 → e7 (SDA).",
+  "TFmini'yi a12 (VCC), a13 (GND), a14 (TX), a15 (RX) deliklerine tak. e12 → alttaki artı rayı (5 V), e13 → eksi rayı. TX gerilim bölücüsü: 10 kΩ direnci d10 ile d14 arasına (d14, TX ile aynı sütun), 20 kΩ direnci dikey olarak e10 ile h10 arasına tak, j10 → eksi rayı; bölücünün orta noktası (a10) → IO16. IO17 → e15 (TFmini RX).",
+  "L298N'i a18 (12V), a19 (GND), a20 (5V), a21 (ENA), a22–a25 (IN1–IN4), a26 (ENB), a27–a30 (OUT1–OUT4) deliklerine tak. Güç kaynağı (breadboard dışında, takılı değil): + ucu → e18 (12V), − ucu → e19 (GND); d19 → eksi rayı (GND ortak); e20 → alttaki artı rayı (mantık 5V; kartın 5V jumper'ını çıkar).",
+  "Kontrol kabloları: IO27 → e22 (IN1), IO14 → e23 (IN2), IO32 → e24 (IN3), IO33 → e25 (IN4). ENA ve ENB jumper'lı kalır. Motorlar (breadboard dışında, takılı değil): sol motor için e27, e28 (OUT1, OUT2); sağ motor için e29, e30 (OUT3, OUT4).",
+  "ESP32-CAM (breadboard dışında, takılı değil): 5V ucu → alttaki artı rayı, GND ucu → eksi rayı; U0T ucu → ESP32 DevKit IO25; U0R ucu → DevKit IO26 (TX ve RX çapraz bağlanır).",
+  "Gerçek robotta LiDAR'ı önde yatay, kamerayı öne bakacak şekilde, MPU6050'yi şasiye sağlam sabitle. TFmini-S 115200 baud ile gelir; ESP32'nin donanım UART'ı bu hızı sorunsuz okur.",
+  "Kodu Arduino IDE'de DevKit için \"ESP32 Dev Module\" seçerek yükle. ESP32-CAM'in ayrı bir programı gerekir (ona \"X=<sayı>\" satırı yazdıran bir sketch); bu proje onu içermez. Simülatörde bu kod ÇALIŞTIRILAMAZ; yalnızca devre görüntüsü ve besleme denetimi yapılır."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Robot üç katmanlı bir önceliğe göre davranır. (1) Güvenlik: lidarOku() Serial2'den TFmini'nin 9 baytlık çerçevelerini okur (0x59 0x59, mesafe cm, sinyal gücü, sıcaklık, toplam sağlama; toplam doğruysa mesafe güncellenir). Mesafe 40 cm'den kısaysa robot durur, jiroskoptan hesaplanan yön 90° artana kadar yerinde sola döner (yönGuncelle jiroskop Z hızını zamanla toplar) ve devam eder. (2) Hedef: kamera kartı (ESP32-CAM) nesneyi görürse seri hattan \"X=<0..159>\" satırı yollar; kameraOku() bu sayıyı alır. Sayı son yarım saniyede geldiyse robot nesneyi ortalar: görüntünün sol üçte birindeyse sola, sağ üçte birindeyse sağa döner, ortadaysa ileri gider. (3) Hiçbiri yoksa ileri gider. ESP32'nin üç donanım UART'ı vardır: Serial (USB), Serial1 ve Serial2; pinler begin() ile seçilir (Serial2: RX IO16, TX IO17; Serial1: RX IO25, TX IO26). TFmini-S'in TX çıkışı 3,3 V mantıklıdır ama ESP32 girişini korumak için 10 kΩ + 20 kΩ bölücü eklendi; MPU6050 3,3 V ile, TFmini ve motor sürücüsü 5 V (VIN) ile beslenir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde ESP32 DevKit ve ESP32-CAM \"güç var · çalıştırılamaz\" durumundadır (DevKit USB beslemesiyle VIN ≈ 5 V, 3V3 ≈ 3,3 V verir; ESP32-CAM 5V rayından beslenir). TFmini kaydırıcıdan verilen mesafeyi gösterir (150 cm) ve MPU6050 \"uyku modu\" durumundadır (çünkü bu kodu çalıştıracak bir mikrodenetleyici çalışmıyor). L298N modülü ortak GND ve 6 V beslemeyi algıladı. MakersHub doğrulayıcısı hiçbir hata ya da uyarı vermedi: TFmini'nin TX çıkışı bölücü üzerinden ESP32 girişine bağlı (bölücüsüz bağlantı \"5 V ile beslenen sensörün çıkışı\" uyarısı verir), MPU6050 3,3 V ile beslenir, ortak GND var. Sensör okumaları, UART haberleşmesi, kamera ve motor hareketi gözlenemedi; bu projede Uno üzerinde ayrıca denenen bir kısım yoktur (benzer LiDAR + jiroskop + motor mantığı 99 numaralı projede Uno'da denendi). Gerçek donanımda doğrulanmadı."
+  ],
+  [
+   "Simülatör sınırı",
+   "ESP32, ESP32-CAM, donanım UART'ları (Serial1/Serial2) ve kamera simülatörde ÇALIŞTIRILAMAZ. Kodun hiçbir kısmı denenmedi; özellikle ESP32 DevKit ile ESP32-CAM arasındaki seri haberleşme ve kamera kartının programı doğrulanmadı. ESP32-CAM'in programı bu projede yazılmadı: \"X=<sayı>\" biçimini üreten bir sketch gerekir (88 numaralı projedeki renk tabanlı nesne bulma, ESP32-CAM kamerası için uyarlanabilir). Bu bir tam otonom robot değildir: yol planlama, konum kestirimi, harita ve bataryalı güç yönetimi yoktur; yalnızca üç katmanlı basit bir davranış denetimidir. Jiroskop açısı zamanla kayar (drift). Motor hızı ayarı yoktur (ENA/ENB jumper'lı). Tek L298N iki motoru sürer; dört motorlu şasi için ikinci sürücü gerekir. ESP32 sketch'i (Arduino-ESP32 çekirdeği) simülatörde ÇALIŞTIRILAMAZ: simülatör ESP32'yi yalnızca çizer, besleme ve gerilim seviyesini denetler. Sitedeki kod gerçek donanımda doğrulanmadı; Arduino IDE'ye ESP32 kart paketi (Espressif) kurulup kendi kartında denenmelidir. Sitedeki 'Derle' hizmeti AVR (Uno) içindir; ESP32 başlıklarını (WiFi.h, esp_camera.h vb.) tanımaz ve bu sketch'te hata verir. Kodu Arduino IDE'de ESP32 kart seçerek derle."
+  ],
+  [
+   "Güç ve GND",
+   "ESP32 DevKit'in VIN pinini 5 V ile besleyen kaynağa USB ile aynı anda 5 V bağlama (çakışma); motorları ESP32'nin 5V/VIN hattından değil, ayrı 6 V kaynaktan beslemek gerekir (bu devrede böyledir), GND'ler ortak olmalıdır. ESP32-CAM kamera çalışırken 300–500 mA çeker: VIN hattı bunu taşıyacak güçte olmalıdır, değilse ayrı 5 V kaynak kullan. ESP32 GPIO'ları 3,3 V mantıklıdır: 5 V'luk bir sinyali doğrudan bağlama. L298N'in 5V ucu mantık beslemesidir; kartın 5V jumper'ı çıkarılmalıdır. Pil kutusunu kısa devre yapma, lityum pillerde yetişkin gözetimi ve koruma devresi kullan, kablolar ısınırsa enerjiyi hemen kes. Robot hareket ederken parmağını tekerleklere yaklaştırma; ilk denemeleri robotu havada tutarak yap."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TX ve RX'i çapraz bağlamamak (modül TX → ESP32 RX); Serial1/Serial2 pinlerini begin() içinde belirtmemek (varsayılanlar boş ya da çakışabilir); TFmini TX'ini bölücüsüz ESP32'ye bağlamak; ESP32-CAM'e ayrı bir program yüklemeyi unutmak (X= satırı gelmez); motor ve sensör GND'lerini ortak yapmamak; açılış pinlerini (IO12, IO15, IO0, IO2) motor girişlerinde kullanıp açılışı bozmak (bu yüzden IO27, IO14, IO32, IO33 seçildi)."
+  ],
+  [
+   "Dene",
+   "ENGEL_CM eşiğini 60 yap ve robotun engelden daha uzakta dönmesini gözle; döndükten sonra ileri gitmeden önce kameraya bir saniye bakacak bir bekleme ekle; ENA/ENB'yi PWM pinlerine bağlayıp (jumper'ları çıkarıp) hız ayarı ekle; dört motor için ikinci bir L298N bağla."
+  ]
+ ],
+ "free": [
+  "esp1",
+  "cam1",
+  "psu1",
+  "m1",
+  "m2"
+ ]
+}

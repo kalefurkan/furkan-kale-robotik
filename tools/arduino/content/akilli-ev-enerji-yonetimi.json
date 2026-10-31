@@ -1,0 +1,76 @@
+{
+ "sketch": "enerji_esp32",
+ "d": "ESP32 bir ACS712 akım sensörüyle evin toplam akımını ölçer ve 4 kanallı röle modülüyle dört yükü (lamba) yönetir. Toplam akım sınırı aşılırsa en az önemli yük (en büyük numara) otomatik kapatılır; yükler ayrıca ESP32'nin Wi-Fi web sayfasından elle açılıp kapatılır. ESP32'nin 3,3 V kuralını (5 V'luk sensör çıkışını gerilim bölücüyle 3,3 V'a indirmeyi), akım ölçmeyi ve yük atmayı öğrenirsin. ESP32 simülatörde ÇALIŞTIRILAMAZ: devre MakersHub'da kurulur ve denetlenir, akım ve yük atma mantığı ayrıca Uno üzerinde denenir.",
+ "parts": [
+  "Arduino Uno yoktur: bu projede mikrodenetleyici ESP32'dir",
+  "Breadboard",
+  "1 × ESP32 DevKit (30 pin; breadboard dışında, USB ile beslenir)",
+  "1 × ACS712 akım sensörü (5 A)",
+  "1 × 10 kΩ direnç (gerilim bölücü)",
+  "1 × 20 kΩ direnç (gerilim bölücü)",
+  "1 × 4 kanallı röle modülü (breadboard dışında)",
+  "4 × ampul (5 V, rölelerle yönetilen yükleri temsil eder; breadboard dışında)",
+  "Jumper kablolar (24 adet)"
+ ],
+ "wiring": [
+  [
+   "ESP32 VIN",
+   "Alttaki artı (+) rayı (5 V): ACS712 VCC, röle modülü VCC ve rölelerin COM uçları"
+  ],
+  [
+   "ESP32 GND",
+   "Alttaki eksi (−) rayı: ACS712 GND, röle modülü GND, bölücü direnci ve ampul uçları"
+  ],
+  [
+   "ESP32 IO34",
+   "10 kΩ + 20 kΩ gerilim bölücünün orta noktası (ACS712 OUT)"
+  ],
+  [
+   "ESP32 IO26, IO27, IO32, IO33",
+   "Röle modülü IN1, IN2, IN3, IN4"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: ESP32'nin USB kablosu takılı olmasın. Röle uçlarına şebeke gerilimi (220 V) bağlama: bu projede yalnızca 5 V'luk ampuller vardır.",
+  "ESP32 breadboard dışındadır ve takılı değildir; kart USB ile beslenir. ESP32 GND → alttaki eksi (−) rayı, ESP32 VIN → alttaki artı (+) rayı (5 V).",
+  "ACS712'yi a4 (VCC), a5 (OUT), a6 (GND) deliklerine tak. e4 → artı rayı, e6 → eksi rayı. ACS712'nin çıkışı yaklaşık 2,5 V merkezli ve 5 V'a kadar çıkar; ESP32 girişi 3,3 V'u aşmamalıdır.",
+  "Gerilim bölücü: 10 kΩ direnci d1 ile d5 arasına tak (d5, OUT ile aynı sütun), 20 kΩ direnci dikey olarak e1 ile h1 arasına tak, j1 → eksi rayı. Bölücünün orta noktası (a1) → ESP32 IO34. Çıkış 5 V × 20 / 30 ≈ 3,3 V'a iner.",
+  "4 kanallı röle modülü ve 4 ampul breadboard dışında, takılı değil: modül VCC → artı rayı, GND → eksi rayı; IN1 → IO26, IN2 → IO27, IN3 → IO32, IN4 → IO33. Her kanalın COM ucu artı rayına, NO ucu ampulün bir ucuna, ampulün diğer ucu eksi rayına kablolanır.",
+  "Gerçek sistemde ACS712'nin IP+ ve IP− güç terminalleri (simülatörde yoktur) ölçülecek yükün besleme hattına seri girer; bu devrede tüm yüklerin ortak besleme hattı sensörden geçecek şekilde bağlanmalıdır.",
+  "Kodu Arduino IDE'de \"ESP32 Dev Module\" seçerek yükle, kodun başındaki Wi-Fi adı ve parolayı kendi ağınla değiştir. Simülatörde bu kod ÇALIŞTIRILAMAZ; yalnızca devre görüntüsü ve seviye denetimi yapılır."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "ACS712 5 A modelinde 185 mV/A verir; çıkış akım yokken VCC/2 (≈ 2,5 V) civarındadır. Çıkış 5 V'a çıkabildiği için 10 kΩ ve 20 kΩ'luk bölücüyle ESP32'nin 3,3 V'luk ADC girişine uygun hale getirilir; kodda BOLUCU = 1,5 ile gerilim eski değerine çevrilir. sensorGerilimi() 64 okumanın ortalamasını alır (analogReadMilliVolts, ADC kalibrasyonlu mV değeri verir). Açılışta tüm yükler kapalıyken ölçülen gerilim 'sıfır akım gerilimi' olarak saklanır; akım = |gerilim − sıfır| / 0,185 A bulunur. Röle modülü 'LOW'da çeker' tiptedir: roleYaz() açmak için LOW yazar. Saniyede bir akım ölçülür; AKIM_SINIRI (1,5 A) aşılırsa en büyük numaralı açık yük kapatılır (öncelik: yük 1 en önemli). WebServer.h ile ESP32 kendi web sayfasını sunar: sayfa toplam akımı ve yük durumlarını gösterir, 'degistir' bağlantısı /role?no=..&durum=.. isteğiyle röleyi değiştirir. ACS712 doğru akım içindir; alternatif akımda (ev şebekesi) tepe/etkin değer hesabı gerekir, bu kod bunu yapmaz."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde ESP32 \"güç var · çalıştırılamaz\" durumundadır: USB beslemesiyle VIN ≈ 5 V ve 3V3 ≈ 3,3 V verir. MakersHub doğrulayıcısı hiçbir uyarı vermedi: IO34 5 V'a değil gerilim bölücünün orta noktasına bağlı, röle modülü 5 V ile beslenen VIN rayında, ortak GND var. Uno ile doğrulanan kısım (Wi-Fi'siz akım ölçme ve yük atma mantığı; ACS712 → A0, 4 kanallı röle → D4–D7, aynı eşik 1,5 A): açılışta sıfır akım gerilimi 2,502 V ölçüldü ve dört yük sırayla açıldı (röleler çekti). Akım kaydırıcısı 0,6 A iken Seri Monitör \"Akim: 0.58 A\" yazdı; 2,0 A yapılınca \"Akim: 1.98 A\" ve ardından saniye arayla \"Sinir asildi: yuk 4 kapatildi\", \"Sinir asildi: yuk 3 kapatildi\" yazıldı ve ilgili röleler bıraktı; akım 1,0 A'e çekilince (\"Akim: 0.98 A\") yük atma durdu. Simülatörde ACS712 akımı kaydırıcıdan verilir; rölelerin kapanması akımı kendiliğinden azaltmaz. Wi-Fi, web sayfası ve ESP32'nin ADC okuması gözlenemedi. Gerçek donanımda doğrulanmadı."
+  ],
+  [
+   "Simülatör sınırı",
+   "ESP32, Wi-Fi, web sunucusu ve analogReadMilliVolts() simülatörde ÇALIŞTIRILAMAZ. Uno sürümü yalnızca ölçme ve yük atma mantığını doğrular: Uno'nun ADC'si 10 bit ve 5 V referanslıdır, ESP32'ninki 12 bit, 3,3 V ve doğrusal değildir (kenar değerlere yakın hatalıdır); bu yüzden gerçek ESP32'de sıfır akım gerilimi ve bölücü katsayısı ölçülerek ayarlanmalıdır. ACS712 simülatörde yalnızca akım kaydırıcısından değer verir, IP+/IP− güç yolu yoktur. Röle modülünün 3,3 V mantıkla çekip çekmediği modüle bağlıdır; bazı modüller 5 V ister. ESP32 sketch'i (Arduino-ESP32 çekirdeği) simülatörde ÇALIŞTIRILAMAZ: simülatör ESP32'yi yalnızca çizer, besleme ve gerilim seviyesini denetler. Sitedeki kod gerçek donanımda doğrulanmadı; Arduino IDE'ye ESP32 kart paketi (Espressif) kurulup kendi kartında denenmelidir. Sitedeki 'Derle' hizmeti AVR (Uno) içindir; ESP32 başlıklarını (WiFi.h, esp_camera.h vb.) tanımaz ve bu sketch'te hata verir. Kodu Arduino IDE'de ESP32 kart seçerek derle."
+  ],
+  [
+   "Güç ve GND",
+   "ESP32 GPIO'ları 3,3 V mantıklıdır: ACS712 çıkışını bölücüsüz IO34'e bağlama; ACS712'yi 3,3 V ile beslemek yerine 5 V ile beslemek (VIN) ve bölücü kullanmak gerekir. Röle modülünün VCC'si 5 V'tur (VIN), COM uçları da 5 V rayından beslenir; GND hepsi ortak olmalıdır. ÖNEMLİ GÜVENLİK: Röle modülü şebeke (220 V) gerilimini anahtarlayabilir, ama bu çok tehlikelidir: ölümcül elektrik çarpmasına ve yangına yol açabilir. Şebekeye bağlı hiçbir devreyi yetişkin ve elektrik bilgisi olmayan biri kurmamalıdır; sertifikalı kutu, sigorta ve yalıtım şarttır. Bu projeyi yalnızca düşük gerilimli ampul ve LED'lerle dene. ACS712 şebeke akımını ölçerken sensörün yüksek gerilimli tarafı da yalıtımsız kalmamalıdır."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "ACS712 çıkışını bölücüsüz ESP32'ye vermek (ADC girişine 5 V binmesi pini bozar); sıfır akım gerilimini yüklerin açıkken ölçmek (sürekli yanlış akım okunur); ADC2 pinlerini Wi-Fi açıkken analog okumak (çalışmaz; IO34 ADC1 olduğu için seçildi); röle modülünün LOW'da çektiğini unutup ters mantık yazmak; şebeke gerilimi ile deneme yapmak."
+  ],
+  [
+   "Dene",
+   "AKIM_SINIRI değerini 1,0 A yap; yük önceliğini değiştir (yük 4 en önemli olsun); akımı Wi-Fi yerine her saniye Seri Monitör'e CSV olarak yazdır ve bir tabloda çizdir."
+  ]
+ ],
+ "free": [
+  "esp1",
+  "rl1",
+  "bulb1",
+  "bulb2",
+  "bulb3",
+  "bulb4"
+ ]
+}

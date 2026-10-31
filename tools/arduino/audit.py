@@ -15,7 +15,7 @@ mark = '--mark-ready' in sys.argv
 idx_path = f'{SITE}/assets/arduino/index.json'
 idx = json.load(open(idx_path, encoding='utf-8'))
 by = {p['id']: p for p in idx['projects']}
-ids = args[0].split(',') if args else sorted(f[:-5] for f in os.listdir(f'{HERE}/out/facts') if f.endswith('.json'))
+ids = args[0].split(',') if args else sorted(f[:-5] for f in os.listdir(f'{HERE}/out/facts') if f.endswith('.json') and '--uno' not in f)
 
 def ohms(txt):
     m = re.search(r'(\d+(?:,\d+)?)\s*([kM]?)\s*Ω', txt)
@@ -28,7 +28,8 @@ def classify(t):
     if 'pasif buzzer' in l: return 'passivebuzzer'
     if 'aktif buzzer' in l: return 'buzzer'
     if re.search(r'Ω\s*direnç', t): return 'resistor'
-    for k, typ in [('ir sensör dizisi', 'irarray'), ('ir çizgi', 'irarray'), ('ir alıcı', 'irreceiver'), ('mpu6050', 'mpu6050'), ('enkoderli', 'encmotor'), ('esp8266', 'esp8266'), ('esp-01', 'esp8266'),
+    for k, typ in [('esp32-?cam', 'esp32cam'), ('esp32', 'esp32'), ('ov7670', 'ov7670'), ('a4988', 'a4988'), ('step motor', 'stepper'), ('lazer', 'laser'), ('alev', 'flame'), ('ses tanıma', 'voicerec'), ('tfmini', 'tfmini'),
+                   ('ir sensör dizisi', 'irarray'), ('ir çizgi', 'irarray'), ('ir alıcı', 'irreceiver'), ('mpu6050', 'mpu6050'), ('enkoderli', 'encmotor'), ('esp8266', 'esp8266'), ('esp-01', 'esp8266'),
                    ('dht22', 'dht22'), ('bme280', 'bme280'), ('pn532', 'pn532'), ('tcs3200', 'tcs3200'), ('ds18b20', 'ds18b20'), ('güneş paneli', 'solarpanel'), ('hc-05', 'hc05'), ('l298n', 'l298n'), ('joystick', 'joystick'), ('rc522', 'rc522'), ('sd kart', 'sdcard'), ('ds3231', 'ds3231'), ('neo-6m', 'neo6m'),
                    ('nrf24', 'nrf24'), ('4 kanallı röle', 'relay4'), ('as608', 'as608'), ('hx711', 'hx711'), ('mq-135', 'mq135'), (r'mq-2\b', 'mq2'), ('sw-420', 'sw420'),
                    ('acs712', 'acs712'), ('ses sensörü', 'soundsensor'), ('ampul', 'bulb'), ('potansiyometre', 'pot'), ('rgb', 'rgbled'), (r'\bldr\b', 'ldr'), ('lm35', 'lm35'), ('dht11', 'dht11'), ('hc-sr04', 'hcsr04'), ('ttp223', 'ttp223'),
@@ -54,6 +55,7 @@ for i in ids:
     if not os.path.exists(sp): errs.append('site JSON yok (python3 make_site.py)')
     if errs: results[i] = (errs, warns); continue
     f = json.load(open(fp, encoding='utf-8')); s = json.load(open(sp, encoding='utf-8'))
+    ESP = bool(f.get('esp32'))
     # (1) parça sayıları
     want, wres, wires_n, has_bb = {}, {}, None, False
     for t in s['parts']:
@@ -94,8 +96,10 @@ for i in ids:
             if not re.search(r"takılı değil|breadboard dışında", txt0): errs.append("(4) serbest parçalar (breadboard dışı) metinde açıklanmamış ('takılı değil' / 'breadboard dışında')")
     # (5) simülatör
     FLY = "Diyot ters bağlı: anot GND'ye (veya katot 5V'a) gidiyor, akım geçirmez."
-    vw = [w for w in f['validator']['warnings'] if w != FLY]
-    nfly = len(f['validator']['warnings']) - len(vw)
+    LASER = lambda w: 'GÜVENLİK' in w and 'lazer' in w
+    vw = [w for w in f['validator']['warnings'] if w != FLY and not LASER(w)]
+    if len(vw) != len([w for w in f['validator']['warnings'] if w != FLY]) and not all(k in json.dumps(s, ensure_ascii=False) for k in ('göz', 'gözlük', 'sınıf')): errs.append('lazer: güvenlik notunda göz/gözlük/sınıf ifadeleri yok')
+    nfly = len([w for w in f['validator']['warnings'] if w == FLY])
     if nfly:  # MakersHub yanlış alarmı: yalnızca güç yolu denetimi diyot yönünü doğruladıysa ve diyot sayısı kadar kabul edilir
         if f.get('powerIssues') or nfly > f['counts'].get('diode', 0): errs.append("(5) 'Diyot ters bağlı' uyarısı yanlış alarm olarak kabul edilemedi (güç yolu hatası ya da diyot sayısından fazla)")
         else: warns.append(f"MakersHub yanlış alarmı kabul edildi ({nfly}): doğru bağlı ters (flyback) diyot 'ters bağlı' uyarısı alıyor; ekran görüntüsünde çerçeve gizlenir, notlarda belirtilmeli")
@@ -106,16 +110,22 @@ for i in ids:
         allowed = [w for w in r['warnings'] if 'gerçek ağ yok' in w]
         r = dict(r, warnings=[w for w in r['warnings'] if w not in allowed])
         if allowed and not any(n[0].startswith('Simülatör sınırı') for n in s['notes']): errs.append("sim:false uyarısı için notlarda 'Simülatör sınırı' yok")
+    if ESP: r = dict(r, warnings=[w for w in r['warnings'] if 'çalıştırılamaz' not in w and 'ESP32' not in w and 'OV7670' not in w], diagnostics=[])
     if r['warnings'] or r['shorted'] or r['overcurrent'] or r['lcdProblem'] or r['diagnostics']: errs.append(f'(5) simülatör uyarısı: {r}')
-    if not (f['serial'] or f['toneLog'] or f['buzLog'] or f['ledLog'] or any(f['lcd'].values())): errs.append('(5) gözlenen davranış yok (seri/ton/buzzer/LED/LCD boş)')
+    if ESP:
+        if by[i].get('sim') is not False: errs.append("ESP32 projesi: index.json'da sim:false yok")
+        if not any(n[0].startswith('Simülatör sınırı') for n in s['notes']): errs.append("ESP32 projesi: notlarda 'Simülatör sınırı' yok")
+        if 'gerçek donanımda doğrulanmadı' not in json.dumps(s, ensure_ascii=False): errs.append("ESP32 projesi: 'gerçek donanımda doğrulanmadı' ifadesi yok")
+        if f['runtime'].get('error') or f['runtime'].get('diagnostics'): pass
+    if not ESP and not (f['serial'] or f['toneLog'] or f['buzLog'] or f['ledLog'] or any(f['lcd'].values())): errs.append('(5) gözlenen davranış yok (seri/ton/buzzer/LED/LCD boş)')
     if f.get('powerIssues'): errs.append(f"güç yolu: {f['powerIssues']}")
     # bağlantı tablosu == Uno pinleri
     wt = set()
     for pin, _ in s['wiring']: wt |= pin_tokens(pin)
-    if wt != set(f['unoPins']): errs.append(f"bağlantı tablosundaki Arduino pinleri {sorted(wt)} != devredekiler {f['unoPins']}")
+    if f.get('hasUno', True) and wt != set(f['unoPins']): errs.append(f"bağlantı tablosundaki Arduino pinleri {sorted(wt)} != devredekiler {f['unoPins']}")
     # kod
     doc = json.load(open(f'{HERE}/out/docs/{i}.json', encoding='utf-8'))
-    if doc['sketch'].rstrip() + '\n' != s['code']: errs.append('site kodu simülatörde koşulan sketch ile aynı değil')
+    if not ESP and doc['sketch'].rstrip() + '\n' != s['code']: errs.append('site kodu simülatörde koşulan sketch ile aynı değil')
     nocomment = re.sub(r'//.*', '', s['code']); nostr = re.sub(r'"[^"]*"', '""', nocomment)
     if re.search(r'[ÇĞİÖŞÜçğıöşü]', nostr): errs.append('kodda Türkçe harfli tanımlayıcı var')
     for m in re.finditer(r'lcd\.print\("([^"]*)"\)', s['code']):
@@ -128,7 +138,7 @@ for i in ids:
     img = f"{SITE}/{s['img']}"
     if not os.path.exists(img) or os.path.getsize(img) < 20000: errs.append('görüntü yok ya da çok küçük')
     alltxt = json.dumps(s, ensure_ascii=False)
-    if f['validator']['warnings'] and not re.search(r'yanlış (uyarı|alarm)', alltxt): errs.append("MakersHub'ın yanlış 'ters bağlı' uyarısı notlarda açıklanmamış ('yanlış uyarı' ifadesi yok)")
+    if [w for w in f['validator']['warnings'] if not LASER(w)] and not re.search(r'yanlış (uyarı|alarm)', alltxt): errs.append("MakersHub'ın yanlış 'ters bağlı' uyarısı notlarda açıklanmamış ('yanlış uyarı' ifadesi yok)")
     if re.search(r'gerçek kartta (denendi|test edildi|çalıştırıldı)', alltxt): errs.append('doğrulanamaz ifade: gerçek kartta denendi')
     if 'denendi' in alltxt and 'gerçek kartta denenmedi' not in alltxt: warns.append("'denendi' geçiyor: simülatörde denendiği açık yazılmış mı kontrol et")
     # adımlarda pin anılıyor mu (uyarı)

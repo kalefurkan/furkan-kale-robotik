@@ -14,8 +14,8 @@ export class Builder {
   wires: any[] = [];
   private wn = 0;
   readonly bbc: any;
-  constructor(opts: { bbX?: number } = {}) {
-    this.comps.push(this.raw("uno", "uno", 24, 24));
+  constructor(opts: { bbX?: number; noUno?: boolean } = {}) {
+    if (!opts.noUno) this.comps.push(this.raw("uno", "uno", 24, 24));
     this.bbc = this.raw("bb", "breadboard", opts.bbX ?? 360, 24);
     this.comps.push(this.bbc);
   }
@@ -72,7 +72,9 @@ export interface Project {
   /** sketches/ altındaki .ino dosyası (uzantısız ad) */
   sketch: string;
   /** Builder seçenekleri (örn. breadboard x konumu) */
-  builder?: { bbX?: number };
+  builder?: { bbX?: number; noUno?: boolean };
+  /** ESP32 ailesi projeleri: simülatörde çalıştırılamaz. Devre görüntüsü + pin/güç denetimi yapılır; doc.sketch yerine boş bir kısa taslak konur, `sketch` sitedeki ESP32 kodudur. */
+  esp32?: boolean;
   build(b: Builder): void;
   /** node tarafı doğrulama: sanal süre ve zamanlı girdi değişiklikleri */
   sim: { runMs: number; events?: { t: number; set: Record<string, Record<string, any>> }[]; sampleMs?: number };

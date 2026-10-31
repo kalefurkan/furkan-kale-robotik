@@ -1,0 +1,83 @@
+{
+ "parts": [
+  "Arduino Uno yoktur: bu projede mikrodenetleyici ESP32'dir",
+  "Breadboard",
+  "1 × ESP32 DevKit (30 pin; breadboard dışında, USB ile beslenir)",
+  "1 × DHT22 sıcaklık ve nem sensörü",
+  "1 × LDR (ışık sensörü)",
+  "1 × PIR hareket sensörü (HC-SR501)",
+  "2 × 10 kΩ direnç (LDR bölücüsü ve PIR bölücüsü)",
+  "1 × 20 kΩ direnç (PIR çıkış bölücüsü)",
+  "1 × 4 kanallı röle modülü (breadboard dışında)",
+  "4 × ampul (5 V, rölelerle yönetilen cihazları temsil eder; breadboard dışında)",
+  "Jumper kablolar (31 adet)"
+ ],
+ "wiring": [
+  [
+   "ESP32 3V3",
+   "Üstteki artı (+) rayı (3,3 V): DHT22 VCC ve LDR'nin bir ucu"
+  ],
+  [
+   "ESP32 VIN",
+   "Alttaki artı (+) rayı (5 V): PIR VCC, röle modülü VCC ve rölelerin COM uçları"
+  ],
+  [
+   "ESP32 GND",
+   "Alttaki eksi (−) rayı: tüm sensörlerin GND'si, bölücü dirençleri ve ampul uçları"
+  ],
+  [
+   "ESP32 IO4",
+   "DHT22 DATA"
+  ],
+  [
+   "ESP32 IO34",
+   "LDR + 10 kΩ bölücünün orta noktası"
+  ],
+  [
+   "ESP32 IO13",
+   "PIR OUT bölücüsünün orta noktası"
+  ],
+  [
+   "ESP32 IO26, IO27, IO32, IO33",
+   "Röle modülü IN1, IN2, IN3, IN4"
+  ]
+ ],
+ "img": "assets/devre/iot-kontrollu-akilli-laboratuvar.png",
+ "steps": [
+  "Devreyi enerjisiz kur: ESP32'nin USB kablosu takılı olmasın. Röle uçlarına şebeke gerilimi (220 V) bağlama: bu projede yalnızca 5 V'luk ampuller vardır.",
+  "ESP32 breadboard dışındadır ve takılı değildir; kart USB ile beslenir. ESP32 GND → alttaki eksi (−) rayı, ESP32 VIN → alttaki artı (+) rayı (5 V), ESP32 3V3 → üstteki artı (+) rayı (3,3 V).",
+  "DHT22'yi a4 (VCC), a5 (DATA), a6 (GND) deliklerine tak. e4 → üstteki artı rayı (3,3 V), e6 → eksi rayı, IO4 → e5.",
+  "LDR'yi c10 ve c11 deliklerine tak. e10 → üstteki artı rayı (3,3 V). 10 kΩ direnci dikey olarak e11 ile h11 arasına tak, j11 → eksi rayı. LDR ile direncin orta noktası (a11) → ESP32 IO34. Işık arttıkça orta nokta gerilimi artar.",
+  "PIR'ı a16 (VCC), a17 (OUT), a18 (GND) deliklerine tak. e16 → alttaki artı rayı (5 V), e18 → eksi rayı. PIR çıkışı için gerilim bölücü: 10 kΩ direnci d13 ile d17 arasına (d17, OUT ile aynı sütun), 20 kΩ direnci dikey olarak e13 ile h13 arasına tak, j13 → eksi rayı; bölücünün orta noktası (a13) → ESP32 IO13.",
+  "4 kanallı röle modülü ve 4 ampul breadboard dışında, takılı değil: modül VCC → alttaki artı rayı, GND → eksi rayı; IN1 → IO26, IN2 → IO27, IN3 → IO32, IN4 → IO33. Her kanalın COM ucu artı rayına, NO ucu ampulün bir ucuna, ampulün diğer ucu eksi rayına kablolanır.",
+  "Kodu Arduino IDE'de \"ESP32 Dev Module\" seçerek yükle; \"DHT sensor library\" ve \"Adafruit Unified Sensor\" kütüphanelerini kur; Wi-Fi adı ve parolayı değiştir. Simülatörde bu kod ÇALIŞTIRILAMAZ; yalnızca devre görüntüsü ve seviye denetimi yapılır."
+ ],
+ "code": "// IoT kontrollu akilli laboratuvar (ESP32). SIMULATORDE CALISTIRILAMAZ; gercek donanimda dogrulanmadi.\n// DHT22 (sicaklik, nem), LDR (isik) ve PIR (hareket) okunur; 4 kanalli role modulu 4 cihazi yonetir:\n//   Role 1 = isik   : ortam karanlik VE hareket varsa acilir, hareket bitince 30 saniye sonra kapanir\n//   Role 2 = fan    : sicaklik 28 C'yi gecince acilir, 26 C'nin altina inince kapanir (histerezis)\n//   Role 3, 4       : yalnizca web sayfasindan elle\n// Role 1 ve 2 web sayfasindan elle de degistirilebilir; \"Otomatige don\" ile otomatik moda doner.\n// Gerekli: Arduino IDE + \"esp32\" kart paketi (Espressif) + \"DHT sensor library\" (Adafruit) ve \"Adafruit Unified Sensor\" kutuphaneleri.\n#include <WiFi.h>\n#include <WebServer.h>\n#include <DHT.h>\n\nconst char *AG_ADI = \"AG_ADINIZ\";               // kendi Wi-Fi agina gore degistir\nconst char *PAROLA = \"PAROLANIZ\";\n\nconst int DHT_PIN = 4;\nconst int LDR_PIN = 34;                          // LDR + 10 kOhm bolucunun orta noktasi (isik arttikca gerilim artar)\nconst int PIR_PIN = 13;                          // PIR OUT (10k + 20k bolucu uzerinden)\nconst int ROLE_PIN[4] = {26, 27, 32, 33};        // role modulu IN1..IN4 (modul LOW'da ceker)\nconst int KARANLIK_MV = 1000;                    // bu mV'un altinda ortam karanlik (kendi LDR'ine gore ayarla)\nconst float FAN_ACIK_C = 28.0;\nconst float FAN_KAPALI_C = 26.0;\nconst unsigned long ISIK_SURESI = 30000;\n\nDHT dht(DHT_PIN, DHT22);\nWebServer sunucu(80);\nbool acik[4] = {false, false, false, false};\nbool elle[4] = {false, false, false, false};     // true ise o rolede otomatik devre disi\nfloat sicaklik = 0, nem = 0;\nint isikMv = 0;\nbool hareket = false;\nunsigned long sonHareket = 0;\nunsigned long sonOkuma = 0;\n\nvoid roleYaz(int k, bool ac) {\n  acik[k] = ac;\n  digitalWrite(ROLE_PIN[k], ac ? LOW : HIGH);    // modul LOW'da ceker\n}\n\nvoid otomatik() {\n  if (!elle[0]) {\n    bool karanlik = (isikMv < KARANLIK_MV);\n    if (hareket) {\n      sonHareket = millis();\n    }\n    bool aktif = (sonHareket != 0) && (millis() - sonHareket < ISIK_SURESI);\n    roleYaz(0, karanlik && aktif);\n  }\n  if (!elle[1]) {\n    if (sicaklik > FAN_ACIK_C) {\n      roleYaz(1, true);\n    } else if (sicaklik < FAN_KAPALI_C) {\n      roleYaz(1, false);\n    }\n  }\n}\n\nvoid anaSayfa() {\n  String s = \"<html><head><meta charset='utf-8'><meta http-equiv='refresh' content='5'></head><body><h2>Akilli laboratuvar</h2><p>Sicaklik: \";\n  s += String(sicaklik, 1);\n  s += \" C, nem: %\";\n  s += String(nem, 0);\n  s += \"</p><p>Isik: \";\n  s += String(isikMv);\n  s += \" mV, hareket: \";\n  s += hareket ? \"var\" : \"yok\";\n  s += \"</p>\";\n  for (int k = 0; k < 4; k++) {\n    s += \"<p>Cihaz \";\n    s += String(k + 1);\n    s += \": \";\n    s += acik[k] ? \"ACIK\" : \"kapali\";\n    s += elle[k] ? \" (elle)\" : \"\";\n    s += \" <a href='/role?no=\";\n    s += String(k + 1);\n    s += \"&durum=\";\n    s += acik[k] ? \"0\" : \"1\";\n    s += \"'>degistir</a> <a href='/otomatik?no=\";\n    s += String(k + 1);\n    s += \"'>otomatige don</a></p>\";\n  }\n  s += \"</body></html>\";\n  sunucu.send(200, \"text/html\", s);\n}\n\nvoid roleIstegi() {\n  int no = sunucu.arg(\"no\").toInt();\n  if (no >= 1 && no <= 4) {\n    elle[no - 1] = true;\n    roleYaz(no - 1, sunucu.arg(\"durum\").toInt() == 1);\n  }\n  sunucu.send(200, \"text/html\", \"<html><head><meta http-equiv='refresh' content='0;url=/'></head></html>\");\n}\n\nvoid otomatigeDon() {\n  int no = sunucu.arg(\"no\").toInt();\n  if (no >= 1 && no <= 4) {\n    elle[no - 1] = false;\n  }\n  sunucu.send(200, \"text/html\", \"<html><head><meta http-equiv='refresh' content='0;url=/'></head></html>\");\n}\n\nvoid durumJson() {                               // baska bir IoT sistemi icin makine okunur durum\n  String s = \"{\\\"sicaklik\\\":\";\n  s += String(sicaklik, 1);\n  s += \",\\\"nem\\\":\";\n  s += String(nem, 0);\n  s += \",\\\"isik_mv\\\":\";\n  s += String(isikMv);\n  s += \",\\\"hareket\\\":\";\n  s += hareket ? \"true\" : \"false\";\n  s += \"}\";\n  sunucu.send(200, \"application/json\", s);\n}\n\nvoid setup() {\n  Serial.begin(115200);\n  dht.begin();\n  pinMode(PIR_PIN, INPUT);\n  analogSetPinAttenuation(LDR_PIN, ADC_11db);\n  for (int k = 0; k < 4; k++) {\n    pinMode(ROLE_PIN[k], OUTPUT);\n    roleYaz(k, false);\n  }\n  WiFi.mode(WIFI_STA);\n  WiFi.begin(AG_ADI, PAROLA);\n  unsigned long t0 = millis();\n  while (WiFi.status() != WL_CONNECTED && millis() - t0 < 15000) {\n    delay(500);\n  }\n  Serial.print(\"Adres: \");\n  Serial.println(WiFi.localIP().toString());\n  sunucu.on(\"/\", anaSayfa);\n  sunucu.on(\"/role\", roleIstegi);\n  sunucu.on(\"/otomatik\", otomatigeDon);\n  sunucu.on(\"/durum\", durumJson);\n  sunucu.begin();\n}\n\nvoid loop() {\n  sunucu.handleClient();\n  hareket = (digitalRead(PIR_PIN) == HIGH);\n  if (millis() - sonOkuma >= 2000) {             // DHT22 en az 2 saniyede bir okunabilir\n    sonOkuma = millis();\n    float t = dht.readTemperature();\n    float h = dht.readHumidity();\n    if (!isnan(t) && !isnan(h)) {\n      sicaklik = t;\n      nem = h;\n    }\n    isikMv = analogReadMilliVolts(LDR_PIN);\n    Serial.print(\"T=\");\n    Serial.print(sicaklik, 1);\n    Serial.print(\" nem=\");\n    Serial.print(nem, 0);\n    Serial.print(\" isik=\");\n    Serial.print(isikMv);\n    Serial.print(\" mV hareket=\");\n    Serial.println(hareket ? \"var\" : \"yok\");\n  }\n  otomatik();\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "loop() sürekli sunucu.handleClient() ile web isteklerini yanıtlar, PIR'ı okur ve her 2 saniyede bir DHT22 ile LDR'yi okur (DHT22 daha sık okunamaz). otomatik() rölelere karar verir. Işık (röle 1): LDR bölücüsünün gerilimi 1000 mV'un altındaysa ortam karanlıktır; PIR hareket görürse zaman damgası güncellenir ve ışık, karanlıkken son harekette 30 saniye boyunca açık kalır. Fan (röle 2) iki eşiklidir (histerezis): sıcaklık 28 °C'yi geçince açılır, 26 °C'nin altına inince kapanır; böylece sınırda sürekli aç-kapa yapmaz. Röle 3 ve 4 yalnızca elle yönetilir. Web sayfası değerleri ve cihaz durumlarını gösterir; \"/role?no=1&durum=1\" isteği bir cihazı elle açar ve o cihazın otomatiğini devre dışı bırakır; \"/otomatik?no=1\" otomatiğe geri döndürür. \"/durum\" adresi sensör değerlerini JSON olarak verir (başka bir IoT sisteminin okuması için). Röle modülü 'LOW'da çeker' tiptedir. PIR çıkışı 3,3 V'luk bir sinyal olsa bile gerilim bölücüyle ESP32 girişi korunur."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde ESP32 \"güç var · çalıştırılamaz\" durumundadır: USB beslemesiyle VIN ≈ 5 V ve 3V3 ≈ 3,3 V verir. MakersHub doğrulayıcısı hiçbir hata ya da uyarı vermedi. İlk kurulumda PIR çıkışı bölücüsüz IO13'e bağlandığında doğrulayıcı \"5 V ile beslenen bir sensörün çıkışı 3,3 V'u aşabilir\" uyarısı verdi; PIR OUT'a 10 kΩ + 20 kΩ bölücü eklenince uyarı kayboldu (gerçek HC-SR501'in çıkışı genellikle 3,3 V'tur, bölücü ek güvence ve kurulumdaki en güvenli seçenektir). DHT22 ve LDR 3,3 V ile beslendi, röle modülü ve PIR 5 V (VIN) ile beslendi, ortak GND var. Sensör okumaları, röleler, Wi-Fi ve web sayfası gözlenemedi; Uno ile ayrıca denenen bir kısım bu projede yoktur. Gerçek donanımda doğrulanmadı."
+  ],
+  [
+   "Simülatör sınırı",
+   "ESP32, Wi-Fi ve WebServer simülatörde ÇALIŞTIRILAMAZ; sensör değerleri, röle çekmesi, otomatik kurallar ve web sayfası hiç denenmedi. DHT22'nin gerçek zamanlaması, PIR'ın ısınma süresi (yaklaşık 1 dakika) ve LDR'nin ortama bağlı eşiği (1000 mV kendi LDR'ine göre ayarlanmalı) kodda yaklaşık değerlerdir. Web sayfası kimlik doğrulamasızdır: yalnızca yerel ağda kullan ya da parolayla koru; internete açma. Bu proje bir laboratuvar güvenlik sistemi değildir. ESP32 sketch'i (Arduino-ESP32 çekirdeği) simülatörde ÇALIŞTIRILAMAZ: simülatör ESP32'yi yalnızca çizer, besleme ve gerilim seviyesini denetler. Sitedeki kod gerçek donanımda doğrulanmadı; Arduino IDE'ye ESP32 kart paketi (Espressif) kurulup kendi kartında denenmelidir. Sitedeki 'Derle' hizmeti AVR (Uno) içindir; ESP32 başlıklarını (WiFi.h, esp_camera.h vb.) tanımaz ve bu sketch'te hata verir. Kodu Arduino IDE'de ESP32 kart seçerek derle."
+  ],
+  [
+   "Güç ve GND",
+   "ESP32 GPIO'ları 3,3 V mantıklıdır: PIR'ın 5 V ile beslenen çıkışını bölücüsüz ESP32'ye bağlama. DHT22 ve LDR bölücüsü 3,3 V'tan beslenir (ESP32'nin 3V3 pini); PIR ve röle modülü 5 V'tan (VIN) beslenir. Tüm GND'ler ortak olmalıdır. ÖNEMLİ GÜVENLİK: Röle modülü şebeke (220 V) gerilimini anahtarlayabilir, ama bu çok tehlikelidir: ölümcül elektrik çarpmasına ve yangına yol açabilir. Şebekeye bağlı hiçbir devreyi yetişkin ve elektrik bilgisi olmayan biri kurmamalıdır; sertifikalı kutu, sigorta ve yalıtım şarttır. Bu projeyi yalnızca düşük gerilimli ampul ve LED'lerle dene. Fan gibi motorlu bir yükü röleyle sürerken yüke uygun ters diyot ve sigorta kullan."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "PIR çıkışını bölücüsüz ESP32'ye bağlamak; PIR'ı ısınmadan denemek; ADC2 pinlerini (IO4, IO12–15, IO25–27, IO0, IO2) Wi-Fi açıkken analog okumak (çalışmaz; LDR için ADC1'deki IO34 seçildi); histerezis koymayıp fanın sürekli aç-kapa yapması; röle modülünün LOW'da çektiğini unutmak; şebeke gerilimi ile deneme yapmak."
+  ],
+  [
+   "Dene",
+   "Fan eşiklerini 25 ve 27 °C yap; ışık süresini 10 saniyeye düşür; /durum JSON'unu başka bir cihazdan (ör. telefon uygulaması) okuyan bir sayfa yaz; röle 3'e zamanlayıcı ekle."
+  ]
+ ],
+ "title": "98. IoT Kontrollü Akıllı Laboratuvar"
+}

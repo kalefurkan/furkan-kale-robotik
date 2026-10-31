@@ -1,0 +1,103 @@
+{
+ "sketch": "tarim_robotu",
+ "d": "Tekerlekli robot bitki sırası boyunca ilerler, her bitkinin yanında durup toprak nem sensörüyle nemi ölçer; toprak kuruysa transistörle sürülen mini pompayı iki saniye çalıştırır, nemliyse geçer. Sürücüyle motor kontrolünü, analog sensörü yüzdeye çevirmeyi, pompayı transistör ve ters diyotla güvenle sürmeyi ve durum makinesi mantığını öğrenirsin. Simülatörde nem değeri sensörün kaydırıcısıyla verilir; robot ve su gerçek değildir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × toprak nem sensörü",
+  "1 × L298N motor sürücü",
+  "3 × DC motor (2 tanesi robotun sol ve sağ tekerleği; 1 tanesi mini su pompasını temsil eder, pompa breadboard dışındadır)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "1 × NPN transistör (BC547 ya da 2N2222; pompa sürücüsü)",
+  "1 × 1 kΩ direnç (transistör tabanı)",
+  "1 × 1N4007 diyot (pompa için ters diyot)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur); su deposu ve pompaya bağlı hortum (devre dışı mekanik parça)",
+  "Jumper kablolar (24 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: L298N 5V ucu ve diğer modüllerin VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: L298N GND ve diğer modüllerin GND'si"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ],
+  [
+   "D11",
+   "1 kΩ direnç → NPN transistör tabanı (pompa)"
+  ],
+  [
+   "A0",
+   "Toprak nem sensörü OUT"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun. Su ve elektrik birlikte tehlikelidir: elektronik parçaları ve breadboard'u sudan uzak tut.",
+  "L298N ve motorlar için ortak kurulum: L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola. Motorların ve Arduino'nun GND'si ortak olmalı: d5 → eksi rayı. e6 → artı rayı: bu bağlantıyla L298N'in mantık devresi Arduino'nun 5V'unu kullanır; kartın üzerindeki 5V jumper'ını çıkar.",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Pompa sürücüsü: NPN transistörü a20 (C), a21 (B), a22 (E) deliklerine tak. 1 kΩ direnci d21 ile d25 arasına, 1N4007 diyodu c20 (anot) ile c24 (katot) arasına tak. D11 → e25, e22 → eksi rayı (emitör GND). Diyodun çizgili ucu (katot) güç tarafına (c24) gelmeli.",
+  "Motorlar (breadboard dışında, takılı değil): sol motor için e13, e14 (OUT1, OUT2); sağ motor için e15, e16 (OUT3, OUT4). Pompa (breadboard dışında, takılı değil): bir ucu e20'ye (transistörün kollektörü), öbür ucu e24'e kablola. Pompanın + beslemesi: a24 → d4 (L298N 12V ucuyla aynı 6 V kaynak şeridi).",
+  "Toprak nem sensörünü a27 (VCC), a28 (OUT), a29 (GND) deliklerine tak. e27 → artı rayı, A0 → e28, e29 → eksi rayı.",
+  "Gerçek robotta nem probunu bitkinin köküne sapla, hortumun ucunu bitkinin üstüne tut; kalan sensör kısmı ve elektronik su sıçramasından korunmalı.",
+  "Kodu yükle (simülatörde çalıştır): robot iki saniye ilerleyip durur, nemi ölçer. Sensörü kurak ayarlayınca (%35'in altı) pompa iki saniye çalışır; nemli ayarlayınca \"yeterli, gec\" yazılır."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "loop() her bitki için aynı adımları sırayla yapar: motor(HIZ, HIZ) ile iki saniye ilerle, motorları durdur, yarım saniye bekleyip robotun oturmasını sağla, nemYuzde() ile nemi ölç. Toprak nem sensöründe nem artınca okunan değer düşer; ham değer KURU (921) ve ISLAK (256) kalibrasyon sayıları arasında map() ile yüzdeye çevrilir ve 5 ölçümün ortalaması alınır (gürültüyü azaltır). Yüzde ESIK (35) değerinin altındaysa D11 HIGH olur; 1 kΩ direnç transistörün tabanını sürer, transistör pompanın akımını açar. Pompa bir motor olduğu için kapanınca bobininden ters gerilim doğar; ters diyot bu gerilimi güvenle boşaltır ve transistörü korur. İki saniye sulandıktan sonra pompa kapanır ve robot sonraki bitkiye gider. Üç bitki bittiğinde robot durur."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Tarim robotu hazir\" yazıldı; iki motor ilk iki saniye ileri döndü (yaklaşık %37 hız). Robot durunca 2,6. saniyede \"Bitki 1: nem %15 -> kuru, pompa acik\" yazıldı ve pompa motoru yaklaşık %90 hızla çalıştı (yaklaşık 180 mA); iki saniye sonra \"sulama bitti\" yazıldı ve pompa durdu. Robot ikinci bitkiye gitti; 6. saniyede nem %75 yapıldığı için 7,7. saniyede \"Bitki 2: nem %75 -> yeterli, gec\" yazıldı ve pompa çalışmadı. Üçüncü bitkide nem %30 olarak ayarlandığı için \"Bitki 3: nem %30 -> kuru, pompa acik\" yazıldı ve pompa iki saniye çalıştı. En sonda \"Sira bitti: robot bekliyor\" yazıldı. Sensör değerleri verilen yüzdelerle birebir çıktı. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Robot simülatörde ilerlemez; bitki, su, hortum ve pompanın gerçek debisi yoktur, nem değeri kaydırıcıdan verilir ve sulamanın nemi artırmasını simülatör göstermez. Gerçek toprak nem sensörleri (özellikle ucuz dirençli probe) çok kısa sürede paslanır; kalibrasyon sayıları (921 ve 256) her sensör ve toprak için kendin ölçülmelidir. İki saniyelik sulama süresi pompaya, hortuma ve toprağa göre denemeyle ayarlanır; sulamadan hemen sonra toprak nemi artmaz, suyun yayılması zaman alır. Bu sketch ek bir kütüphane kullanmaz; yalnızca Arduino çekirdek işlevleri vardır."
+  ],
+  [
+   "Güç ve GND",
+   "Pompa ve motorlar Arduino'nun 5V pininden beslenmez: ayrı güç kaynağından gelir; güç kaynağının GND'si Arduino GND'siyle ortak olmalı. Pompayı doğrudan Arduino pinine bağlama: pin yalnızca yaklaşık 20 mA verebilir; transistör şarttır. Ters diyot yönü önemlidir: çizgili uç (katot) + tarafına bakar. Güvenlik: su ve elektriği ayır; pompa, kablo ve breadboard su sıçramasından uzak ve kapalı bir kutuda olsun; devreyi şebekeye bağlama, yalnızca düşük gerilimli (6 V) pil kutusu kullan; pil kutusunu kısa devre yapma; kablolar ısınırsa enerjiyi hemen kes. Mini dalgıç pompayı hiçbir zaman susuz çalıştırma."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Pompayı transistör ve ters diyot olmadan sürmek (pin yanar); diyodu ters takmak (kısa devre ya da pompa çalışmaz); transistör bacaklarını (C, B, E) karıştırmak; sulama sonrası ölçümü beklemeden tekrar sulamak (toprak su basar); nem kalibrasyonunu yapmamak; sensör probunu sürekli ıslak bırakıp paslandırmak; motor sürücü GND'sini Arduino GND'sine bağlamamak."
+  ],
+  [
+   "Dene",
+   "Eşiği (ESIK) 50 yap ve hangi bitkilerin sulandığına bak; sulama süresini 1 saniyeye düşürüp sulama sonrası ikinci ölçüm ekle (hâlâ kuruysa tekrar sula); bitki sayısını 5'e çıkar."
+  ]
+ ],
+ "free": [
+  "psu1",
+  "m1",
+  "m2",
+  "pump1"
+ ]
+}
