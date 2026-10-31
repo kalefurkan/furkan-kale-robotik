@@ -305,15 +305,15 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <div class="sec-head">
       <div>
         <div class="eyebrow">U1 · İçerikler</div>
-        <h2>Yazılar, videolar ve projeler</h2>
-        <p>Seviyeye ve platforma göre filtrele. Her içerikte devre şeması, malzeme listesi ve kaynak kod var.</p>
+        <h2>Ders üniteleri</h2>
+        <p>2026-2027 yıllık planından: sınıf kademesine göre filtrele, ünite adı, konu ya da araç adıyla ara.</p>
       </div>
     </div>
     <div class="filters" role="toolbar" aria-label="İçerik filtresi">
       <div id="chips" style="display:flex;flex-wrap:wrap;gap:8px"></div>
       <label class="search" for="q">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="search" placeholder="Ara: servo, PID, kamera…" autocomplete="off">
+        <input id="q" type="search" placeholder="Ara: Python, Scratch, algoritma…" autocomplete="off">
       </label>
     </div>
     <div class="posts" id="posts"></div>
@@ -568,38 +568,75 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   if (reduce) { new ResizeObserver(() => draw(0)).observe(cv); }
 
   /* ---------- İçerikler ---------- */
-  const POSTS = [
-    { t: 'Arduino ile ilk servo motorunu sür', d: 'Servo kütüphanesi, PWM mantığı ve potansiyometreyle açı kontrolü. Tek kablo hatasının neden kartı resetlediğini de anlatıyorum.', tag: 'Arduino', lv: 1, min: 8, f: 'Yazı' },
-    { t: 'Engelden kaçan robot: HC-SR04 ile', d: 'Ultrasonik sensörle mesafe ölçüp iki DC motoru L298N üzerinden yönlendiren tam proje. Şema ve 3B baskı dosyaları dahil.', tag: 'Arduino', lv: 1, min: 25, f: 'Proje' },
-    { t: 'PID kontrolü: teoriden koda', d: 'Kp, Ki, Kd ne işe yarar? Bir çizgi izleyen robotun salınımını adım adım ayarlayarak gösteriyorum.', tag: 'Arduino', lv: 3, min: 14, f: 'Video' },
-    { t: 'ESP32 ile Wi-Fi üzerinden robot kontrolü', d: 'ESP32 üzerinde küçük bir web sunucusu kurup telefon tarayıcısından joystick ile robotu sürmek.', tag: 'ESP32', lv: 2, min: 15, f: 'Proje' },
-    { t: 'MPU6050 ile eğim açısı okuma', d: 'İvmeölçer ve jiroskop verisini tamamlayıcı filtreyle birleştirip titremeyen bir açı değeri elde etmek.', tag: 'ESP32', lv: 2, min: 12, f: 'Yazı' },
-    { t: "Raspberry Pi 5'e ROS 2 Jazzy kurulumu", d: 'Ubuntu 24.04 üzerine kurulum, çalışma alanı oluşturma ve sık karşılaşılan colcon hataları.', tag: 'ROS 2', lv: 2, min: 18, f: 'Yazı' },
-    { t: 'İlk ROS 2 düğümün: publisher ve subscriber', d: "Python ile iki düğüm yazıp topic üzerinden sensör verisi aktarmak. rqt_graph ile akışı görselleştirmek.", tag: 'ROS 2', lv: 3, min: 20, f: 'Video' },
-    { t: 'OpenCV ile renk takibi yapan kamera', d: 'HSV maskesiyle bir topu bulup iki servoyla kamerayı onun peşinden döndürmek. Pan-tilt düzeneği dahil.', tag: 'Python', lv: 2, min: 22, f: 'Proje' },
-    { t: "Python'dan Arduino'ya seri haberleşme", d: 'pyserial ile bilgisayardan komut göndermek, gelen veriyi grafiğe dökmek ve bağlantı kopunca toparlamak.', tag: 'Python', lv: 1, min: 10, f: 'Yazı' }
-  ];
-  const TAGS = ['Tümü', 'Arduino', 'ESP32', 'ROS 2', 'Python'];
-  const LV = ['', 'Başlangıç', 'Orta', 'İleri'];
+  const POSTS = [{"g":"5 Yaş","n":"Bilişim Teknolojilerini Tanıyorum","w":6,"s":"1","top":["TANIŞMA VE SINIF KURALLARI","ÇEVREMİZDEKİ TEKNOLOJİK ARAÇLAR","İLETİŞİM ARAÇLARI","BİLGİSAYARI TANIYORUM","HAYATIMIZDA BİLGİSAYAR","BİLGİSAYAR PARÇALARI","DONANIM PARÇALARI","FARE KULLANIMI","ROBOTUMU TASARLIYORUM","İNTERNET DÜNYAMIZ","DİJİTAL DÜNYA"],"tools":[]},
+    {"g":"5 Yaş","n":"Kodlama ve Unplugged Kodlama","w":7,"s":"1","top":["TANGRAM ETKİNLİĞİ","UNPLUGGED KODLAMA","BLOK KODLAMA ARAÇLARI","TALEBOT İLE KODLAMA","TALEBOT İLE 23 NİSAN ETKİNLİK"],"tools":["TaleBot","Code Spark"]},
+    {"g":"5 Yaş","n":"Robotik","w":7,"s":"1","top":["TALEBOT İLE KODLAMA","HOUR OF AI","BİLİŞİM HAFTAMIZ","BASİT MAKİNELER","BASİT MAKİNELER, Spike"],"tools":["SPIKE","TaleBot"]},
+    {"g":"5 Yaş","n":"Master Kids: Yapay Zekâ Okuryazarlığı","w":4,"s":"1","top":["MASTER KİDS - YAPAY ZEKAYI TANIYALIM","MASTER KİDS - YAPAY ZEKA İLE ÇİZİMLER","MASTER KİDS - YAPAY ZEKA İLE MÜZİK ZAMANI","MASTER KİDS - YAPAY ZEKA İLE ANİMASYON","MASTER KİDS - YAPAY ZEKA İLE ARTIRILMIŞ GERÇEKLİK"],"tools":[]},
+    {"g":"5 Yaş","n":"STEM Jr.","w":4,"s":"1","top":["STEM - Scratch Jr.","Scratch Jr. Serbest Etkinlik"],"tools":["Scratch Jr."]},
+    {"g":"5 Yaş","n":"Tasarım Geliştirme","w":3,"s":"1","top":["DİJİTAL TASARIM - ÜRÜN GELİŞTİRME"],"tools":["ABCya"]},
+    {"g":"1. Sınıf","n":"Dijital Dünyada Güvende","w":6,"s":"1","top":["Bilgisayar nedir?","Bilgisayarın parçaları (ekran, kasa, klavye, fare)","Fareyi doğru tutuyorum","Klavye ile yazıyorum","Tablet ve bilgisayar farkı","İnternet nedir?","Güvenli internet (izin almadan tıklamam)","Tanımadığım kişilerle konuşmam","Dijital zorbalık nedir? (hikâye temelli)","Ekran süresi","Güvenli şifre (resimli)","Kişisel bilgiler","İnternette nazik davranma","Siber zorbalık farkındalık","Yardım isteme","Dijital ayak izi (çok basit)"],"tools":[]},
+    {"g":"1. Sınıf","n":"Kodlama Dünyası","w":6,"s":"1","top":["Yönergeler ve sıralama","Günlük hayatta algoritma","Ok yönleri ve hareket","Adım adım düşünme","Labirent etkinlikleri","Hata bulma","Tekrarlı komut kavramı","Bloklarla hareket"],"tools":[]},
+    {"g":"1. Sınıf","n":"Robotik Yolculuğu","w":8,"s":"1","top":["Robotik sistem nedir","Sensör ve motor","Giriş–çıkış mantığı","Robot hareket kontrolü","Temel robot komutları","Engel algılama","Basit robot görevleri","Robot test etme"],"tools":["SPIKE"]},
+    {"g":"1. Sınıf","n":"Yapay Zekâ Okuryazarlığı","w":4,"s":"1","top":["Yapay Zekayı Tanıyorum & Artırılmış Gerçeklik","Dijital Fırça: AI ile Çiziyorum!","AI ile Animasyon : Çizimim Canlanıyor"],"tools":[]},
+    {"g":"1. Sınıf","n":"Dijital Oyun Tasarımı","w":3,"s":"1","top":["Oyun nedir?","Dijital ve fiziksel oyunlar","Oyunun amacı","Oyun kuralları","Oyunda hedef","Karakter kavramı","Oyun ortamı","Oyun hikâyesi"],"tools":["Scratch Jr.","Kodu Game Lab","Draw Your Game"]},
+    {"g":"1. Sınıf","n":"Dijital Ürün Tasarımı","w":4,"s":"1","top":["Dijital görsel nedir","Şekil ve renk kullanımı","Dijital boyama","Basit figür oluşturma","Arka plan seçme","Metin ekleme","Dijital kart tasarımı","Görseli kaydetme"],"tools":[]},
+    {"g":"2. Sınıf","n":"Dijital Dünyada Güvende","w":4,"s":"2","top":["Donanım çeşitleri","Giriş-çıkış birimleri","Dosya nedir?","İnternetle bilgi arama","Güvenli siteler","Reklam nedir?","Gerçek-sanal ayrımı","Dijital vatandaşlık giriş","Güçlü şifre","Kişisel veri","Güvenli paylaşım","Siber zorbalık örnekleri","Çevrim içi nezaket","Dijital iz bırakma","Güvenli oyun"],"tools":[]},
+    {"g":"2. Sınıf","n":"Kodlama Dünyası","w":11,"s":"2","top":["Algoritma oluşturma","Olay–tepki mantığı","Koşul kavramı (eğer)","Döngüye giriş","Karakter kontrolü","Sahne ve nesne","Basit animasyon oluşturma","Kod okuma ve tahmin"],"tools":[]},
+    {"g":"2. Sınıf","n":"Yapay Zekâ Okuryazarlığı","w":3,"s":"2","top":["Yapay Zeka Nasıl Algılar ve Karar Verir?","Yapay Zeka ile İlk Videom : Yapay Zeka Nasıl Video Üretir?","Cognimates ile Yapay Zeka + Blok Kodlama"],"tools":["Cognimates"]},
+    {"g":"2. Sınıf","n":"Robotik Yolculuğu","w":5,"s":"2","top":["Robotik sistem nedir","Sensör ve motor","Giriş–çıkış mantığı","Robot hareket kontrolü","Temel robot komutları","Engel algılama","Basit robot görevleri","Robot test etme"],"tools":["SPIKE"]},
+    {"g":"2. Sınıf","n":"Dijital Oyun Tasarımı","w":5,"s":"2","top":["Oyun fikri oluşturma","Karakter tasarımı","Oyun ortamı tasarımı","Oyun kuralları yazma","Başlangıç–bitiş","Seviye mantığı","Engel ve ödül","Oyun akışı planı"],"tools":["Scratch Jr.","Kodu Game Lab","Draw Your Game"]},
+    {"g":"2. Sınıf","n":"Dijital Ürün Tasarımı","w":4,"s":"2","top":["Dijital ürün nedir","Poster tasarımı","Karakter/ikon kullanımı","Metin–görsel yerleşimi","Başlık oluşturma","Basit afiş","Davetiye/kart","Dijital sayfa düzeni"],"tools":[]},
+    {"g":"3. Sınıf","n":"Dijital Dünyada Güvende","w":4,"s":"2","top":["Donanım-yazılım","İşletim sistemi","Dosya yönetimi","İnternet nasıl çalışır?","Ağ nedir?","Wi-Fi mantığı","Tarayıcı kullanımı","Güvenli indirme","Dijital kimlik","İnternet kuralları","Telif nedir?","Güvenli iletişim","Siber zorbalık çözümü","Dijital ayak izi etkisi","Bilgi doğrulama"],"tools":[]},
+    {"g":"3. Sınıf","n":"Kodlama Dünyası","w":11,"s":"2","top":["Algoritma geliştirme","Olay tabanlı çalışma mantığı","Koşul yapıları (eğer)","Döngü kullanımı","Çoklu komut akışı","Zamanlama mantığı","Mesajlaşma blokları","Kod akışını izleme"],"tools":[]},
+    {"g":"3. Sınıf","n":"Yapay Zekâ Okuryazarlığı","w":4,"s":"2","top":["Üretken Yapay Zeka","AI Nasıl Öğreniyor? Verileri Nasıl Ayırıyor ? : Makine Öğrenmesi","Makine Öğrenmesi Yapay Zeka Görüntü Algılama","Makine Öğrenmesi Blok Kodlama Uygulama"],"tools":[]},
+    {"g":"3. Sınıf","n":"Dijital Oyun Tasarımı","w":5,"s":"2","top":["Dijital oyunun yapısı","Oyun karakteri programlama","Hareket ve kontrol","Etkileşimli nesneler","Koşullu oyun davranışı","Basit görev tasarımı","Skor ve geri bildirim","Oyunu test etme"],"tools":["Scratch","Minecraft"]},
+    {"g":"3. Sınıf","n":"Robotik Yolculuğu","w":4,"s":"2","top":["Robotik sistem nedir","Sensör ve motor","Giriş–çıkış mantığı","Robot hareket kontrolü","Temel robot komutları","Engel algılama","Basit robot görevleri","Robot test etme"],"tools":["SPIKE"]},
+    {"g":"3. Sınıf","n":"Dijital Ürün Tasarımı","w":4,"s":"2","top":["Tasarım öğeleri","Düzen ve hizalama","Renk uyumu","İkon ve şekiller","3B nesne nedir","Tinkercad arayüzü","Basit 3B şekiller","3B model oluşturma"],"tools":["Tinkercad"]},
+    {"g":"4. Sınıf","n":"Dijital Dünyada Güvende","w":6,"s":"2","top":["Bilgisayar mimarisi","Veri nedir?","Depolama türleri","İnternet servisleri","Bulut mantığı","Ağ güvenliği","Zararlı yazılım","Dijital sorumluluk","Siber güvenlik giriş","Şifreleme mantığı","Dijital haklar","Telif ve lisans","Sosyal medya güvenliği","Siber zorbalık müdahale","Dijital itibar","Güvenli internet projesi"],"tools":[]},
+    {"g":"4. Sınıf","n":"Robotik Yolculuğu","w":6,"s":"2","top":["Robotik sistem nedir","Sensör ve motor","Giriş–çıkış mantığı","Robot hareket kontrolü","Temel robot komutları","Engel algılama","Basit robot görevleri","Robot test etme"],"tools":["SPIKE"]},
+    {"g":"4. Sınıf","n":"Yapay Zekâ Okuryazarlığı","w":3,"s":"2","top":["Üretken Yapay Zeka","AI Nasıl Öğreniyor? Verileri Nasıl Ayırıyor ? : Makine Öğrenmesi","Makine Öğrenmesi Blok Kodlama Uygulama 1","Makine Öğrenmesi Blok Kodlama Uygulama 2"],"tools":[]},
+    {"g":"4. Sınıf","n":"Kodlama Dünyası","w":5,"s":"2","top":["Algoritma tasarımı","Koşul yapıları (if–else)","Döngüler (tekrar yapıları)","Değişken kavramı","Veri tutma ve güncelleme","Fonksiyon (özel blok)","Parametre mantığı","Kod akışı ve kontrol"],"tools":[]},
+    {"g":"4. Sınıf","n":"Dijital Oyun Tasarımı","w":7,"s":"2","top":["Oyun mekaniği tasarımı","Görev ve hedef sistemi","Seviye tasarımı","Değişken ile oyun kontrolü","Oyuncu etkileşimi","Minecraft dünyasında oyun","Oyun deneyimi iyileştirme","Oyun projesi geliştirme"],"tools":["Scratch","Minecraft"]},
+    {"g":"4. Sınıf","n":"Dijital Ürün Tasarımı","w":5,"s":"2","top":["Tasarım süreci","Amaç–kullanıcı","Dijital ürün planı","3B model geliştirme","Nesne birleştirme","Ölçek ve boyut","Ürün sunumu","Tasarım projesi"],"tools":["Tinkercad"]},
+    {"g":"5. Sınıf","n":"Dijital Dünya ve Güvenlik","w":5,"s":"1","top":["Dijital kimlik nedir","Kullanıcı adı ve profil","Güçlü şifre oluşturma","Kişisel veri nedir","İnternette paylaşım kuralları","Siber zorbalık tanıma","Çevrim içi nezaket","Dijital ayak izi giriş","Güvenli oyun ortamı","“Benim Dijital Profilim” posteri"],"tools":[]},
+    {"g":"5. Sınıf","n":"Python ile Programlama","w":7,"s":"1","top":["algoritma yazma","akış şeması","problem çözme adımları","değişken mantığı","koşul mantığı","döngü mantığı","blok–metin karşılaştırma"],"tools":["Python"]},
+    {"g":"5. Sınıf","n":"Robotik Sistemler","w":6,"s":"1","top":["Robotik sistem nedir","Sensör ve motor","Giriş–çıkış mantığı","Robot hareket kontrolü","Temel robot komutları","Engel algılama","Basit robot görevleri","Robot test etme"],"tools":[]},
+    {"g":"5. Sınıf","n":"Dijital Oyun Geliştirme","w":7,"s":"1","top":["Oyun dünyası","Minecraft tasarım","Görev sistemi","Oyun kuralları","Oyun senaryosu","Oyun mekaniği","Karakter kontrol","Skor ve can","Çarpışma","Seviye","Oyun algoritması","Gelişmiş mekanik","Oyun dengesi","Çoklu seviye","Oyun projesi"],"tools":["Minecraft"]},
+    {"g":"5. Sınıf","n":"Yapay Zeka ile Programlama Temelleri","w":3,"s":"1","top":["Yapay zekâ karar mantığı","Veri ve özellik","Kural tabanlı AI","Python ile sınıflandırma","Python ile tahmin","Metin AI mantığı","Basit chatbot","AI algoritması"],"tools":["Python"]},
+    {"g":"5. Sınıf","n":"Dijital Tasarım ve Ürün Geliştirme","w":4,"s":"1","top":["Tasarım nedir","Tasarım öğeleri","Renk ve tipografi","Yerleşim (layout)","Görsel hiyerarşi","Poster/afiş tasarımı","Sosyal medya görseli","Dijital içerik oluşturma"],"tools":[]},
+    {"g":"6. Sınıf","n":"Dijital Dünya ve Güvenlik","w":5,"s":"2","top":["Sosyal medya mantığı","Çevrim içi iletişim türleri","Dijital itibar","Sahte hesaplar","Dolandırıcılık yöntemleri","Kimlik avı (phishing)","Zararlı içerik","Siber zorbalık müdahale","Bilgi doğrulama","“Güvenli Sosyal Medya Rehberi”"],"tools":[]},
+    {"g":"6. Sınıf","n":"Python ile Programlama","w":7,"s":"2","top":["Python nedir","çıktı alma (print)","değişken","veri türleri","giriş (input)","koşul (if)","döngü (for/while)"],"tools":["Python"]},
+    {"g":"6. Sınıf","n":"Robotik Sistemler","w":8,"s":"2","top":["Robotik sistem nedir","Sensör ve motor","Giriş–çıkış mantığı","Robot hareket kontrolü","Temel robot komutları","Engel algılama","Basit robot görevleri","Robot test etme","Arduino nedir","Fiziksel hesaplama","Dijital sinyal","Sensör nedir","Sensör verisi okuma","Aktüatör kontrolü","LED ve motor kontrol","Sensör tabanlı karar","Basit IoT mantığı","akıllı lamba","mesafe alarmı","ışığa duyarlı sistem"],"tools":["Arduino"]},
+    {"g":"6. Sınıf","n":"Dijital Oyun Geliştirme","w":5,"s":"2","top":["Oyun dünyası","Minecraft tasarım","Görev sistemi","Oyun kuralları","Oyun senaryosu","Oyun mekaniği","Karakter kontrol","Skor ve can","Çarpışma","Seviye","Oyun algoritması","Gelişmiş mekanik","Oyun dengesi","Çoklu seviye","Oyun projesi"],"tools":["Minecraft"]},
+    {"g":"6. Sınıf","n":"Yapay Zeka ile Akıllı Teknolojiler","w":3,"s":"2","top":["Sensör verisi","Veri toplama","IoT veri","Sensör sınıflandırma","AI karar cihazı","Akıllı otomasyon","Arduino veri analizi","IoT AI sistemi"],"tools":["Arduino"]},
+    {"g":"6. Sınıf","n":"Dijital Tasarım ve Ürün Geliştirme","w":4,"s":"2","top":["Web tasarım mantığı","Sayfa düzeni","Menü yapısı","Arayüz bileşenleri","Kullanıcı deneyimi","Basit web sayfası","Çoklu sayfa","Web içeriği"],"tools":[]},
+    {"g":"7. Sınıf","n":"Dijital Dünya ve Güvenlik","w":5,"s":"2","top":["Veri nedir","Veri güvenliği","Şifreleme mantığı","İnternet güvenliği","Zararlı yazılımlar","Güvenli ağ kullanımı","Gizlilik ayarları","Dijital haklar","Telif ve lisans","Yapay zekâ ve etik","“Dijital Güvenlik Kontrol Listesi”"],"tools":[]},
+    {"g":"7. Sınıf","n":"Python ile Programlama","w":7,"s":"2","top":["fonksiyon","parametre","liste","karar yapıları","döngü kontrol","diziler","proje geliştirme"],"tools":["Python"]},
+    {"g":"7. Sınıf","n":"Robotik Sistemler","w":8,"s":"2","top":["Robotik sistem nedir","Sensör ve motor","Giriş–çıkış mantığı","Robot hareket kontrolü","Temel robot komutları","Engel algılama","Basit robot görevleri","Robot test etme","IoT nedir","Veri toplama","Sensör ağı","Kablosuz iletişim","IoT cihaz mantığı","Veri–karar sistemi","Yapay zekâ sensör verisi","Akıllı cihaz tasarımı","IoT proje geliştirme","Akıllı sistem entegrasyonu"],"tools":[]},
+    {"g":"7. Sınıf","n":"Dijital Oyun Geliştirme","w":6,"s":"2","top":["Oyun dünyası","Minecraft tasarım","Görev sistemi","Oyun kuralları","Oyun senaryosu","Oyun mekaniği","Karakter kontrol","Skor ve can","Çarpışma","Seviye","Oyun algoritması","Gelişmiş mekanik","Oyun dengesi","Çoklu seviye","Oyun projesi"],"tools":["Minecraft"]},
+    {"g":"7. Sınıf","n":"Yapay Zeka ile Uygulama Geliştirme","w":3,"s":"2","top":["AI model mantığı","Python veri işleme","AI web uygulaması","AI mobil uygulama","AI API kullanımı","AI proje tasarımı","AI etik","AI ürün geliştirme"],"tools":["Python"]},
+    {"g":"7. Sınıf","n":"Dijital Tasarım ve Ürün Geliştirme","w":3,"s":"2","top":["Kullanıcı odaklı tasarım","Ürün planlama","Prototip geliştirme","3B modelleme","Ürün–arayüz entegrasyonu","Ürün sunumu","Dijital ürün projesi"],"tools":[]}];
+  const TAGS = ['Tümü', '5 Yaş', '1. Sınıf', '2. Sınıf', '3. Sınıf', '4. Sınıf', '5. Sınıf', '6. Sınıf', '7. Sınıf'];
   let tag = 'Tümü', q = '';
   try { const s = localStorage.getItem('fk-tag'); if (TAGS.includes(s)) tag = s; } catch (e) {}
   const chips = document.getElementById('chips'), posts = document.getElementById('posts');
+  const escH = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   function renderChips() {
     chips.innerHTML = TAGS.map(t => `<button type="button" class="filter-btn" aria-pressed="${t === tag}" data-t="${t}">${t}</button>`).join('');
   }
   function renderPosts() {
     const n = q.toLocaleLowerCase('tr');
-    const list = POSTS.filter(p => (tag === 'Tümü' || p.tag === tag) && (!n || (p.t + ' ' + p.d + ' ' + p.tag).toLocaleLowerCase('tr').includes(n)));
+    const list = POSTS.filter(p => (tag === 'Tümü' || p.g === tag) && (!n || (p.n + ' ' + p.g + ' ' + p.top.join(' ') + ' ' + p.tools.join(' ')).toLocaleLowerCase('tr').includes(n)));
     posts.innerHTML = list.length ? list.map(p => `
       <article class="post">
-        <div class="post-meta"><span class="tag">${p.tag}</span><span>${p.min} dk</span></div>
-        <h3>${p.t}</h3>
-        <p>${p.d}</p>
+        <div class="post-meta"><span class="tag">${escH(p.g)}</span><span>${p.w} hafta</span></div>
+        <h3>${escH(p.n)}</h3>
+        <p>${escH(p.top.slice(0, 5).join(' · '))}${p.top.length > 5 ? ' …' : ''}</p>
         <div class="post-foot">
-          <span class="level"><i>${[1, 2, 3].map(i => `<b class="${i <= p.lv ? 'on' : ''}"></b>`).join('')}</i>${LV[p.lv]}</span>
-          <span class="fmt">${p.f}</span>
+          <span class="level">${p.tools.length ? escH(p.tools.join(' · ')) : 'Araçsız / etkinlik tabanlı'}</span>
+          <span class="fmt">haftada ${p.s} saat</span>
         </div>
-      </article>`).join('') : `<div class="empty">"${q.replace(/[<>&"]/g, '')}" için içerik bulunamadı. Başka bir kelime dene ya da filtreyi "Tümü" yap.</div>`;
+      </article>`).join('') : `<div class="empty">"${q.replace(/[<>&"]/g, '')}" için ders bulunamadı. Başka bir kelime dene ya da filtreyi "Tümü" yap.</div>`;
   }
   chips.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; tag = b.dataset.t; try { localStorage.setItem('fk-tag', tag); } catch (er) {} renderChips(); renderPosts(); });
   document.getElementById('q').addEventListener('input', e => { q = e.target.value.trim(); renderPosts(); });
