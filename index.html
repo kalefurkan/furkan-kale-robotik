@@ -116,8 +116,11 @@ section{padding-block:72px;border-bottom:1px solid var(--line)}
 .lvlbar{display:flex;gap:8px;overflow-x:auto;margin:-4px 0 16px;padding-bottom:4px;scrollbar-width:thin}
 .lvlbar[hidden]{display:none}
 .lvlbar .filter-btn{flex:none;white-space:nowrap;font-size:12px;padding:6px 11px}
-.ytabs{display:flex;gap:8px;margin:0 0 18px}
-.ytabs .filter-btn[aria-selected=true]{background:var(--mask);color:var(--on-mask);border-color:var(--mask)}
+.yol-h{display:flex;flex-wrap:wrap;gap:0 28px}
+.yol-h button{all:unset;cursor:pointer;font:inherit;color:var(--muted);opacity:.55;border-bottom:4px solid transparent;padding-bottom:2px}
+.yol-h button:hover{opacity:.85}
+.yol-h button[aria-selected=true]{color:var(--ink);opacity:1;border-bottom-color:var(--gold)}
+.yol-h button:focus-visible{outline:2px solid var(--gold);outline-offset:4px}
 .apath[hidden]{display:none}
 .apath{position:relative;display:grid;gap:10px}
 .apath::before{content:"";position:absolute;left:19px;top:18px;bottom:18px;width:2px;background:var(--trace)}
@@ -486,11 +489,10 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <div class="sec-head">
       <div>
         <div class="eyebrow">U4 · Öğrenme yolu</div>
-        <h2 id="yol-h">Arduino</h2>
+        <h2 class="yol-h" role="tablist" aria-label="Öğrenme yolu"><button type="button" role="tab" id="tab-ard" aria-selected="true" data-tab="ard">Arduino</button><button type="button" role="tab" id="tab-py" aria-selected="false" data-tab="py">Python</button></h2>
         <p id="yol-p">Kolaydan zora beş seviye. Bir projeye tıkla, devre şeması, kod ve adım adım anlatımı aç. <span id="apath-sum"></span></p>
       </div>
     </div>
-    <div class="ytabs" role="tablist" aria-label="Öğrenme yolu"><button type="button" role="tab" class="filter-btn" id="tab-ard" aria-selected="true" data-tab="ard">Arduino</button><button type="button" role="tab" class="filter-btn" id="tab-py" aria-selected="false" data-tab="py">Python</button></div>
     <div class="apath" id="apath" aria-live="polite"></div>
     <div class="apath" id="ppath" aria-live="polite" hidden></div>
   </div>
@@ -747,7 +749,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   function renderPath() {
     const root = document.getElementById('apath'); if (!root) return;
     const ready = ARD.list.filter(x => x.ready).length;
-    document.getElementById('apath-sum').textContent = `${ARD.list.filter(x => x.n).length} proje · ${ready} tanesi hazır`;
+    document.getElementById('apath-sum').textContent = `${ARD.list.filter(x => x.n).length} proje · ${ARD.list.filter(x => x.n && x.ready).length} tanesi hazır${ARD.list.some(x => !x.n && x.ready) ? ' · ' + ARD.list.filter(x => !x.n && x.ready).length + ' ek proje' : ''}.`;
     root.innerHTML = ARD.levels.map((l, i) => {
       const items = ARD.list.filter(x => x.lv === l.id && x.n).sort((a, b) => a.n - b.n);
       const extras = ARD.list.filter(x => x.lv === l.id && !x.n && x.ready);
@@ -765,13 +767,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     root.innerHTML = PYD.stages.map((g, i) => `<details class="alevel"${i === 0 ? ' open' : ''}><summary><span class="anode">${g.id}</span><span class="atitle"><b>${escH(g.name)}</b><small>${escH(g.sub)}</small></span><span class="acount">${g.mods.length} modül</span></summary>
       <ol class="alist" start="${g.mods[0].n}">${g.mods.map(x => `<li><a class="alink" href="${PYD.base}${x.n}" target="_blank" rel="noopener" title="${escH(x.d)}"><span class="anum">${String(x.n).padStart(2, '0')}</span>${escH(x.t)}<em class="aex">PyLearn ↗</em></a></li>`).join('')}</ol></details>`).join('');
   }
-  document.querySelector('.ytabs').addEventListener('click', e => {
+  document.querySelector('.yol-h').addEventListener('click', e => {
     const b = e.target.closest('[data-tab]'); if (!b) return;
     const py = b.dataset.tab === 'py';
     document.getElementById('tab-ard').setAttribute('aria-selected', String(!py));
     document.getElementById('tab-py').setAttribute('aria-selected', String(py));
     document.getElementById('apath').hidden = py; document.getElementById('ppath').hidden = !py;
-    document.getElementById('yol-h').textContent = py ? 'Python' : 'Arduino';
     document.getElementById('yol-p').innerHTML = py ? 'PyLearn\'deki 50 modül, yedi aşamada. Bir modüle tıkla, PyLearn\'de derse başla.' : 'Kolaydan zora beş seviye. Bir projeye tıkla, devre şeması, kod ve adım adım anlatımı aç. <span id="apath-sum"></span>';
     if (py) { if (PYD) renderPy(); else fetch('assets/python/modules.json').then(r => r.json()).then(d => { PYD = d; renderPy(); }); } else renderPath();
   });
