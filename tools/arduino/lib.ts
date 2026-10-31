@@ -58,7 +58,13 @@ export type Action =
   | { presses: { id: string; n: number; hold?: number; gap?: number } }
   | { waitText: string; timeout?: number }
   | { keys: { id: string; seq: string; hold?: number; gap?: number } }
-  | { waitLcd: number };
+  | { waitLcd: number }
+  | { select: string }
+  | { slider: { value: number; index?: number } }
+  | { fill: { placeholder: string; text: string } }
+  | { clickText: string }
+  | { clickCss: string }
+  | { clickLabel: string; exact?: boolean };
 
 export interface Project {
   /** index.json'daki kimlik */

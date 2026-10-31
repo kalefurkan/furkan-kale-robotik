@@ -1,0 +1,99 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HC-05 Bluetooth modülü",
+  "1 × L298N motor sürücü",
+  "2 × DC motor (robot arabanın sol ve sağ tekerleği)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "1 × 1 kΩ direnç (gerilim bölücü)",
+  "1 × 2 kΩ direnç (gerilim bölücü)",
+  "Jumper kablolar (21 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: HC-05 VCC ve L298N 5V ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: HC-05 GND, gerilim bölücü ve L298N GND"
+  ],
+  [
+   "D2",
+   "HC-05 TXD (Arduino'nun RX'i)"
+  ],
+  [
+   "D3",
+   "1 kΩ direncin ucu → HC-05 RXD (Arduino'nun TX'i)"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ]
+ ],
+ "img": "assets/devre/bluetooth-kontrollu-robot-araba.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola. Motorların ve Arduino'nun GND'si ortak olmalı: d5 → eksi rayı. e6 → artı rayı: bu bağlantıyla L298N'in mantık devresi Arduino'nun 5V'unu kullanır; kartın üzerindeki 5V jumper'ını çıkar.",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Motorlar (breadboard dışında, takılı değil): sol motor için e13 → motor A, e14 → motor B (OUT1, OUT2); sağ motor için e15 → motor A, e16 → motor B (OUT3, OUT4).",
+  "HC-05'i a20 (VCC), a21 (GND), a22 (TXD), a23 (RXD) deliklerine tak. e20 → artı rayı, e21 → eksi rayı, e22 → D2.",
+  "Gerilim bölücü: 1 kΩ direnci d23 ile d27 arasına, 2 kΩ direnci dikey olarak e23 ile h23 arasına tak. D3 pinini e27'ye, j23'ü eksi rayına kablola.",
+  "Kodu yükle (simülatörde çalıştır): HC-05'i seç, kutuya F yaz ve \"Telefondan gönder\"e bas: iki motor ileri döner. B, L, R, S ve 1–9 ile diğer komutları dene."
+ ],
+ "code": "// Bluetooth kontrollu robot araba: telefondan gelen harfe gore L298N ile iki DC motor surulur\n// F = ileri, B = geri, L = sola don, R = saga don, S = dur, 1..9 = hiz\n#include <SoftwareSerial.h>\n\nSoftwareSerial bt(2, 3);   // RX = D2 (HC-05 TXD), TX = D3 (HC-05 RXD, bolucu uzerinden)\n\nconst int ENA = 5;   // sol motor hiz (PWM)\nconst int IN1 = 7;\nconst int IN2 = 8;\nconst int IN3 = 9;\nconst int IN4 = 10;\nconst int ENB = 6;   // sag motor hiz (PWM)\n\nint hiz = 200;       // 0-255 arasi PWM degeri\n\nvoid solMotor(int yon) {          // 1 = ileri, -1 = geri, 0 = dur\n  digitalWrite(IN1, yon > 0 ? HIGH : LOW);\n  digitalWrite(IN2, yon < 0 ? HIGH : LOW);\n}\n\nvoid sagMotor(int yon) {\n  digitalWrite(IN3, yon > 0 ? HIGH : LOW);\n  digitalWrite(IN4, yon < 0 ? HIGH : LOW);\n}\n\nvoid sur(int sol, int sag) {\n  analogWrite(ENA, hiz);\n  analogWrite(ENB, hiz);\n  solMotor(sol);\n  sagMotor(sag);\n}\n\nvoid setup() {\n  pinMode(ENA, OUTPUT);\n  pinMode(ENB, OUTPUT);\n  pinMode(IN1, OUTPUT);\n  pinMode(IN2, OUTPUT);\n  pinMode(IN3, OUTPUT);\n  pinMode(IN4, OUTPUT);\n  Serial.begin(9600);\n  bt.begin(9600);\n  sur(0, 0);\n  Serial.println(\"Robot araba hazir\");\n}\n\nvoid loop() {\n  while (bt.available() > 0) {\n    char c = bt.read();\n    if (c == 'F') {\n      sur(1, 1);\n      Serial.println(\"Komut: F -> ILERI\");\n    } else if (c == 'B') {\n      sur(-1, -1);\n      Serial.println(\"Komut: B -> GERI\");\n    } else if (c == 'L') {\n      sur(-1, 1);\n      Serial.println(\"Komut: L -> SOLA\");\n    } else if (c == 'R') {\n      sur(1, -1);\n      Serial.println(\"Komut: R -> SAGA\");\n    } else if (c == 'S') {\n      sur(0, 0);\n      Serial.println(\"Komut: S -> DUR\");\n    } else if (c >= '1' && c <= '9') {\n      hiz = map(c - '0', 1, 9, 80, 255);   // 1 yavas, 9 tam hiz\n      analogWrite(ENA, hiz);\n      analogWrite(ENB, hiz);\n      Serial.print(\"Hiz: \");\n      Serial.println(hiz);\n    }\n  }\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "L298N'in her kanalı bir H köprüdür. Bir motorun iki ucuna IN1/IN2 ile polarite verilir: IN1 = HIGH, IN2 = LOW ileri; IN1 = LOW, IN2 = HIGH geri; ikisi de LOW (ya da ikisi de HIGH) motoru durdurur. ENA/ENB pinleri kanalı açar; bu pinlere analogWrite() ile PWM verilirse motorun ortalama gerilimi, yani hızı değişir. Kod, sur(sol, sag) fonksiyonuyla iki motorun yönünü birlikte ayarlar: L komutunda sol motor geri, sağ motor ileri döner (araba yerinde sola döner)."
+  ],
+  [
+   "Komut tablosu",
+   "F: ileri. B: geri. L: sola dön. R: sağa dön. S: dur. 1–9: hız (map ile 80–255 arası PWM; varsayılan 200)."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde gerçek Bluetooth eşleşmesi yoktur; komut harfi modülün kutusuna yazılıp gönderilir. Seri Monitör'de \"Robot araba hazir\" yazdı. 1,5. saniyede F gönderince L298N modülü \"A: ileri %78 · B: ileri %78\" gösterdi ve iki motor ileri döndü; L gönderince \"A: geri · B: ileri\", R gönderince \"A: ileri · B: geri\", B gönderince iki kanal da geri, S gönderince \"A: fren · B: fren\" oldu. 5 gönderince Seri Monitör'e \"Hiz: 167\" yazıldı ve sonraki F'de görev oranı %65'e indi. Motor modelinde 6 V tam hızdır; PWM %78 ve L298N'in yaklaşık 2 V gerilim düşümü yüzünden motor yaklaşık yarı hızda (0,49) döndü, her motor yaklaşık 97 mA çekti. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Bluetooth eşleşmesi, telefon uygulaması, tekerlek yükü, motor ataleti, L298N'in ısınması ve akım sınırı simüle edilmez. Gerilim bölücü kullandığın için simülatör Arduino'dan telefona giden verileri göstermez; bu sketch telefona veri de göndermez. Sketch yalnızca SoftwareSerial.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Güç ve GND",
+   "Motorları Arduino'nun 5V pininden besleme, çünkü motorlar yüzlerce mA çeker. Motor gücü ayrı güç kaynağından (pil kutusu) gelir; ama L298N'in GND'si Arduino GND'sine mutlaka bağlanmalı, yoksa IN/EN sinyalleri anlamsız olur. L298N yaklaşık 2 V gerilim düşürür; bu yüzden motor beslemesini motorun istediği gerilimden yaklaşık 2 V yüksek seç. L298N'de motorun ters EMK'sı için dahili serbest dönüş diyotları vardır; bu yüzden devreye ayrıca diyot eklenmez."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Motor beslemesinin GND'sini Arduino GND'sine bağlamamak; IN pinlerini ENA/ENB ile karıştırmak; ENA'yı boş bırakıp (jumper takılı) hız kontrolü beklemek; TXD ve RXD'yi çapraz bağlamamak; RXD'yi gerilim bölücüsüz 5 V'luk D3'e bağlamak; HC-05'in hız ayarını (9600) kodla uyumsuz yapmak."
+  ],
+  [
+   "Dene",
+   "Hız komutuna '+' ve '-' ekle (hız 20'şer artsın/azalsın) ya da F komutunda motorlardan birini biraz yavaşlatarak arabanın düz gitmesini ayarla."
+  ]
+ ],
+ "title": "42. Bluetooth Kontrollü Robot Araba"
+}

@@ -1,0 +1,109 @@
+{
+ "sketch": "rfid_personel",
+ "d": "RC522 ile okunan kartın UID'si LCD'de gösterilir; kayıtlı kartlar için kişinin adı yazılır ve buzzer bir kez, tanınmayan kart için üç kez öter. SPI ile LCD'yi aynı anda kullanmayı (pinleri paylaştırmayı) ve baytları dizide aramayı öğrenirsin. Simülatörde gerçek RFID alanı yoktur; kart UID'si arayüzden verilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × RC522 RFID okuyucu modülü (kart ve anahtarlık ile)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "1 × aktif buzzer",
+  "Jumper kablolar (23 adet)"
+ ],
+ "wiring": [
+  [
+   "3V3",
+   "RC522 3.3V (yalnızca 3,3 V ile beslenir)"
+  ],
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW, K, RC522 GND ve buzzer −"
+  ],
+  [
+   "D2",
+   "LCD RS"
+  ],
+  [
+   "D3",
+   "LCD E"
+  ],
+  [
+   "D4",
+   "LCD D4"
+  ],
+  [
+   "D5",
+   "LCD D5"
+  ],
+  [
+   "D6",
+   "LCD D6"
+  ],
+  [
+   "D7",
+   "LCD D7"
+  ],
+  [
+   "D8",
+   "Buzzer + (anot)"
+  ],
+  [
+   "D9",
+   "RC522 RST"
+  ],
+  [
+   "D10",
+   "RC522 SDA (SS, çip seçme)"
+  ],
+  [
+   "D11",
+   "RC522 MOSI"
+  ],
+  [
+   "D12",
+   "RC522 MISO"
+  ],
+  [
+   "D13",
+   "RC522 SCK"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D2 → e5 (RS), D3 → e7 (E), D4 → e8 (D4), D5 → e9 (D5), D6 → e10 (D6), D7 → e11 (D7).",
+  "Bu projede LCD'yi D2–D7 pinlerine bağladık, çünkü D11, D12 ve D13 pinleri RC522'nin SPI hattına ayrılmıştır.",
+  "RC522'yi a20 (3.3V), a21 (RST), a22 (GND), a23 (MISO), a24 (MOSI), a25 (SCK), a26 (SDA) deliklerine tak. DİKKAT: RC522 yalnızca 3,3 V ile beslenir. Arduino 3V3 pinini e20'ye kablola.",
+  "RC522 kabloları: e22 → eksi rayı, D9 → e21 (RST), D12 → e23 (MISO), D11 → e24 (MOSI), D13 → e25 (SCK), D10 → e26 (SDA).",
+  "Aktif buzzer'ı c28 (+) ve c29 (−) deliklerine tak. D8 pinini e28'e, e29'u eksi rayına kablola.",
+  "Kodu yükle (simülatörde çalıştır): RC522'yi seç, \"kart yakın\" seçeneğini aç. A1B2C3D4 UID'si için LCD'de \"Giris: Ahmet\", 5A6B7C8D için \"Giris: Zeynep\" görünür; başka UID için \"Giris reddedildi\" yazılır."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "RC522 Arduino ile SPI üzerinden konuşur (MOSI D11, MISO D12, SCK D13, SS D10, RST D9). Kart okununca UID baytları hem LCD'ye hem Seri Monitör'e onaltılık (HEX) olarak yazılır; tek haneli bayt başına 0 eklenir. kayitli[] dizisinde iki kişinin 4'er baytlık kart numarası art arda durur; kartEslesti(kisi) bunları bayt bayt karşılaştırır (çok boyutlu dizi yerine kisi × 4 + i indeksi kullanılır). Eşleşen kart için buzzer 120 ms öter; eşleşmeyen için üç kez öter. Sonuç 1,5 saniye gösterilip ekran \"Karti okutun\"a döner."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Başlangıçta LCD \"Personel Giris\" / \"Karti okutun\" gösterdi. 1,5. saniyede A1B2C3D4 kartı yaklaşınca LCD'de \"A1B2C3D4\" ve \"Giris: Ahmet\" yazıldı, buzzer bir kez (120 ms) öttü; 4,5. saniyede 5A6B7C8D için \"Giris: Zeynep\" ve bir bip; 7,5. saniyede tanınmayan 99887766 için \"Giris reddedildi\" ve üç bip oldu. Her sonuçtan yaklaşık 1,7 saniye sonra ekran bekleme metnine döndü. Gerçek kartta ve gerçek RFID etiketiyle denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde gerçek RFID alanı ve anten menzili yoktur: kart, modülün ayarlarındaki UID ve \"kart yakın\" kutusuyla temsil edilir. Yalnızca UID okunur; kart belleği ve MIFARE kimlik doğrulaması yoktur. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki MFRC522.h ve LiquidCrystal.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "LCD'yi D11–D13'e bağlayıp SPI ile çakıştırmak; RC522'yi 5 V'a bağlamak; MOSI ve MISO'yu ters bağlamak; UID'yi 0 ile doldurmayı unutmak (0A yerine A görünür); kayıtlı kartları dizide sırasını karıştırmak."
+  ],
+  [
+   "Dene",
+   "Üçüncü bir kişi ekle (kayitli[] dizisini 12 bayta çıkar) ya da her kişinin kaç kez giriş yaptığını sayıp LCD'de göster."
+  ]
+ ]
+}

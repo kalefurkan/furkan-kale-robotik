@@ -1,0 +1,98 @@
+{
+ "sketch": "kablosuz_istasyon",
+ "d": "DHT11 sıcaklık ve nemi 16x2 LCD'de gösterir, aynı ölçümü HC-05 ile telefona yollar; telefondan gelen F ve C harfleri birimi Fahrenheit/Celsius yapar. Üç modülü (DHT, LCD, Bluetooth) tek sketch'te birleştirmeyi öğrenirsin. Simülatörde Bluetooth eşleşmesi yoktur; telefon komutu kutudan gönderilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HC-05 Bluetooth modülü",
+  "1 × DHT11 sıcaklık ve nem sensörü (3 pinli modül)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "1 × 1 kΩ direnç (gerilim bölücü)",
+  "1 × 2 kΩ direnç (gerilim bölücü)",
+  "Jumper kablolar (22 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D8",
+   "DHT11 DATA"
+  ],
+  [
+   "D9",
+   "1 kΩ direncin ucu → HC-05 RXD (Arduino'nun TX'i)"
+  ],
+  [
+   "D10",
+   "HC-05 TXD (Arduino'nun RX'i)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "HC-05'i a21 (VCC), a22 (GND), a23 (TXD), a24 (RXD) deliklerine tak. e21 → artı rayı, e22 → eksi rayı, e23 → D10.",
+  "Gerilim bölücü: 1 kΩ direnci d24 ile d20 arasına, 2 kΩ direnci dikey olarak e24 ile h24 arasına tak. D9 pinini e20'ye, j24'ü eksi rayına kablola.",
+  "DHT11'i c27 (VCC), c28 (DATA), c29 (GND) deliklerine tak. e27 → artı rayı, e29 → eksi rayı, D8 pinini e28'e kablola.",
+  "Kodu yükle (simülatörde çalıştır): LCD'de \"Sicaklik: 27.0 C\" ve \"Nem: %55\" görünür. DHT11 kaydırıcısını değiştir; HC-05'i seçip F gönder: sıcaklık Fahrenheit'a döner, C gönderince tekrar Celsius olur."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Her 2 saniyede bir DHT11'den sıcaklık ve nem okunur, LCD'ye yazılır ve bt.print() ile Bluetooth'a gönderilir (telefondaki seri terminal uygulaması \"Sicaklik: 27.0 C  Nem: %55\" satırlarını gösterir). Döngünün başında bt.available() ile telefondan komut gelip gelmediğine bakılır: 'F' gelirse dht.readTemperature(true) Fahrenheit, 'C' gelirse Celsius okur. D0/D1 USB'ye ayrılı olduğu için Bluetooth için SoftwareSerial bt(10, 9) kullanılır: D10 RX, D9 TX."
+  ],
+  [
+   "Gerilim bölücü",
+   "HC-05'in RXD girişi 3,3 V mantıklıdır; Arduino D9 pini ise 5 V verir. 1 kΩ + 2 kΩ gerilim bölücü bu seviyeyi yaklaşık 3,3 V'a indirir. HC-05'in TXD çıkışı (3,3 V) Arduino için HIGH sayıldığından o yönde bölücü gerekmez."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde gerçek Bluetooth eşleşmesi yoktur; komut harfi modülün kutusuna yazılıp gönderilir. Sensör 27 °C ve %55 iken LCD \"Sicaklik: 27.0 C\" / \"Nem: %55\" gösterdi; 31 °C ve %70'e getirince \"31.0 C\" / \"%70\"; F gönderince \"Sicaklik: 87.8 F\" (31 °C = 87,8 °F), C gönderince tekrar \"31.0 C\"; 18 °C ve %35'e getirince \"18.0 C\" / \"%35\". Seri Monitör'e her ölçümde \"Gonderildi: ...\" ve komutlarda \"Komut: F -> Fahrenheit\" yazıldı. Gerçek kartta ve gerçek telefonla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Bluetooth eşleşmesi, telefon uygulaması ve radyo menzili simüle edilmez. Gerilim bölücü kullandığın için simülatör Arduino'dan telefona giden \"Sicaklik: ...\" satırlarını modülün ekranında göstermez (simülatör yalnızca doğrudan bağlı RXD hattını izler); bu yüzden gönderilen veriyi Seri Monitör'e de yazdırdık. Gerçek devrede aynı satır telefona gider. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki DHT.h ve LiquidCrystal.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "HC-05'in TXD ve RXD'sini çapraz bağlamamak; RXD'yi gerilim bölücüsüz bağlamak; Bluetooth ve LCD için aynı pinleri kullanmak (LCD D2–D5, D11, D12'de, Bluetooth D9 ve D10'da); DHT11'i 2 saniyeden sık okumak; dht.readTemperature() sonucunu isnan() ile denetlememek."
+  ],
+  [
+   "Dene",
+   "Telefondan 'T' gelince yalnızca bir ölçümü anında göndersin; ya da sıcaklık 30 °C'yi aşınca bt.println(\"UYARI: SICAK\") ile telefonu uyar."
+  ]
+ ]
+}

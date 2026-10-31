@@ -96,7 +96,7 @@ for (const p of __PROJECTS__) {
       if (c.type === "relay") for (const pn of ["C1", "C2"]) if (has(`${c.id}.${pn}`, isMcuPin)) powerIssues.push(`${c.id}.${pn}: röle bobini doğrudan Arduino veri pinine bağlı (sürücü transistör gerekir)`);
       if (c.type === "npn" && has(`${c.id}.B`, isMcuPin)) powerIssues.push(`${c.id}: taban doğrudan Arduino pinine bağlı (direnç gerekir)`);
       if (c.type === "npn" && !has(`${c.id}.E`, isGnd)) powerIssues.push(`${c.id}: emitör GND'ye bağlı değil`);
-      if (c.type === "dcmotor") {
+      if (c.type === "dcmotor" && !(has(`${c.id}.A`, (k) => /^[^.]+\.OUT\d$/.test(k) && typeById.get(k.split(".")[0]) === "l298n") && has(`${c.id}.B`, (k) => /^[^.]+\.OUT\d$/.test(k) && typeById.get(k.split(".")[0]) === "l298n"))) {
         const diodes = circuit.components.filter((d: any) => d.type === "diode");
         const ok = diodes.some((d: any) => (has(`${c.id}.A`, new RegExp(`^${d.id}\\.K$`)) && has(`${c.id}.B`, new RegExp(`^${d.id}\\.A$`)) && has(`${c.id}.A`, isPlus)) || (has(`${c.id}.B`, new RegExp(`^${d.id}\\.K$`)) && has(`${c.id}.A`, new RegExp(`^${d.id}\\.A$`)) && has(`${c.id}.B`, isPlus)));
         if (!ok) powerIssues.push(`${c.id}: ters diyot yok ya da yönü yanlış (katot + tarafa bakmalı)`);
@@ -122,6 +122,7 @@ for (const p of __PROJECTS__) {
   const motorLog: [number, string, number, number][] = [];
   const relayLog: [number, string, boolean][] = [];
   const lcdLog: [number, string][] = []; let lastLcd = "";
+  const modLog: [number, string, string][] = []; const lastMod = new Map<string, string>();
   const lastServo = new Map<string, string>(), lastMotor = new Map<string, string>(), lastRelay = new Map<string, boolean>();
   const lastTone = new Map<string, number>(), lastBuz = new Map<string, boolean>(), lastLed = new Map<string, string>();
   const warnings = new Set<string>();
@@ -141,6 +142,7 @@ for (const p of __PROJECTS__) {
     for (const [id, sv] of f.servos) { const k = `${sv.angle}/${sv.powered}`; if (lastServo.get(id) !== k) { lastServo.set(id, k); servoLog.push([t, id, sv.angle, sv.powered]); } }
     for (const [id, m] of f.motors) { const k = `${m.speed.toFixed(2)}/${m.currentMa.toFixed(0)}`; if (lastMotor.get(id) !== k) { lastMotor.set(id, k); motorLog.push([t, id, +m.speed.toFixed(2), +m.currentMa.toFixed(1)]); } }
     for (const [id, r] of f.relays) if (lastRelay.get(id) !== r.on) { lastRelay.set(id, r.on); relayLog.push([t, id, r.on]); }
+    for (const [id, m] of f.modules) if (lastMod.get(id) !== m.status) { lastMod.set(id, m.status); modLog.push([t, id, m.status]); }
     { const cur = [...f.lcds.values()].map((l: any) => l.rows.join("|")).join("#"); if (cur !== lastLcd) { lastLcd = cur; lcdLog.push([t, cur]); } }
     f.lcds.forEach((l) => { if (l.problem && (!l.waiting || f.timeUs > 2_000_000)) lcdProblem = l.problem; });
   }
@@ -155,6 +157,7 @@ for (const p of __PROJECTS__) {
     toneLog: toneLog.slice(0, 80), buzLog: buzLog.slice(0, 200), ledLog: ledLog.slice(0, 60),
     lcdLog: lcdLog.slice(0, 120), servoLog: servoLog.slice(0, 60), motorLog: motorLog.slice(0, 60), relayLog: relayLog.slice(0, 40),
     ledEnd: Object.fromEntries([...(last?.leds ?? [])].map(([id, l]: any) => [id, l.lit])),
+    modLog: modLog.slice(0, 80), modules: Object.fromEntries([...(last?.modules ?? [])].map(([id, m]: any) => [id, { status: m.status, detail: m.detail }])),
     lcd, finished: s.finished, timeMs: s.timeUs / 1000,
   };
   writeFileSync(`${OUT}/facts/${p.id}.json`, JSON.stringify(facts, null, 1));

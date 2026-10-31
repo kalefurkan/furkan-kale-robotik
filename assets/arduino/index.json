@@ -393,7 +393,9 @@
    "t": "Bluetooth Kontrollü LED",
    "comps": "HC-05, LED",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "Telefondan HC-05 Bluetooth modülüne gönderilen '1' LED'i yakar, '0' söndürür. SoftwareSerial ile ikinci bir seri hat kurmayı ve 5 V / 3,3 V seviye uyumunu (gerilim bölücü) öğrenirsin. Simülatörde Bluetooth eşleşmesi yoktur; telefon metni kutudan gönderilir.",
+   "sim": false
   },
   {
    "n": 42,
@@ -401,7 +403,9 @@
    "t": "Bluetooth Kontrollü Robot Araba",
    "comps": "HC-05, L298N, DC motorlar",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "Telefondan HC-05 ile gelen F, B, L, R, S harflerine göre L298N motor sürücü iki DC motoru ileri, geri, sola, sağa sürer ve durdurur; 1–9 rakamları PWM ile hızı ayarlar. H köprü mantığını (IN1/IN2) ve hız denetimini (ENA/ENB) öğrenirsin. Simülatörde Bluetooth eşleşmesi yoktur; telefon komutu kutudan gönderilir.",
+   "sim": false
   },
   {
    "n": 43,
@@ -409,7 +413,8 @@
    "t": "Joystick Kontrollü Servo",
    "comps": "Joystick, servo",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "Analog joystick'in X ekseni servonun açısını belirler (0–180°), joystick düğmesi servoyu 90° merkeze getirir. analogRead ile iki eksen okumayı, map() ile aralık çevirmeyi ve INPUT_PULLUP ile düğme okumayı öğrenirsin."
   },
   {
    "n": 44,
@@ -417,7 +422,9 @@
    "t": "Kablosuz Sıcaklık İstasyonu",
    "comps": "HC-05, DHT11, LCD",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "DHT11 sıcaklık ve nemi 16x2 LCD'de gösterir, aynı ölçümü HC-05 ile telefona yollar; telefondan gelen F ve C harfleri birimi Fahrenheit/Celsius yapar. Üç modülü (DHT, LCD, Bluetooth) tek sketch'te birleştirmeyi öğrenirsin. Simülatörde Bluetooth eşleşmesi yoktur; telefon komutu kutudan gönderilir.",
+   "sim": false
   },
   {
    "n": 45,
@@ -425,7 +432,9 @@
    "t": "RFID Kartlı Kapı Sistemi",
    "comps": "RC522, RFID kart, servo",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "RC522 okuyucu kartın UID numarasını SPI ile okur; kayıtlı kart (A1 B2 C3 D4) servoyu 90°'ye çevirip kapıyı 3 saniye açar, tanınmayan kart reddedilir. SPI haberleşmesini, MFRC522 kütüphanesini ve baytları karşılaştırmayı öğrenirsin. Simülatörde gerçek RFID alanı yoktur; kart UID'si ve 'kart yakın' bilgisi arayüzden verilir.",
+   "sim": false
   },
   {
    "n": 46,
@@ -433,7 +442,9 @@
    "t": "RFID Personel Giriş Sistemi",
    "comps": "RC522, LCD, buzzer",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "RC522 ile okunan kartın UID'si LCD'de gösterilir; kayıtlı kartlar için kişinin adı yazılır ve buzzer bir kez, tanınmayan kart için üç kez öter. SPI ile LCD'yi aynı anda kullanmayı (pinleri paylaştırmayı) ve baytları dizide aramayı öğrenirsin. Simülatörde gerçek RFID alanı yoktur; kart UID'si arayüzden verilir.",
+   "sim": false
   },
   {
    "n": 47,
@@ -441,7 +452,8 @@
    "t": "SD Karta Veri Kaydedici",
    "comps": "SD kart modülü, DHT11",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "DHT11'in ölçtüğü sıcaklık ve nem 2 saniyede bir SD karttaki VERI.CSV dosyasına satır satır eklenir; altı kayıttan sonra dosya geri okunup Seri Monitör'e yazılır. SD kart modülünü (SPI), dosya açma/yazma/kapatma ve CSV biçimini öğrenirsin."
   },
   {
    "n": 48,
@@ -449,7 +461,8 @@
    "t": "Gerçek Zamanlı Saat",
    "comps": "DS3231, LCD",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "DS3231 gerçek zamanlı saat modülünden I2C ile tarih, saat, haftanın günü ve sıcaklık okunur ve 16x2 LCD'de gösterilir. RTClib kütüphanesini, DateTime nesnesini ve rakamları iki haneye tamamlamayı öğrenirsin."
   },
   {
    "n": 49,
@@ -457,7 +470,8 @@
    "t": "Alarm Saat",
    "comps": "DS3231, buzzer, LCD",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "DS3231 saati LCD'de gösterilir; saat 08:00 olunca buzzer 10 saniye boyunca saniyede iki bip çalar ve LCD'de ALARM CALIYOR! yazar. Saat/dakika karşılaştırmasını, millis() ile bip ritmi üretmeyi ve alarm durumunu bir değişkenle izlemeyi öğrenirsin."
   },
   {
    "n": 50,
@@ -465,7 +479,9 @@
    "t": "GPS Konum Takip Sistemi",
    "comps": "NEO-6M GPS, LCD",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "NEO-6M GPS modülünün seri hattan gönderdiği NMEA cümleleri TinyGPS++ kütüphanesiyle ayrıştırılır; enlem ve boylam LCD'de, uydu sayısı, yükseklik ve hız Seri Monitör'de gösterilir. Seri veri ayrıştırmayı ve konum verisinin güncel olup olmadığını (age) denetlemeyi öğrenirsin. Simülatörde uydu yoktur; konum arayüzden verilir.",
+   "sim": false
   },
   {
    "n": 51,
@@ -473,7 +489,9 @@
    "t": "Kablosuz Kumandalı LED",
    "comps": "NRF24L01, buton, LED",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "Butona basılınca NRF24L01 radyo modülü bir paket gönderir, karşı modül paketi alır ve alıcı taraftaki LED yanar. RF24 kütüphanesini, gönderici/alıcı (dinleyici) modunu ve adres eşleşmesini öğrenirsin. Gerçekte iki ayrı Arduino gerekir; simülatörde radyo yoktur ve iki modül tek Arduino'ya bağlanır.",
+   "sim": false
   },
   {
    "n": 52,
@@ -481,7 +499,9 @@
    "t": "Kablosuz Sensör Ağı",
    "comps": "2x NRF24L01, sensörler",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "Sensör düğümü DHT11'den sıcaklık ve nemi okuyup {düğüm no, sıcaklık, nem} paketi olarak NRF24L01 ile yollar; merkez düğüm paketi alıp Seri Monitör'e yazar ve 30 °C'yi aşınca uyarı verir. Veri paketi tasarlamayı, dizi göndermeyi ve çok düğümlü ağ fikrini öğrenirsin. Gerçekte iki ayrı Arduino gerekir; simülatörde radyo yoktur ve iki modül tek Arduino'ya bağlanır.",
+   "sim": false
   },
   {
    "n": 53,
@@ -489,7 +509,8 @@
    "t": "Akıllı Ev Kontrol Paneli",
    "comps": "4 kanal röle, LCD, buton",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "İki butonla (SEÇ ve AÇIK/KAPALI) 4 kanallı röle modülünün istenen kanalı açılıp kapanır; 4 ampul ev ışıklarını temsil eder, LCD hangi rölenin seçili ve hangilerinin açık olduğunu gösterir. Aktif LOW röle mantığını, dizilerle çoklu çıkış yönetimini ve buton kenar algılamayı öğrenirsin."
   },
   {
    "n": 54,
@@ -497,7 +518,8 @@
    "t": "Ses Kontrollü Işık Sistemi",
    "comps": "Ses sensörü, röle",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "Ses sensörü yüksek bir ses (alkış) duyunca röle lambayı açar, bir alkış daha kapatır. Ses sensörünün analog ve dijital çıkışını, NPN transistörle röle sürmeyi, ters (flyback) diyodu ve kenar algılamayı öğrenirsin."
   },
   {
    "n": 55,
@@ -505,7 +527,9 @@
    "t": "Parmak İziyle Kapı Kilidi",
    "comps": "AS608, servo",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "AS608 parmak izi sensörü okutulan parmağı kayıtlı şablonlarla karşılaştırır; tanınan parmakta servo kapıyı 3 saniye açar, tanınmayan parmak reddedilir. SoftwareSerial ile ikinci bir seri hat, Adafruit_Fingerprint kütüphanesi ve dönüş kodlarını yorumlamayı öğrenirsin. Simülatörde gerçek parmak izi taraması yoktur; parmak ve kimlik arayüzden verilir.",
+   "sim": false
   },
   {
    "n": 56,
@@ -513,7 +537,8 @@
    "t": "Elektronik Terazi",
    "comps": "HX711, load cell, LCD",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "HX711 yük hücresi yükselticisi bir ağırlığı ham sayıya çevirir; kalibrasyon katsayısı ve dara (tare) ile bu sayı gram olarak 16x2 LCD'de gösterilir. HX711 kütüphanesini, kalibrasyonu ve dara almayı öğrenirsin. Simülatörde yük hücresi yoktur; ağırlık modülün kaydırıcısından verilir."
   },
   {
    "n": 57,
@@ -521,7 +546,8 @@
    "t": "Hava Kalitesi Ölçer",
    "comps": "MQ-135, LCD",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "MQ-135 gaz sensörünün analog çıkışı okunur, ham değer LCD'de gösterilir ve hava IYI / ORTA / KOTU olarak sınıflandırılır. Gaz sensörünün çalışma ilkesini, analog değeri eşiklerle yorumlamayı ve sensörün sınırlarını öğrenirsin. Simülatörde gaz miktarı modülün kaydırıcısından verilir."
   },
   {
    "n": 58,
@@ -529,7 +555,8 @@
    "t": "Gaz Kaçağı Alarmı",
    "comps": "MQ-2, buzzer",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "MQ-2 gaz/duman sensörü analog değeri eşiği aşınca buzzer aralıklı (bip bip) öter; değer eşiğin biraz altına inince alarm biter. Gaz sensörünü okumayı, eşik ve histerezisle alarm mantığı kurmayı öğrenirsin. Simülatörde gaz miktarı modülün kaydırıcısından verilir."
   },
   {
    "n": 59,
@@ -537,7 +564,8 @@
    "t": "Deprem Algılama ve Uyarı",
    "comps": "SW-420, buzzer, LCD",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "SW-420 titreşim sensörünün darbeleri saniyede sayılır; bir saniyede en az 3 darbe gelirse LCD'de DEPREM UYARISI! yazar ve buzzer en az 3 saniye öter. Sensör darbelerini sayma, zaman penceresiyle değerlendirme ve uyarı süresini millis() ile yönetmeyi öğrenirsin. Bu devre gerçek bir deprem erken uyarı sistemi değildir; yalnızca titreşimi algılar."
   },
   {
    "n": 60,
@@ -545,7 +573,8 @@
    "t": "Enerji Tüketim Ölçer",
    "comps": "ACS712, LCD",
    "lv": 3,
-   "ready": false
+   "ready": true,
+   "d": "ACS712 akım sensörünün çıkış gerilimi okunur, akım (A), güç (W) ve harcanan enerji (Wh) hesaplanıp LCD'de gösterilir. Hall etkili akım sensörünün çalışmasını, sıfır akım kalibrasyonunu, ortalama almayı ve güç ile enerji formüllerini öğrenirsin. Simülatörde akım modülün kaydırıcısından verilir. Yalnızca düşük gerilimli devrelerde kullanılır."
   },
   {
    "n": 61,

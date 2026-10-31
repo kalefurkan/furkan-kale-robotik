@@ -37,7 +37,12 @@ struct HardwareSerial {
   template <typename T> void print(T, int = 10);
   template <typename T> void println(T, int = 10);
   void println();
+  int available(); int read(); int peek(); size_t write(uint8_t);
 };
 extern HardwareSerial Serial;
 double degrees(double); double radians(double);
 void setup(); void loop();
+#define F(x) (x)
+#define DEC 10
+#define HEX 16
+#define BIN 2

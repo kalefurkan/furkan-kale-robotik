@@ -1,0 +1,75 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × ses sensörü modülü (mikrofonlu, LM393)",
+  "1 × röle (5 V, tek kontaklı)",
+  "1 × NPN transistör (BC547 tipi)",
+  "1 × 1 kΩ direnç (transistör taban direnci)",
+  "1 × diyot (1N4007, bobin koruma diyodu)",
+  "1 × ampul (3 V, röleyle anahtarlanan lamba)",
+  "Jumper kablolar (14 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: ses sensörü VCC, röle bobini, ters diyot katodu ve röle COM (lambanın + beslemesi)"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: ses sensörü GND, transistör emitörü ve lamba"
+  ],
+  [
+   "D7",
+   "1 kΩ direncin ucu (transistör tabanı)"
+  ],
+  [
+   "D3",
+   "Ses sensörü DO (dijital çıkış)"
+  ],
+  [
+   "A0",
+   "Ses sensörü AO (analog çıkış)"
+  ]
+ ],
+ "img": "assets/devre/ses-kontrollu-isik-sistemi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Röleyi a2 (C1), a3 (C2), a4 (COM), a5 (NO), a6 (NC) deliklerine tak. e2 → artı rayı: bobinin bir ucu 5 V'a gider.",
+  "Ters diyodu c3 (anot) ve c7 (katot, çizgili uç) deliklerine tak; e7 → artı rayı. Diyot bobine paralel ve ters yönde bağlanır.",
+  "NPN transistörü a12 (C), a13 (B), a14 (E) deliklerine tak. e12 → e3: kolektör röle bobininin diğer ucuna (C2) gider. e14 → eksi rayı (emitör GND).",
+  "1 kΩ direnci d13 ile d17 arasına tak (taban direnci) ve D7 pinini e17'ye kablola.",
+  "Ses sensörünü a20 (VCC), a21 (GND), a22 (AO), a23 (DO) deliklerine tak. e20 → artı rayı, e21 → eksi rayı, A0 → e22, D3 → e23.",
+  "Lamba (ampul) breadboard dışındadır (takılı değil): e4 → artı rayı (röle COM'u 5 V'ta), e5 → ampulün A ucu (röle NO), ampulün B ucu → eksi rayı.",
+  "Kodu yükle (simülatörde çalıştır): ses sensörünün ses kaydırıcısını hızla yukarı çekip bırak (alkış): lamba yanar. Bir alkış daha atınca söner."
+ ],
+ "code": "// Ses kontrollu isik sistemi: alkis (yuksek ses) algilaninca role isigi acar, bir alkis daha kapatir\nconst int ROLE_PIN = 7;        // NPN surucu transistorun tabani (1 kOhm uzerinden)\nconst int SES_DO = 3;          // ses sensoru dijital cikis (esik asilinca HIGH)\nconst int SES_AO = A0;         // ses sensoru analog cikis (ses siddeti)\n\nbool isikAcik = false;\nbool sonSes = LOW;\nunsigned long sonTetik = 0;    // son alkis zamani (ard arda tetiklenmeyi onlemek icin)\nbool tetiklendiMi = false;     // henuz hic alkis algilandi mi?\nunsigned long sonYazi = 0;\n\nvoid setup() {\n  pinMode(ROLE_PIN, OUTPUT);\n  digitalWrite(ROLE_PIN, LOW);\n  pinMode(SES_DO, INPUT);\n  Serial.begin(9600);\n  Serial.println(\"Ses kontrollu isik hazir: alkis bekleniyor\");\n}\n\nvoid loop() {\n  bool ses = digitalRead(SES_DO);\n\n  // yalnizca LOW'dan HIGH'a gecis (yeni alkis) ve en az 500 ms ara\n  if (ses == HIGH && sonSes == LOW && (!tetiklendiMi || millis() - sonTetik > 500)) {\n    tetiklendiMi = true;\n    isikAcik = !isikAcik;\n    digitalWrite(ROLE_PIN, isikAcik ? HIGH : LOW);\n    sonTetik = millis();\n    Serial.print(\"Alkis algilandi: isik \");\n    Serial.println(isikAcik ? \"ACIK\" : \"KAPALI\");\n  }\n  sonSes = ses;\n\n  // saniyede bir ses seviyesini yaz\n  if (millis() - sonYazi >= 1000) {\n    sonYazi = millis();\n    Serial.print(\"Ses seviyesi: \");\n    Serial.println(analogRead(SES_AO));\n  }\n  delay(10);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Ses sensörü modülü mikrofon sinyalini yükseltir; AO pini ses şiddetine göre değişen gerilim, DO pini ise karttaki eşik aşılınca HIGH veren dijital çıkıştır. Kod DO'yu okur: LOW'dan HIGH'a geçişte (yani yeni bir alkışta) isikAcik değişkeni tersine çevrilir ve D7 ile transistör sürülür. Ard arda tetiklenmeyi önlemek için iki alkış arasında en az 500 ms aranır. NPN transistör D7'nin küçük akımıyla röle bobinini sürer; röle COM–NO kontağı lambanın devresini kapatır. Saniyede bir AO okunup Seri Monitör'e yazılır."
+  ],
+  [
+   "Ters diyot neden gerekli?",
+   "Röle bobini akım kesilince uçlarında ters yönde yüksek gerilim doğurur ve transistörü bozabilir. Bobine paralel, ters yönde bağlı diyot bu akımı bobinin içinde dolaştırır. Diyodun katodu (çizgili uç) 5 V tarafına, anodu transistör tarafına bakar."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Sessizken (ses 0,1) AO ≈ 225 okundu ve lamba söndü. 2. saniyede ses 0,9'a çıkınca (alkış) Seri Monitör'e \"Alkis algilandi: isik ACIK\" yazıldı, röle çekti, lamba yandı; AO ≈ 798 okundu. 3,5. saniyede ses 0,3'e çıkınca (gürültü, AO ≈ 368) DO eşiği aşmadı ve hiçbir şey olmadı. 4,5. saniyedeki alkışta \"isik KAPALI\", 5,2. saniyedekinde \"isik ACIK\", 7. saniyedekinde yine \"isik KAPALI\" yazıldı. Gerçek kartta ve gerçek mikrofonla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde gerçek ses yoktur: ses şiddeti modülün kaydırıcısıyla verilir; DO eşiği %50'de sabittir (gerçek modüldeki ayar potu yok), frekans ve mikrofon gürültüsü modellenmez. Gerçek mikrofon her yüksek sesi (kapı çarpması, konuşma) alkış sayar; hassasiyet pot ile ayarlanır. Sketch kütüphane kullanmaz, gerçek derleme servisiyle derlenebilir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Röleyi doğrudan Arduino pinine bağlamak (bobin akımı fazladır); ters diyodu unutmak ya da ters takmak; taban direncini koymamak; ses sensörünün eşik potunu ayarlamamak (lamba hiç tetiklenmez ya da sürekli tetiklenir); LOW→HIGH geçişi yerine sadece HIGH'ı okuyup lambayı titretmek."
+  ],
+  [
+   "Dene",
+   "İki alkışı (500 ms içinde) birlikte algılayıp yalnızca çift alkışta lambayı değiştir ya da lambayı 30 saniye sonra otomatik kapat."
+  ]
+ ],
+ "title": "54. Ses Kontrollü Işık Sistemi"
+}

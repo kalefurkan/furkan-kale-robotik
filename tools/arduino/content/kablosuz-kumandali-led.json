@@ -1,0 +1,91 @@
+{
+ "sketch": "nrf_led",
+ "d": "Butona basılınca NRF24L01 radyo modülü bir paket gönderir, karşı modül paketi alır ve alıcı taraftaki LED yanar. RF24 kütüphanesini, gönderici/alıcı (dinleyici) modunu ve adres eşleşmesini öğrenirsin. Gerçekte iki ayrı Arduino gerekir; simülatörde radyo yoktur ve iki modül tek Arduino'ya bağlanır.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "2 × NRF24L01 radyo modülü (3,3 V)",
+  "1 × buton",
+  "1 × LED (kırmızı)",
+  "1 × 220 Ω direnç (LED için)",
+  "Jumper kablolar (19 adet)"
+ ],
+ "wiring": [
+  [
+   "3V3",
+   "Her iki NRF24L01'in 3.3V ucu (yalnızca 3,3 V ile beslenir)"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: NRF24L01 GND'leri, buton ve LED direnci"
+  ],
+  [
+   "D2",
+   "Buton"
+  ],
+  [
+   "D6",
+   "LED anodu (c25)"
+  ],
+  [
+   "D7",
+   "Kumanda modülü CE"
+  ],
+  [
+   "D8",
+   "Kumanda modülü CSN"
+  ],
+  [
+   "D9",
+   "Alıcı modülü CE"
+  ],
+  [
+   "D10",
+   "Alıcı modülü CSN"
+  ],
+  [
+   "D11",
+   "İki modülün MOSI ucu"
+  ],
+  [
+   "D12",
+   "İki modülün MISO ucu"
+  ],
+  [
+   "D13",
+   "İki modülün SCK ucu"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino GND2 pinini alttaki eksi (−) rayına kablola. Bu projede 5V pini kullanılmaz.",
+  "Birinci NRF24L01'i (kumanda) a2 (GND), a3 (3.3V), a4 (CE), a5 (CSN), a6 (SCK), a7 (MOSI), a8 (MISO) deliklerine tak. İkincisini (alıcı) a12–a18 deliklerine aynı sırayla tak.",
+  "DİKKAT: NRF24L01 yalnızca 3,3 V ile beslenir, 5 V verirsen bozulur. Kumanda modülü kabloları: e2 → eksi rayı, Arduino 3V3 → e3, D7 → e4 (CE), D8 → e5 (CSN), D13 → e6 (SCK), D11 → e7 (MOSI), D12 → e8 (MISO).",
+  "Alıcı modülü kabloları: e12 → eksi rayı, d3 → d13 (3,3 V), D9 → e14 (CE), D10 → e15 (CSN). SPI hatları iki modülde ortaktır: d6 → d16 (SCK), d7 → d17 (MOSI), d8 → d18 (MISO).",
+  "Butonu c21 ve c23 deliklerine tak. D2 pinini e21'e, e23'ü eksi rayına kablola.",
+  "LED'i c25 (anot, uzun bacak) ve c26 (katot) deliklerine tak. 220 Ω direnci d26 ile d30 arasına tak. D6 pinini e25'e, e30'u eksi rayına kablola.",
+  "Kodu yükle (simülatörde çalıştır): butona bas ve basılı tut; LED yanar. Bırakınca söner."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "NRF24L01, 2,4 GHz radyo ile kısa paketler yollayan bir modüldür; Arduino ile SPI üzerinden konuşur (MOSI D11, MISO D12, SCK D13) ve ek olarak CE ve CSN pinlerini kullanır. RF24 verici(7, 8) ve RF24 alici(9, 10) nesneleri CE ve CSN pinlerini belirtir. Gönderici openWritingPipe(adres) ve stopListening() ile, alıcı openReadingPipe(1, adres) ve startListening() ile ayarlanır; iki modül aynı adresi (\"00001\") ve kanalı kullanmalıdır. verici.write(&durum, sizeof(durum)) bir int'i bayt olarak gönderir, alici.available() paket var mı der, alici.read() paketi okur. Buton durumu yalnızca değişince gönderilir (1 = basılı, 0 = bırakıldı)."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Seri Monitör'de \"NRF24L01 hazir\" yazdı. Başlangıçta durum 0 gönderildi ve alındı. 2. saniyede butona basılınca \"Gonderildi: 1 (onaylandi)\" ve hemen ardından \"Alindi: 1\" yazıldı, LED yandı; 3,5. saniyede bırakılınca \"Gonderildi: 0\" / \"Alindi: 0\" ile söndü; 5. saniyede 0,4 saniyelik kısa basış da LED'i bu kadar süre yaktı. Kumanda modülü \"gönderici · kanal 76\", alıcı modülü \"dinliyor · kanal 76\" durumunu gösterdi. Gerçek radyo ile ve gerçek iki Arduino ile denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde gerçek radyo, menzil, girişim ve kayıp paket yoktur; aynı devredeki iki modül arasında adres ve kanal eşleşirse paket iletilir ve otomatik onay (ACK) varsayılır. Ayrı Arduino'lar arasında haberleşme de yoktur: gerçekte kumanda (buton + gönderici) ve alıcı (LED + dinleyici) ayrı Arduino'lardır ve her biri kendi sketch'ini çalıştırır; burada ikisi tek sketch'te birleştirildi. Gerçek NRF24L01'de VCC ile GND arasına 10 µF kapasitör eklemek gürültüyü azaltır; simülatörde kapasitör yoktur. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki nRF24L01.h ve RF24.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir. SPI.h izinlidir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "NRF24L01'i 5 V'a bağlamak; iki modülde adresi farklı yazmak (paket iletilmez, write() false döner); alıcıda startListening() ya da vericide stopListening() unutmak; CE/CSN pinlerini koddakiyle uyumsuz bağlamak; Uno'nun 3,3 V pininin zayıf olduğunu unutup uzun mesafe/yüksek güçte sorun yaşamak (ayrı 3,3 V regülatörü gerekebilir)."
+  ],
+  [
+   "Dene",
+   "Gönderilen veriyi bir sayıya dönüştür (örneğin potansiyometre değeriyle LED parlaklığını uzaktan ayarla) ya da alıcıdan geri onay paketi gönder."
+  ]
+ ]
+}

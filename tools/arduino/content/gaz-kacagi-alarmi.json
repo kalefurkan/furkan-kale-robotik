@@ -1,0 +1,62 @@
+{
+ "sketch": "gaz_alarm",
+ "d": "MQ-2 gaz/duman sensörü analog değeri eşiği aşınca buzzer aralıklı (bip bip) öter; değer eşiğin biraz altına inince alarm biter. Gaz sensörünü okumayı, eşik ve histerezisle alarm mantığı kurmayı öğrenirsin. Simülatörde gaz miktarı modülün kaydırıcısından verilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × MQ-2 gaz/duman sensörü modülü",
+  "1 × aktif buzzer",
+  "Jumper kablolar (8 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: MQ-2 VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: MQ-2 GND ve buzzer −"
+  ],
+  [
+   "A0",
+   "MQ-2 AO (analog çıkış)"
+  ],
+  [
+   "D7",
+   "MQ-2 DO (dijital çıkış)"
+  ],
+  [
+   "D8",
+   "Buzzer + (anot)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "MQ-2'yi a4 (VCC), a5 (GND), a6 (AO), a7 (DO) deliklerine tak. e4 → artı rayı, e5 → eksi rayı, A0 → e6 (AO), D7 → e7 (DO).",
+  "Aktif buzzer'ı c12 (+) ve c13 (−) deliklerine tak. D8 pinini e12'ye, e13'ü eksi rayına kablola.",
+  "Kodu yükle (simülatörde çalıştır): MQ-2'nin gaz kaydırıcısını yükselt. Değer eşiği aşınca Seri Monitör'e \"GAZ ALGILANDI!\" yazılır ve buzzer aralıklı öter."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "MQ-2 ısıtılan bir metal oksit tabaka içerir; LPG, duman, hidrojen gibi yanıcı gazlar tabakanın direncini düşürür ve AO gerilimi yükselir. analogRead() 0–1023 değer verir. Kod ALARM_ESIK = 450 üstünde alarmı başlatır, alarm ancak değer ALARM_ESIK − HISTEREZIS = 400'ün altına inince biter. Bu histerezis, değer eşik civarında oynadığında alarmın sürekli açılıp kapanmasını önler. Alarm sırasında (millis() / 200) % 2 ifadesiyle buzzer 200 ms açık, 200 ms kapalı öter. Durum bilgisi saniyede bir Seri Monitör'e yazılır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Temiz havada (300 ppm) AO = 168 okundu ve buzzer sustu. 4. saniyede gaz 1000 ppm'e çıkınca AO = 427 oldu; eşiğin (450) altında kaldığı için alarm çalmadı. 7. saniyede 2500 ppm'e çıkınca AO = 624 ve DO = 0 oldu: Seri Monitör'e \"GAZ ALGILANDI! AO=624\" yazıldı, buzzer 200 ms açık / 200 ms kapalı öttü. 11. saniyede gaz 1000 ppm'e inince AO = 427 oldu ama bu değer 400'ün altına inmediği için alarm sürdü (histerezis); 13. saniyede 300 ppm'e inince \"Gaz seviyesi normale dondu. AO=168\" yazıldı ve buzzer sustu. Eşik değerleri bu simülatör modeline göre seçilmiştir. Gerçek kartta denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde ısınma süresi, gaz türü ayrımı (LPG/duman/hidrojen), R0 kalibrasyonu ve sıcaklık/nem etkisi yoktur; DO eşiği sabittir (gerçek kartta ayar potu var), AO modeli logaritmik ve basittir. Gerçek MQ-2 ilk kullanımda uzun süre ısınmalı, eşikler denemeyle ayarlanmalıdır. BU DEVRE GERÇEK BİR GÜVENLİK ALARMI DEĞİLDİR: gerçek gaz kaçağı tespiti için sertifikalı bir dedektör kullanılmalıdır. Sketch kütüphane kullanmaz, gerçek derleme servisiyle derlenebilir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Sensörü ısınmadan okuyup tetiklendi sanmak; eşiği denemeden seçmek (sürekli alarm ya da hiç alarm); histerezis koymayıp eşik civarında buzzerın titremesine yol açmak; MQ-2'yi 3,3 V'a bağlamak (ısıtıcı yetersiz kalır); aktif buzzer için tone() kullanmaya çalışmak."
+  ],
+  [
+   "Dene",
+   "Alarm sırasında kırmızı bir LED'i buzzer ile birlikte yak-söndür ya da bir düğmeyle alarmı 30 saniye susturmayı ekle."
+  ]
+ ]
+}

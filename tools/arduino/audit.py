@@ -28,7 +28,9 @@ def classify(t):
     if 'pasif buzzer' in l: return 'passivebuzzer'
     if 'aktif buzzer' in l: return 'buzzer'
     if re.search(r'Ω\s*direnç', t): return 'resistor'
-    for k, typ in [('potansiyometre', 'pot'), ('rgb', 'rgbled'), (r'\bldr\b', 'ldr'), ('lm35', 'lm35'), ('dht11', 'dht11'), ('hc-sr04', 'hcsr04'), ('ttp223', 'ttp223'),
+    for k, typ in [('hc-05', 'hc05'), ('l298n', 'l298n'), ('joystick', 'joystick'), ('rc522', 'rc522'), ('sd kart', 'sdcard'), ('ds3231', 'ds3231'), ('neo-6m', 'neo6m'),
+                   ('nrf24', 'nrf24'), ('4 kanallı röle', 'relay4'), ('as608', 'as608'), ('hx711', 'hx711'), ('mq-135', 'mq135'), (r'mq-2\b', 'mq2'), ('sw-420', 'sw420'),
+                   ('acs712', 'acs712'), ('ses sensörü', 'soundsensor'), ('ampul', 'bulb'), ('potansiyometre', 'pot'), ('rgb', 'rgbled'), (r'\bldr\b', 'ldr'), ('lm35', 'lm35'), ('dht11', 'dht11'), ('hc-sr04', 'hcsr04'), ('ttp223', 'ttp223'),
                    ('eğim', 'tilt'), ('tilt', 'tilt'), ('lcd', 'lcd16x2'), ('servo', 'servo'), (r'\bpir\b', 'pir'),
                    ('keypad', 'keypad4x4'), ('tuş takımı', 'keypad4x4'), ('su seviye', 'waterlevel'), ('yağmur', 'rainsensor'),
                    ('toprak nem', 'soil'), (r'\bir\b.*(sensör|engel)', 'irsensor'), ('hall', 'hallsensor'), ('hmc5883l', 'hmc5883l'),

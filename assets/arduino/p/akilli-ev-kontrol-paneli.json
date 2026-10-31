@@ -1,0 +1,107 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × 4 kanallı röle modülü (5 V, aktif LOW)",
+  "4 × ampul (3 V; ev lambalarını temsil eder)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "2 × buton",
+  "Jumper kablolar (36 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD, arka ışık direnci, röle VCC ve COM1–COM4"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW, K, röle GND, butonlar ve ampuller"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D6",
+   "Röle IN1"
+  ],
+  [
+   "D7",
+   "Röle IN2"
+  ],
+  [
+   "D8",
+   "Röle IN3"
+  ],
+  [
+   "D9",
+   "Röle IN4"
+  ],
+  [
+   "D10",
+   "SEÇ butonu"
+  ],
+  [
+   "A0",
+   "AÇIK/KAPALI butonu"
+  ]
+ ],
+ "img": "assets/devre/akilli-ev-kontrol-paneli.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "SEÇ butonunu c24 ve c26 deliklerine tak: D10 → e24, e26 → eksi rayı. AÇIK/KAPALI butonunu c28 ve c30 deliklerine tak: A0 → e28, e30 → eksi rayı.",
+  "4 kanallı röle modülü ve 4 ampul breadboard dışındadır (takılı değil), kablolarla bağlanır. Röle VCC → artı rayı, röle GND → eksi rayı. Röle girişleri: D6 → IN1, D7 → IN2, D8 → IN3, D9 → IN4.",
+  "Röle kontakları: COM1, COM2, COM3, COM4 uçlarının her birini artı rayında ayrı bir deliğe kablola (ampullerin + beslemesi buradan geçer).",
+  "NO1, NO2, NO3, NO4 uçlarını sırayla ampul 1, 2, 3, 4'ün A ucuna kablola. Ampullerin B uçlarını eksi rayına bağla. NC uçları boş kalır.",
+  "Kodu yükle (simülatörde çalıştır): SEÇ butonuna basınca \"Secili Role\" numarası değişir; AÇIK/KAPALI butonuna basınca seçili rölenin ampulü yanar ya da söner, LCD'nin ikinci satırında \"1:K 2:A 3:K 4:K\" gibi durum görünür (A = açık, K = kapalı)."
+ ],
+ "code": "// Akilli ev kontrol paneli: 4 kanalli role modulu, LCD ve iki buton\n// SEC butonu (D10) rolenin numarasini degistirir, ACIK/KAPALI butonu (A0) secili roleyi acar/kapatir\n#include <LiquidCrystal.h>\n\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\n\nconst int ROLE_PIN[4] = {6, 7, 8, 9};   // IN1..IN4 (bu role modulu LOW'da calisir)\nconst int SEC_BUTON = 10;\nconst int DEGISTIR_BUTON = A0;\n\nbool acik[4] = {false, false, false, false};\nint secili = 0;                          // 0..3\nbool sonSec = HIGH;\nbool sonDegistir = HIGH;\n\nvoid roleleriYaz() {\n  for (int i = 0; i < 4; i++) {\n    digitalWrite(ROLE_PIN[i], acik[i] ? LOW : HIGH);   // LOW = role ceker\n  }\n}\n\nvoid ekraniYaz() {\n  lcd.setCursor(0, 0);\n  lcd.print(\"Secili Role: \");\n  lcd.print(secili + 1);\n  lcd.print(\"   \");\n  lcd.setCursor(0, 1);\n  for (int i = 0; i < 4; i++) {\n    lcd.print(i + 1);\n    lcd.print(\":\");\n    lcd.print(acik[i] ? \"A\" : \"K\");        // A = acik, K = kapali\n    lcd.print(\" \");\n  }\n}\n\nvoid setup() {\n  for (int i = 0; i < 4; i++) {\n    pinMode(ROLE_PIN[i], OUTPUT);\n    digitalWrite(ROLE_PIN[i], HIGH);       // HIGH = role birakir (bu modul LOW'da ceker)\n  }\n  pinMode(SEC_BUTON, INPUT_PULLUP);\n  pinMode(DEGISTIR_BUTON, INPUT_PULLUP);\n  Serial.begin(9600);\n  lcd.begin(16, 2);\n  ekraniYaz();\n}\n\nvoid loop() {\n  bool sec = digitalRead(SEC_BUTON);\n  bool degistir = digitalRead(DEGISTIR_BUTON);\n\n  if (sonSec == HIGH && sec == LOW) {      // SEC'e basildi\n    secili = (secili + 1) % 4;\n    Serial.print(\"Secili role: \");\n    Serial.println(secili + 1);\n    ekraniYaz();\n  }\n  if (sonDegistir == HIGH && degistir == LOW) {   // ACIK/KAPALI'ya basildi\n    acik[secili] = !acik[secili];\n    roleleriYaz();\n    Serial.print(\"Role \");\n    Serial.print(secili + 1);\n    Serial.println(acik[secili] ? \" ACIK\" : \" KAPALI\");\n    ekraniYaz();\n  }\n  sonSec = sec;\n  sonDegistir = degistir;\n  delay(20);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Bu röle modülü aktif LOW'dur: IN pini LOW olunca röle çeker (COM–NO bağlanır), HIGH olunca bırakır. Bu yüzden kod rölenin \"açık\" durumunu digitalWrite(pin, LOW) ile verir. acik[] dizisi dört kanalın durumunu tutar, ROLE_PIN[] dizisi pin numaralarını. SEC butonu secili değişkenini 0–3 arasında döndürür; AÇIK/KAPALI butonu acik[secili] değerini tersine çevirip roleleriYaz() ile tüm pinleri günceller. Butonlar INPUT_PULLUP olduğu için basılınca LOW okunur; kod yalnızca HIGH'dan LOW'a geçişte (kenar) bir kez işlem yapar, böylece buton basılı tutulunca röle sürekli değişmez. A0 analog pini burada dijital giriş olarak kullanılır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta dört röle de bırakmış durumdaydı, LCD \"Secili Role: 1\" ve \"1:K 2:K 3:K 4:K\" gösterdi. 1,5. saniyede SEÇ'e basılınca \"Secili role: 2\"; 2,5. saniyede AÇIK/KAPALI'ya basılınca \"Role 2 ACIK\" yazıldı, 2. röle çekti ve 2. ampul yandı; 3,5. saniyede SEÇ ile 3. röle seçildi, 4,5. saniyede açıldı (\"3:A\"). SEÇ'e iki kez basılınca seçim 4'e, sonra 1'e döndü; 8. saniyede 1. röle açıldı, 10. saniyede tekrar basılınca kapandı (\"Role 1 KAPALI\"). Gerçek kartta ve gerçek röle modülüyle denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde röle kontağı ve ampuller 5 V ile çalışır; şebeke gerilimi (220 V) ve röle sıçraması modellenmez. Röle modülündeki JD-VCC jumper'ı, optokuplör ve bobin akımı yoktur. GERÇEK EV LAMBALARINI RÖLEYLE BAĞLAMAK TEHLİKELİDİR: 220 V can güvenliği riski taşır; öğretmen ya da yetişkin gözetimi olmadan denenmez, bu projede yalnızca 5 V'luk ampullerle çalışılır. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki LiquidCrystal.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Aktif LOW rölede mantığı ters kurmak (LOW = kapalı sanmak); röle pinlerini setup()'ta pinMode(OUTPUT) yapıp HIGH yazmamak (başlangıçta röleler çekebilir); COM ucunu eksi ya da boş bırakmak; ampulün B ucunu GND'ye bağlamamak; butonları INPUT_PULLUP yapmamak (kenar algılama çalışmaz)."
+  ],
+  [
+   "Dene",
+   "Dördüncü bir düğme ile \"hepsini kapat\" fonksiyonu ekle ya da bir kanalın açık kalma süresini millis() ile 10 saniye ile sınırla (otomatik kapanma)."
+  ]
+ ],
+ "title": "53. Akıllı Ev Kontrol Paneli"
+}

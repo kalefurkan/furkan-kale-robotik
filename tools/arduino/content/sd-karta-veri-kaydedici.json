@@ -1,0 +1,71 @@
+{
+ "sketch": "sd_kayit",
+ "d": "DHT11'in ölçtüğü sıcaklık ve nem 2 saniyede bir SD karttaki VERI.CSV dosyasına satır satır eklenir; altı kayıttan sonra dosya geri okunup Seri Monitör'e yazılır. SD kart modülünü (SPI), dosya açma/yazma/kapatma ve CSV biçimini öğrenirsin.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × SD kart modülü (FAT32 biçimli bir SD kart takılı)",
+  "1 × DHT11 sıcaklık ve nem sensörü (3 pinli modül)",
+  "Jumper kablolar (11 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: SD modülü VCC ve DHT11 VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: SD modülü GND ve DHT11 GND"
+  ],
+  [
+   "D2",
+   "DHT11 DATA"
+  ],
+  [
+   "D4",
+   "SD modülü CS (çip seçme)"
+  ],
+  [
+   "D11",
+   "SD modülü MOSI"
+  ],
+  [
+   "D12",
+   "SD modülü MISO"
+  ],
+  [
+   "D13",
+   "SD modülü SCK"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın. SD kartı modüle tak (kart önce bilgisayarda FAT32 biçimlendirilmiş olmalı).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "SD kart modülünü a4 (GND), a5 (VCC), a6 (MISO), a7 (MOSI), a8 (SCK), a9 (CS) deliklerine tak.",
+  "SD modülü kabloları: e4 → eksi rayı, e5 → artı rayı, D12 → e6 (MISO), D11 → e7 (MOSI), D13 → e8 (SCK), D4 → e9 (CS).",
+  "DHT11'i c14 (VCC), c15 (DATA), c16 (GND) deliklerine tak. e14 → artı rayı, e16 → eksi rayı, D2 pinini e15'e kablola.",
+  "Kodu yükle (simülatörde çalıştır): Seri Monitör'de \"SD kart hazir\" ve her 2 saniyede \"Kayit N yazildi\" görünür; altıncı kayıttan sonra VERI.CSV içeriği ekrana basılır. SD modülünü seçersen dosya adı ve satırları modülün bilgisinde de görünür."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "SD kart modülü Arduino ile SPI üzerinden konuşur (MOSI D11, MISO D12, SCK D13); çip seçme (CS) pini kodda SD.begin(4) ile belirtilir. SD.open(\"veri.csv\", FILE_WRITE) dosyayı açar (yoksa oluşturur, varsa sonuna ekler). print() ve println() ile satır yazılır; sütunlar noktalı virgülle ayrılır (CSV). close() veriyi karta kesin olarak yazar; kapatılmazsa veri kaybolabilir. Dosya adı 8.3 biçiminde olmalıdır (en çok 8 harf + 3 harflik uzantı). Sonunda SD.open(\"veri.csv\") ile dosya okunur: available() okunacak bayt kaldı mı der, read() bir bayt verir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Seri Monitör'de \"SD kart hazir\" yazdı; ilk kayıt hemen yazıldı, sonra her 2 saniyede bir \"Kayit 2 yazildi\" … \"Kayit 6 yazildi\" göründü. Sensör kaydırıcısı 3., 5. ve 7. saniyelerde 29 °C/%58, 31 °C/%62, 33 °C/%66'ya getirildi. Altıncı kayıttan sonra dosya şu satırlarla basıldı: sure_sn;sicaklik;nem / 0;27.0;55 / 2;27.0;55 / 4;29.0;58 / 6;31.0;62 / 8;33.0;66 / 10;33.0;66 (toplam 89 bayt). SD modülü \"hazır · 1 dosya\" gösterdi. Gerçek kartta denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde SD kart bellekte tutulan sahte bir dosya sistemidir: dosyalar yalnızca simülasyon boyunca durur, yeniden başlatınca silinir; kart kapasitesi, hızı, biçimlendirme ve veri bozulması yoktur. Kart takılı değilse ya da CS pini yanlışsa SD.begin() başarısız olur (\"SD kart hatasi!\"). Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki SD.h ve DHT.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "CS pinini kodda farklı seçmek (SD.begin() false döner); dosya adını 8.3 kuralına uymayan uzun yazmak; close() unutmak; SD kartı FAT32 yerine başka biçimde kullanmak; 5 V'luk Arduino'ya seviye dönüştürücüsü olmayan çıplak microSD yuvası bağlamak."
+  ],
+  [
+   "Dene",
+   "Kaydı 10 saniyede bir yapacak şekilde değiştir ya da bir düğmeye basıldığında dosyayı okuyup ekrana yazdır."
+  ]
+ ]
+}

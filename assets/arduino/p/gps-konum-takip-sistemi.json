@@ -1,0 +1,87 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × NEO-6M GPS modülü",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "Jumper kablolar (18 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D8",
+   "NEO-6M TX (Arduino'nun RX'i)"
+  ],
+  [
+   "D9",
+   "NEO-6M RX (Arduino'nun TX'i; sketch GPS'e veri göndermez, isteğe bağlıdır)"
+  ]
+ ],
+ "img": "assets/devre/gps-konum-takip-sistemi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "NEO-6M'i a21 (VCC), a22 (GND), a23 (TX), a24 (RX) deliklerine tak. e21 → artı rayı, e22 → eksi rayı.",
+  "GPS'in TX ucu Arduino'nun RX'ine, RX ucu TX'ine gider (çapraz): e23 → D8, e24 → D9. D0/D1 USB için ayrıldığından SoftwareSerial gpsSerial(8, 9) ile ikinci bir seri hat kuruldu.",
+  "Kodu yükle (simülatörde çalıştır): ilk saniyede LCD \"Konum yok\" der; GPS modülü seçilip \"konum sabit\" açıkken LCD'de \"Enlem 41.0082\" ve \"Boylam 28.9784\" görünür. Modülden enlem/boylamı değiştirince ekran güncellenir."
+ ],
+ "code": "// GPS konum takip sistemi: NEO-6M NMEA cumlelerini gonderir, TinyGPS++ ayristirir, LCD'de enlem ve boylam gosterilir\n#include <SoftwareSerial.h>\n#include <TinyGPS++.h>\n#include <LiquidCrystal.h>\n\nSoftwareSerial gpsSerial(8, 9);   // RX = D8 (NEO-6M TX'ten gelir), TX = D9 (kullanilmiyor)\nTinyGPSPlus gps;\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\n\nunsigned long sonGuncelleme = 0;\n\nvoid setup() {\n  Serial.begin(9600);\n  gpsSerial.begin(9600);            // NEO-6M varsayilan hizi 9600\n  lcd.begin(16, 2);\n  lcd.print(\"GPS araniyor\");\n}\n\nvoid loop() {\n  // gelen NMEA karakterlerini TinyGPS++'a ver\n  while (gpsSerial.available() > 0) {\n    gps.encode(gpsSerial.read());\n  }\n\n  if (millis() - sonGuncelleme >= 1000) {   // saniyede bir ekrani guncelle\n    sonGuncelleme = millis();\n    lcd.clear();\n    // isValid() bir kez konum alindiktan sonra hep true kalir; konum guncel mi diye age() de bakilir\n    if (gps.location.isValid() && gps.location.age() < 3000) {\n      lcd.setCursor(0, 0);\n      lcd.print(\"Enlem \");\n      lcd.print(gps.location.lat(), 4);\n      lcd.setCursor(0, 1);\n      lcd.print(\"Boylam \");\n      lcd.print(gps.location.lng(), 4);\n\n      Serial.print(\"Konum: \");\n      Serial.print(gps.location.lat(), 6);\n      Serial.print(\", \");\n      Serial.print(gps.location.lng(), 6);\n      Serial.print(\" uydu=\");\n      Serial.print(gps.satellites.value());\n      Serial.print(\" yukseklik=\");\n      Serial.print(gps.altitude.meters(), 0);\n      Serial.print(\" m hiz=\");\n      Serial.print(gps.speed.kmph(), 0);\n      Serial.println(\" km/s\");\n    } else {\n      lcd.setCursor(0, 0);\n      lcd.print(\"Konum yok\");\n      lcd.setCursor(0, 1);\n      lcd.print(\"Uydu bekleniyor\");\n      Serial.println(\"Konum yok: uydu bekleniyor\");\n    }\n  }\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "GPS modülü saniyede bir NMEA cümlesi gönderir (örneğin $GPRMC ve $GPGGA). Bunlar enlem, boylam, uydu sayısı, yükseklik ve hız gibi bilgileri metin olarak taşır. gpsSerial.read() ile okunan her karakter gps.encode()'a verilir; TinyGPS++ cümleyi toplar, sağlama toplamını (checksum) denetler ve alanları ayrıştırır. gps.location.lat() ve lng() derece cinsinden ondalık sayı verir (güney ve batı negatif). gps.location.isValid() bir kez konum alındıktan sonra hep true kalır, bu yüzden konumun güncel olup olmadığı gps.location.age() < 3000 (son 3 saniye) ile de denetlenir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde gerçek uydu yoktur; NEO-6M modülü, arayüzden verilen enlem, boylam, yükseklik, hız ve uydu sayısıyla her saniye RMC ve GGA cümlesi üretir. İlk saniyede Seri Monitör'de \"Konum yok: uydu bekleniyor\" yazdı; 2. saniyeden itibaren \"Konum: 41.008202, 28.978399 uydu=7 yukseklik=40 m hiz=0 km/s\" yazıldı (altı basamak, kayan noktalı sayı yuvarlaması), LCD \"Enlem 41.0082\" / \"Boylam 28.9784\" gösterdi. 5. saniyede konum 39.9208, 32.8541'e (938 m, 36 km/s, 9 uydu) değişince LCD ve Seri Monitör birkaç saniye içinde güncellendi. 9. saniyede \"konum sabit\" kapatılınca eski konum 3 saniye daha gösterildi, sonra \"Konum yok\" / \"Uydu bekleniyor\" oldu; 13. saniyede konum yeniden verilince (38.4237, 27.1428) ekran toparlandı. Gerçek GPS ile ve açık havada denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde uydu alımı yoktur; NEO-6M modülü verilen koordinatları NMEA cümlesine çevirir. İlk sabitleme süresi (soğuk başlangıçta birkaç dakika), iç mekanda sinyal kaybı, UBX yapılandırma komutları ve güncelleme hızı simüle edilmez. Gerçek GPS'e açık havada ve uzun süre bekleyerek konum alırsın. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki TinyGPS++.h ve LiquidCrystal.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir. SoftwareSerial.h izinlidir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TX/RX'i çapraz bağlamamak (GPS TX → Arduino RX); baud hızını 9600'den farklı seçmek; GPS'i iç mekanda deneyip \"Konum yok\"u arıza sanmak; loop() içinde uzun delay() kullanmak (SoftwareSerial 64 baytlık tamponu taşar, cümleler kaybolur); isValid() true diye konumun güncel olduğunu varsaymak."
+  ],
+  [
+   "Dene",
+   "Konumu 5 saniyede bir kaydet ve iki nokta arasındaki mesafeyi gps.distanceBetween() ile hesapla ya da hız 50 km/s'i aşınca uyarı ver."
+  ]
+ ],
+ "title": "50. GPS Konum Takip Sistemi"
+}

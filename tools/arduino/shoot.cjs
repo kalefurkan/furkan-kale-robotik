@@ -38,10 +38,16 @@ const shoot = fs.existsSync(SHOOT) ? JSON.parse(fs.readFileSync(SHOOT, 'utf8')) 
       else if (a.up) await down(page, a.up, false);
       else if (a.press) await press(page, a.press, a.hold || 150);
       else if (a.keys) for (const k of a.keys.seq) { await pressKey(page, a.keys.id, k, a.keys.hold || 90); await page.waitForTimeout(a.keys.gap || 180); }
+      else if (a.slider) await page.evaluate(({ v, i }) => { const el = document.querySelectorAll('input[type=range]')[i || 0]; const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, String(v)); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); }, { v: a.slider.value, i: a.slider.index });
+      else if (a.select) await page.locator(`g[data-id="${a.select}"]`).first().click();
+      else if (a.fill) await page.getByPlaceholder(a.fill.placeholder).first().fill(a.fill.text);
+      else if (a.clickText) await page.getByRole('button', { name: a.clickText }).first().click();
+      else if (a.clickCss) await page.locator(a.clickCss).first().click();
+      else if (a.clickLabel) await page.getByText(a.clickLabel, { exact: !!a.exact }).first().click();
       else if (a.waitMs === undefined && a.waitLcd) await page.waitForTimeout(a.waitLcd);
       else if (a.presses) for (let i = 0; i < a.presses.n; i++) { await press(page, a.presses.id, a.presses.hold || 90); await page.waitForTimeout(a.presses.gap || 160); }
     }
-    if ((sc.actions || []).some(a => a.keys || a.press || a.presses || a.down)) {
+    if ((sc.actions || []).some(a => a.keys || a.press || a.presses || a.down || a.select || a.slider)) {
       // tıklanan parça seçili kalır (turkuaz çerçeve + sağ/sol denetçi paneli): boş bir yere tıklayıp seçimi kaldır
       await page.keyboard.press('Escape');
       const sv = await page.evaluate(() => { const r = [...document.querySelectorAll('svg')].map(s => s.getBoundingClientRect()).sort((a, b) => b.width * b.height - a.width * a.height)[0]; return { x: r.right - 14, y: r.bottom - 14 }; });

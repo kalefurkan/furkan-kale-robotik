@@ -1,0 +1,92 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × DS3231 RTC modülü (I2C, CR2032 pilli)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "1 × aktif buzzer",
+  "Jumper kablolar (20 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "A4",
+   "DS3231 SDA (I2C veri)"
+  ],
+  [
+   "A5",
+   "DS3231 SCL (I2C saat)"
+  ],
+  [
+   "D8",
+   "Buzzer + (anot)"
+  ]
+ ],
+ "img": "assets/devre/alarm-saat.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "DS3231'i a21 (VCC), a22 (GND), a23 (SCL), a24 (SDA) deliklerine tak. e21 → artı rayı, e22 → eksi rayı, A5 → e23 (SCL), A4 → e24 (SDA).",
+  "Aktif buzzer'ı c27 (+) ve c28 (−) deliklerine tak. D8 pinini e27'ye, e28'i eksi rayına kablola.",
+  "Kodu yükle (simülatörde çalıştır): DS3231'in başlangıç saati 07:59:50'dir; 10 saniye sonra LCD'de \"ALARM CALIYOR!\" yazar ve buzzer öter. Alarm saatini koddaki ALARM_SAAT ve ALARM_DAKIKA ile değiştirebilirsin."
+ ],
+ "code": "// Alarm saat: DS3231 saati tutar, belirlenen saat ve dakikada buzzer 10 saniye boyunca oter\n#include <Wire.h>\n#include <RTClib.h>\n#include <LiquidCrystal.h>\n\nRTC_DS3231 rtc;\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\n\nconst int BUZZER_PIN = 8;\nconst int ALARM_SAAT = 8;      // alarm 08:00'de caliyor\nconst int ALARM_DAKIKA = 0;\nconst int ALARM_SURE = 10;     // saniye\n\nbool alarmVardi = false;\n\nvoid iki(int v) {\n  if (v < 10) {\n    lcd.print(\"0\");\n  }\n  lcd.print(v);\n}\n\nvoid setup() {\n  pinMode(BUZZER_PIN, OUTPUT);\n  Serial.begin(9600);\n  lcd.begin(16, 2);\n  if (!rtc.begin()) {\n    lcd.print(\"RTC bulunamadi\");\n    while (true) {\n      delay(1000);\n    }\n  }\n}\n\nvoid loop() {\n  DateTime simdi = rtc.now();\n\n  // alarm penceresi: ayarlanan saat:dakikanin ilk 10 saniyesi\n  bool calsin = (simdi.hour() == ALARM_SAAT && simdi.minute() == ALARM_DAKIKA && simdi.second() < ALARM_SURE);\n\n  lcd.setCursor(0, 0);\n  lcd.print(\"Saat \");\n  iki(simdi.hour());\n  lcd.print(\":\");\n  iki(simdi.minute());\n  lcd.print(\":\");\n  iki(simdi.second());\n  lcd.setCursor(0, 1);\n  if (calsin) {\n    lcd.print(\"ALARM CALIYOR!  \");\n  } else {\n    lcd.print(\"Alarm \");\n    iki(ALARM_SAAT);\n    lcd.print(\":\");\n    iki(ALARM_DAKIKA);\n    lcd.print(\"     \");\n  }\n\n  if (calsin) {\n    // saniyede 2 bip: 250 ms acik, 250 ms kapali\n    digitalWrite(BUZZER_PIN, (millis() / 250) % 2 == 0 ? HIGH : LOW);\n    if (!alarmVardi) {\n      Serial.println(\"ALARM! Zaman geldi\");\n      alarmVardi = true;\n    }\n  } else {\n    digitalWrite(BUZZER_PIN, LOW);\n    if (alarmVardi) {\n      Serial.println(\"Alarm bitti\");\n      alarmVardi = false;\n    }\n  }\n  delay(100);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Her 100 ms'de rtc.now() ile saat okunur. Saat ALARM_SAAT, dakika ALARM_DAKIKA ve saniye ALARM_SURE'den küçükse (alarm penceresi: 08:00:00–08:00:09) calsin değişkeni true olur. Alarm sırasında buzzer, (millis() / 250) % 2 ifadesiyle 250 ms açık, 250 ms kapalı yani saniyede 2 bip çalar. alarmVardi değişkeni, \"ALARM!\" ve \"Alarm bitti\" mesajlarının her alarmda yalnızca bir kez yazılmasını sağlar. Alarm bitince buzzer LOW olur ve ekran \"Alarm 08:00\" gösterir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Saat 07:59:50'den başladı; LCD \"Saat 07:59:50\" ve \"Alarm 08:00\" gösterdi. 10. saniyede (08:00:00) Seri Monitör'e \"ALARM! Zaman geldi\" yazıldı, LCD'nin ikinci satırı \"ALARM CALIYOR!\" oldu ve buzzer öttü: 10 saniye boyunca 20 bip (her biri yaklaşık 250 ms açık). 08:00:10'da buzzer sustu, Seri Monitör'e \"Alarm bitti\" yazıldı, ekran \"Alarm 08:00\"a döndü. Gerçek kartta denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde buzzerın sesi yoktur; \"öter\" durumu gösterilir. Saat modülün \"başlangıç saati\" ayarından başlayıp sanal zamanla ilerler (kristal sapması ve pil yoktur). Alarm kodla yapıldığı için DS3231'in kendi alarm yazmaçları ve SQW çıkışı kullanılmaz ve simüle edilmez. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki RTClib.h ve LiquidCrystal.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir. Wire.h izinlidir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Saniyeyi kontrol etmeyip yalnızca saat ve dakikaya bakmak (alarm bir dakika boyunca çalar); SDA ve SCL'yi ters bağlamak (\"RTC bulunamadi\"); buzzer + ve − uçlarını ters takmak; tone() yerine aktif buzzer için digitalWrite kullanmamak (aktif buzzer sabit frekanslıdır, tone() gerekmez)."
+  ],
+  [
+   "Dene",
+   "Alarmı kapatmak için bir düğme ekle (INPUT_PULLUP ile D7) ya da alarm 10 saniye yerine düğmeye basılana kadar çalsın."
+  ]
+ ],
+ "title": "49. Alarm Saat"
+}

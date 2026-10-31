@@ -1,0 +1,86 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HX711 modülü ve yük hücresi (5 kg)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "Jumper kablolar (18 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "A1",
+   "HX711 DT (veri)"
+  ],
+  [
+   "A0",
+   "HX711 SCK (saat)"
+  ]
+ ],
+ "img": "assets/devre/elektronik-terazi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve terazi tablası boş olsun.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "HX711'i a21 (VCC), a22 (GND), a23 (DT), a24 (SCK) deliklerine tak. e21 → artı rayı, e22 → eksi rayı, A1 → e23 (DT), A0 → e24 (SCK). Yük hücresinin dört teli (kırmızı E+, siyah E−, beyaz A−, yeşil A+) modülün kendi vidalı klemenslerine bağlıdır; bu bağlantı simülatörde gösterilmez.",
+  "Kodu yükle (simülatörde çalıştır): tabla boşken dara alınır ve LCD \"0.0 g\" gösterir. HX711'i seçip ağırlık kaydırıcısını yukarı çek: LCD gramı gösterir."
+ ],
+ "code": "// Elektronik terazi: HX711 + yuk hucresi agirligi olcer, LCD'de gram olarak gosterir\n#include <HX711.h>\n#include <LiquidCrystal.h>\n\nconst int DT_PIN = A1;\nconst int SCK_PIN = A0;\nconst float OLCEK = 420.0;     // kalibrasyon: ham deger / gram (kendi yuk hucrene gore bulunur)\n\nHX711 terazi;\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\n\nvoid setup() {\n  Serial.begin(9600);\n  lcd.begin(16, 2);\n  lcd.print(\"Terazi hazir...\");\n  terazi.begin(DT_PIN, SCK_PIN);\n  terazi.set_scale(OLCEK);     // ham degeri grama cevirir\n  terazi.tare();               // bos terazide sifirla (dara)\n  lcd.clear();\n  lcd.print(\"Agirlik:\");\n  Serial.println(\"Terazi hazir: tabla bos olmali, dara alindi\");\n}\n\nvoid loop() {\n  float gram = terazi.get_units(5);   // 5 olcumun ortalamasi\n  if (gram < 0.5 && gram > -0.5) {\n    gram = 0;                          // kucuk gurultuyu sifir say\n  }\n  lcd.setCursor(0, 1);\n  lcd.print(gram, 1);\n  lcd.print(\" g       \");\n  Serial.print(\"Agirlik: \");\n  Serial.print(gram, 1);\n  Serial.println(\" g\");\n  delay(500);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Yük hücresi, üzerine konan ağırlıkla çok küçük bir gerilim değişimi verir; HX711 bunu 24 bitlik sayıya çevirir ve iki telli bir hatla (DT, SCK) Arduino'ya gönderir. terazi.begin(DT, SCK) pinleri tanıtır. terazi.tare() boş tablanın ham değerini ofset olarak saklar (dara). terazi.set_scale(OLCEK) ham fark değerini gram'a çeviren katsayıyı ayarlar. terazi.get_units(5) 5 ölçümün ortalamasını (ham değer − ofset) / ölçek olarak gram verir. Kalibrasyonu kendi yük hücren için şöyle yaparsın: set_scale() ile ölçeği 1 yapıp bilinen bir ağırlığı (örneğin 100 g) koy, get_units() değerini oku ve bunu ağırlığa böl; çıkan sayı OLCEK'tir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde ham değer = 87000 + 420 × ağırlık(g) olarak verilir, bu yüzden kodda OLCEK = 420 seçildi. Dara tabla boşken (0 g) alındı ve Seri Monitör'de \"Terazi hazir: tabla bos olmali, dara alindi\" yazdı; LCD \"Agirlik:\" ve \"0.0 g\" gösterdi. Kaydırıcı 4. saniyede 250 g yapılınca \"250.0 g\", 7. saniyede 1200,5 g yapılınca \"1200.5 g\", 10. saniyede 0 yapılınca \"0.0 g\", 12,5. saniyede 75 g yapılınca \"75.0 g\" göründü. Simülatörde her ölçüm yaklaşık 100 ms sürdüğü için get_units(5) yarım saniye alır. Gerçek kartta denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde gerçek yük hücresi yoktur; ağırlık kaydırıcıdan 0–5000 g aralığında verilir. Gürültü, sıcaklık kayması, taşma, kazanç/kanal seçimi ve yük hücresinin E+/E−/A+/A− bağlantıları modellenmez; gerçek terazide kalibrasyon ve dara her açılışta gereklidir. Gerçek HX711 modülünde doğruluk için yük hücresi sağlam bir tabana vidalanmalıdır. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki HX711.h ve LiquidCrystal.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "DT ve SCK pinlerini koddakiyle (A1, A0) uyumsuz bağlamak (ekran 0 kalır); dara almadan önce tablaya bir şey koymak; kalibrasyon katsayısını başka yük hücresinden almak; negatif okumayı (tablaya ters bakan hücre) fark etmemek; yük hücresinin tellerini yanlış sırayla bağlamak (değerler ters çıkar)."
+  ],
+  [
+   "Dene",
+   "Bir düğme ekleyip dara (tare) almayı düğmeye bağla ya da ağırlık 500 g'ı aşınca ekrana \"FAZLA YUK\" yazdır."
+  ]
+ ],
+ "title": "56. Elektronik Terazi"
+}

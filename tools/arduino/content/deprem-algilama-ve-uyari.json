@@ -1,0 +1,87 @@
+{
+ "sketch": "deprem",
+ "d": "SW-420 titreşim sensörünün darbeleri saniyede sayılır; bir saniyede en az 3 darbe gelirse LCD'de DEPREM UYARISI! yazar ve buzzer en az 3 saniye öter. Sensör darbelerini sayma, zaman penceresiyle değerlendirme ve uyarı süresini millis() ile yönetmeyi öğrenirsin. Bu devre gerçek bir deprem erken uyarı sistemi değildir; yalnızca titreşimi algılar.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × SW-420 titreşim sensörü modülü",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "1 × aktif buzzer",
+  "Jumper kablolar (19 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D6",
+   "SW-420 DO (dijital çıkış)"
+  ],
+  [
+   "D8",
+   "Buzzer + (anot)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "SW-420'yi a21 (VCC), a22 (GND), a23 (DO) deliklerine tak. e21 → artı rayı, e22 → eksi rayı, D6 → e23.",
+  "Aktif buzzer'ı c27 (+) ve c28 (−) deliklerine tak. D8 pinini e27'ye, e28'i eksi rayına kablola.",
+  "Kodu yükle (simülatörde çalıştır): SW-420'yi seçip \"titret\" düğmesine hızla art arda bas. Saniyede en az 3 darbe olunca LCD'de \"DEPREM UYARISI!\" görünür ve buzzer öter."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "SW-420 içinde bir titreşim anahtarı ve bir karşılaştırıcı (LM393) vardır; sarsıntıda DO pini kısa süre HIGH olur. Kod LOW'dan HIGH'a her geçişi bir darbe sayar (sayac). Her saniye sonunda o saniyedeki darbe sayısı sonSaniye değişkenine alınır ve ESIK = 3 ile karşılaştırılır. Eşik aşılırsa uyariBitis, şimdiki zaman + 3000 ms olarak ayarlanır; uyari = (millis() < uyariBitis) doğru olduğu sürece buzzer öter ve LCD uyarı gösterir. Böylece tek bir tıkırtı uyarı vermez, ama sürekli sarsıntı verir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta LCD \"Titresim: 0/sn\" / \"Durum: SAKIN\" gösterdi. 2. saniyede tek bir darbe gelince \"Titresim: 1/sn\" oldu ama eşik (3) aşılmadığı için uyarı olmadı. 5. saniyede 8 hızlı darbe (yaklaşık saniyede 6) verilince Seri Monitör'e \"DEPREM UYARISI! Titresim sayisi: 6\" yazıldı, LCD \"DEPREM UYARISI!\" gösterdi ve buzzer 6,04. saniyeden 9,04. saniyeye kadar (3 saniye) öttü; sonra LCD \"Durum: SAKIN\"a döndü. 11 ve 11,4. saniyelerdeki iki darbe eşik altında kaldı. Gerçek kartta denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde titreşim, modülün \"titret\" düğmesiyle verilir; darbe sıklığı, genliği, hassasiyet potu ve gürültü yoktur. Bazı SW-420 modüllerinde çıkış mantığı ters olabilir (titreşimde LOW). Gerçek bir deprem sismik dalgalarla (P ve S dalgaları) ilerler ve gerçek erken uyarı sistemleri ivmeölçer ağları kullanır; bu devre bir sınıf ya da masa sarsıntısını bile ayırt edemez, deprem ölçümü ya da güvenlik amaçlı kullanılamaz. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki LiquidCrystal.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Her HIGH okumasını darbe saymak (kenar algılama yapmamak); eşiği çok düşük seçmek (her masa vuruşu uyarı verir); uyarı süresini millis() yerine delay() ile beklemek (sensör o sırada okunamaz); sensörün hassasiyet potunu ayarlamamak; SW-420'yi tek sarsıntıdan sonra bir daha okumamak."
+  ],
+  [
+   "Dene",
+   "Uyarı sırasında LCD'ye son uyarının kaçıncı saniyede başladığını (millis() / 1000) yaz ya da ESIK ve uyarı süresini bir potansiyometreyle ayarlanabilir yap."
+  ]
+ ]
+}

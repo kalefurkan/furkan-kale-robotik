@@ -1,0 +1,68 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × analog joystick modülü (VRx, VRy, SW)",
+  "1 × servo motor (SG90)",
+  "Jumper kablolar (10 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: joystick +5V ve servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: joystick GND ve servo GND"
+  ],
+  [
+   "A0",
+   "Joystick VRx (X ekseni)"
+  ],
+  [
+   "A1",
+   "Joystick VRy (Y ekseni)"
+  ],
+  [
+   "D2",
+   "Joystick SW (düğme)"
+  ],
+  [
+   "D9",
+   "Servo sinyal (SIG)"
+  ]
+ ],
+ "img": "assets/devre/joystick-kontrollu-servo.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Joystick'i a4 (GND), a5 (+5V), a6 (VRx), a7 (VRy), a8 (SW) deliklerine tak.",
+  "Joystick kabloları: e4 → eksi rayı, e5 → artı rayı, e6 → A0, e7 → A1, e8 → D2.",
+  "Servoyu d12 (SIG), d13 (VCC), d14 (GND) deliklerine tak. Servo sinyal kablosu: b12 → D9. Servo güç kabloları: b13 → artı rayı, b14 → eksi rayı.",
+  "Kodu yükle (simülatörde çalıştır): joystick'in X kaydırıcısını değiştir; servo kolu 0–180° arasında onu izler. Düğmeye basınca servo 90°'ye döner."
+ ],
+ "code": "// Joystick kontrollu servo: X ekseni servo acisini belirler, joystick dugmesi (SW) servoyu 90 dereceye ortalar\n#include <Servo.h>\n\nServo servo;\nconst int X_PIN = A0;\nconst int Y_PIN = A1;\nconst int SW_PIN = 2;\nconst int SERVO_PIN = 9;\n\nvoid setup() {\n  Serial.begin(9600);\n  pinMode(SW_PIN, INPUT_PULLUP);   // SW basilinca GND'ye baglanir: LOW\n  servo.attach(SERVO_PIN);\n  servo.write(90);\n}\n\nvoid loop() {\n  int x = analogRead(X_PIN);       // 0-1023, orta nokta yaklasik 512\n  int y = analogRead(Y_PIN);\n  bool basili = (digitalRead(SW_PIN) == LOW);\n\n  int aci = map(x, 0, 1023, 0, 180);\n  if (x > 492 && x < 532) {\n    aci = 90;                      // ortada kucuk bir olu bolge: servo titremesin\n  }\n  if (basili) {\n    aci = 90;                      // dugmeye basinca merkeze don\n  }\n  servo.write(aci);\n\n  Serial.print(\"X=\");\n  Serial.print(x);\n  Serial.print(\" Y=\");\n  Serial.print(y);\n  Serial.print(\" SW=\");\n  Serial.print(basili ? \"basili\" : \"birakildi\");\n  Serial.print(\" aci=\");\n  Serial.println(aci);\n  delay(200);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Joystick içinde iki potansiyometre vardır: biri X, biri Y yönünü ölçer. Bırakınca iki eksen de yaklaşık orta noktaya (analogRead ≈ 512) döner. map(x, 0, 1023, 0, 180) bu değeri servo açısına çevirir. Ortada 492–532 arası küçük bir ölü bölge bırakılır; böylece joystick gevşekken servo titremez. Joystick'in SW ucu düğmedir: basılınca GND'ye bağlanır. pinMode(2, INPUT_PULLUP) ile dahili direnç etkinleştirildiği için basılmadığında HIGH, basılınca LOW okunur."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "X kaydırıcısı ortada (0,5) iken Seri Monitör \"X=512\" ve servo 90°; X = 0,8 iken \"X=819, aci=144\"; en sağda (1,0) \"X=1023, aci=180\"; en solda \"X=0, aci=0\"; 0,25'te \"X=256, aci=45\". Düğmeye basılıyken X = 0,9 olduğu halde açı 90° kaldı ve \"SW=basili\" yazıldı; bırakınca servo 162°'ye döndü. Y ekseni yalnızca ekrana yazılır (Y = 1,0'da \"Y=1023\"). Simülatörde joystick yay etkisi, gürültü ve ölü bölge yoktur; gerçek joystick merkezde 500–520 arasında oynar. Gerçek kartta denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Joystick ve servo simülatörde çalışır; kayan kaydırıcılar fiziksel kolun yerini tutar. Sketch yalnızca Servo.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Joystick VCC'sini 3,3 V'a bağlamak (değerler daralır); X ve Y'yi A0/A1'de karıştırmak; SW pinini INPUT_PULLUP yapmayıp boş bırakmak (rastgele okur); servoyu Arduino 5V pininden güçlü motorlarla beslemek (SG90 küçük olduğu için sorun olmaz, büyük servolara ayrı güç gerekir)."
+  ],
+  [
+   "Dene",
+   "Y eksenini ikinci bir servoya bağla (pan-tilt kamera düzeneği) ya da servoyu açıya değil dönüş hızına göre kontrol et."
+  ]
+ ],
+ "title": "43. Joystick Kontrollü Servo"
+}

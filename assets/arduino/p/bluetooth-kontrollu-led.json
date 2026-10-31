@@ -1,0 +1,72 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HC-05 Bluetooth modülü",
+  "1 × LED (yeşil)",
+  "1 × 220 Ω direnç (LED için)",
+  "1 × 1 kΩ direnç (gerilim bölücü)",
+  "1 × 2 kΩ direnç (gerilim bölücü)",
+  "Jumper kablolar (9 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: HC-05 VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: HC-05 GND, LED direnci ve gerilim bölücü"
+  ],
+  [
+   "D8",
+   "LED anodu (c4)"
+  ],
+  [
+   "D10",
+   "HC-05 TXD (Arduino'nun RX'i)"
+  ],
+  [
+   "D11",
+   "1 kΩ direncin ucu → HC-05 RXD (Arduino'nun TX'i)"
+  ]
+ ],
+ "img": "assets/devre/bluetooth-kontrollu-led.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LED'i c4 (anot, uzun bacak) ve c5 (katot) deliklerine tak. 220 Ω direnci d5 ile d9 arasına tak. D8 pinini e4'e, e9'u eksi rayına kablola.",
+  "HC-05'i a14 (VCC), a15 (GND), a16 (TXD), a17 (RXD) deliklerine tak. e14 → artı rayı, e15 → eksi rayı.",
+  "HC-05'in TXD ucu Arduino'nun D10 (RX) pinine gider: e16 → D10.",
+  "HC-05'in RXD ucu 3,3 V mantıklıdır, Arduino TX'i ise 5 V verir. Bu yüzden gerilim bölücü kur: 1 kΩ direnci d17 ile d21 arasına, 2 kΩ direnci dikey olarak e17 ile h17 arasına tak. D11 pinini e21'e, j17'yi eksi rayına kablola. Bölücü çıkışı (RXD) 5 V × 2 / 3 ≈ 3,3 V olur.",
+  "Kodu yükle (simülatörde çalıştır): HC-05 modülünü seç, kutuya 1 yaz ve \"Telefondan gönder\"e bas: LED yanar. 0 gönderince söner."
+ ],
+ "code": "// Bluetooth kontrollu LED: telefondan '1' gelirse LED yanar, '0' gelirse soner (HC-05 + SoftwareSerial)\n#include <SoftwareSerial.h>\n\nSoftwareSerial bt(10, 11);   // RX = D10 (HC-05 TXD'den gelir), TX = D11 (HC-05 RXD'ye gider, bolucu uzerinden)\nconst int LED_PIN = 8;\n\nvoid setup() {\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(9600);\n  bt.begin(9600);            // HC-05 varsayilan hizi 9600\n  Serial.println(\"Bluetooth LED hazir\");\n}\n\nvoid loop() {\n  while (bt.available() > 0) {\n    char c = bt.read();      // telefondan gelen tek karakter\n    if (c == '1') {\n      digitalWrite(LED_PIN, HIGH);\n      bt.println(\"LED ACIK\");\n      Serial.println(\"Komut: 1 -> LED ACIK\");\n    } else if (c == '0') {\n      digitalWrite(LED_PIN, LOW);\n      bt.println(\"LED KAPALI\");\n      Serial.println(\"Komut: 0 -> LED KAPALI\");\n    }\n  }\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "HC-05 telefonla Bluetooth üzerinden, Arduino ile seri hat (UART) üzerinden konuşur. D0/D1 pinleri USB'ye ayrılı olduğu için SoftwareSerial bt(10, 11) ile D10'u RX, D11'i TX yapan ikinci bir seri hat kurulur; hız 9600 baud'dur (HC-05'in varsayılan hızı). bt.available() kaç karakter geldiğini söyler, bt.read() bir karakter okur. Gelen karakter '1' ise LED yanar, '0' ise söner; başka karakterler yok sayılır. Arduino ayrıca bt.println() ile telefona \"LED ACIK\" / \"LED KAPALI\" yazar."
+  ],
+  [
+   "Neden gerilim bölücü?",
+   "HC-05'in veri girişi (RXD) 3,3 V ile çalışır, Arduino Uno'nun çıkışı ise 5 V'tur. 1 kΩ + 2 kΩ gerilim bölücü 5 V'u yaklaşık 3,3 V'a indirir. TXD → D10 yönünde bölücü gerekmez: HC-05'in 3,3 V'luk HIGH seviyesini Arduino HIGH olarak okur."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde gerçek Bluetooth eşleşmesi yoktur; \"telefondan\" gelen metin modülün kutusuna yazılıp gönderilir (9600 baud). Çalıştırınca Seri Monitör'de \"Bluetooth LED hazir\" yazdı; 1,5 saniyede 1 gönderince \"Komut: 1 -> LED ACIK\" yazıldı ve LED yandı, 3. saniyede 0 gönderince \"Komut: 0 -> LED KAPALI\" yazıldı ve LED söndü; 7 gönderince hiçbir şey olmadı; 5. saniyede 1 ile LED yeniden yandı. Gerçek kartta ve gerçek telefonla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Eşleşme (PIN 1234 ya da 0000), telefon uygulaması, AT komutları ve radyo menzili simüle edilmez. Gerilim bölücü kullandığın için simülatör Arduino'dan telefona giden \"LED ACIK\" yanıtını modülün ekranında göstermez (simülatör yalnızca doğrudan bağlı RXD hattını izler); gerçek devrede bu yanıt telefona gider. Bu sketch yalnızca SoftwareSerial.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TXD ve RXD'yi çapraz bağlamamak (modülün TXD'si Arduino'nun RX pinine, RXD'si TX pinine gider); bt.begin() hızını modülünkinden farklı seçmek (anlamsız karakterler gelir); RXD'yi doğrudan 5 V'luk D11'e bağlamak (modülü zorlar); HC-05'e 5V yerine 3,3 V vermek (bu modül kartı 3,6–6 V ister); D0/D1 pinlerini hem USB hem Bluetooth için kullanmak (yükleme sırasında hata verir)."
+  ],
+  [
+   "Dene",
+   "'2' gönderince LED'in yanıp sönmesini sağla ya da yeni bir LED ekleyip '3' ve '4' komutlarıyla ikinci LED'i kontrol et."
+  ]
+ ],
+ "title": "41. Bluetooth Kontrollü LED"
+}

@@ -1,0 +1,83 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × ACS712 akım sensörü modülü (5 A)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "Jumper kablolar (17 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "A0",
+   "ACS712 OUT (analog çıkış)"
+  ]
+ ],
+ "img": "assets/devre/enerji-tuketim-olcer.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve ölçülecek yük bağlı olmasın (başlangıçta sıfır akım kalibrasyonu yapılır).",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "ACS712'yi a21 (VCC), a22 (OUT), a23 (GND) deliklerine tak. e21 → artı rayı, e23 → eksi rayı, A0 → e22 (OUT).",
+  "Gerçek devrede ölçülecek yük, modülün IP+ ve IP− vidalı uçlarına seri bağlanır; bu uçlar simülatörde modellenmez, akım modülün kaydırıcısından verilir. Yalnızca 5 V gibi düşük gerilimli devreleri ölç.",
+  "Kodu yükle (simülatörde çalıştır): yük bağlı değilken (0 A) kalibrasyon yapılır. ACS712'yi seçip akım kaydırıcısını 1,5 A'e getir: LCD'de yaklaşık \"Akim: 1.48 A\", \"7.4W\" ve artan bir enerji (Wh) değeri görünür."
+ ],
+ "code": "// Enerji tuketim olcer: ACS712 (5 A) akimi olcer, sabit gerilimle gucu hesaplar, harcanan enerjiyi toplar\n// Dusuk gerilimli (ornegin 5 V) bir devreyi olcmek icin tasarlandi; sebeke gerilimine (220 V) ASLA baglanmaz\n#include <LiquidCrystal.h>\n\nconst int AKIM_PIN = A0;\nconst float DUYARLILIK = 0.185;   // ACS712-05B: 185 mV / A\nconst float GERILIM = 5.0;        // olculen devrenin gerilimi (V), sabit kabul edilir\n\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\n\nfloat ofsetV = 2.5;               // akim yokken sensor cikisi (kalibrasyonla bulunur)\nfloat toplamWh = 0;               // harcanan enerji (Wh)\nunsigned long sonZaman = 0;\n\nfloat gerilimOku() {              // 20 okumanin ortalamasi (gurultuyu azaltir)\n  long toplam = 0;\n  for (int i = 0; i < 20; i++) {\n    toplam += analogRead(AKIM_PIN);\n  }\n  return (toplam / 20.0) * 5.0 / 1024.0;\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  lcd.begin(16, 2);\n  lcd.print(\"Kalibrasyon...\");\n  delay(500);\n  ofsetV = gerilimOku();          // yuk bagli degilken: sifir akim noktasi\n  lcd.clear();\n  sonZaman = millis();\n  Serial.print(\"Sifir akim cikisi (V): \");\n  Serial.println(ofsetV, 3);\n}\n\nvoid loop() {\n  float v = gerilimOku();\n  float akim = (v - ofsetV) / DUYARLILIK;      // amper\n  if (akim < 0.05 && akim > -0.05) {\n    akim = 0;                                   // kucuk gurultuyu sifir say\n  }\n  float guc = abs(akim) * GERILIM;              // watt = amper x volt\n\n  unsigned long simdi = millis();\n  toplamWh += guc * (simdi - sonZaman) / 3600000.0;   // watt x saat\n  sonZaman = simdi;\n\n  lcd.setCursor(0, 0);\n  lcd.print(\"Akim: \");\n  lcd.print(akim, 2);\n  lcd.print(\" A    \");\n  lcd.setCursor(0, 1);\n  lcd.print(guc, 1);\n  lcd.print(\"W E:\");\n  lcd.print(toplamWh, 3);\n  lcd.print(\"Wh  \");\n\n  Serial.print(\"Akim=\");\n  Serial.print(akim, 2);\n  Serial.print(\" A, Guc=\");\n  Serial.print(guc, 1);\n  Serial.print(\" W, Enerji=\");\n  Serial.print(toplamWh, 4);\n  Serial.println(\" Wh\");\n  delay(500);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "ACS712'de akım yolu üzerinden geçen akımın oluşturduğu manyetik alanı ölçen bir Hall sensörü vardır. 5 A'lik modelde çıkış gerilimi akım yokken 2,5 V'tur ve her amper için 185 mV değişir (DUYARLILIK = 0,185). Kod önce yük yokken çıkışı ölçüp ofsetV'ye kaydeder (kalibrasyon). Sonra akim = (v − ofsetV) / 0,185 ile amperi, guc = |akim| × GERILIM ile watt'ı hesaplar. Enerji, gücün zamanla toplamıdır: toplamWh += guc × (geçen süre) / 3 600 000. Gürültüyü azaltmak için her ölçüm 20 okumanın ortalamasıdır ve ±0,05 A'den küçük değerler sıfır sayılır. GERILIM sabit 5 V kabul edildi; gerçek devrede yük geriliminin de ölçülmesi gerekir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta Seri Monitör'e \"Sifir akim cikisi (V): 2.500\" yazıldı. Akım kaydırıcısı 0,5 A iken \"Akim=0.48 A, Guc=2.4 W\", 1,5 A iken \"1.48 A, 7.4 W\", 3 A iken \"2.98 A, 14.9 W\" ve −1 A iken \"-1.00 A, 5.0 W\" okundu (10 bitlik ADC adımı yaklaşık 0,026 A olduğu için sonuçlar 0,02 A kadar sapar). Enerji sayacı 18 saniyede yaklaşık 0,031 Wh'e ulaştı; LCD'de örneğin \"Akim: 1.48 A\" ve \"7.4W E:0.008Wh\" göründü. Gerçek kartta denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde ACS712'nin IP+/IP− akım yolu modellenmez: devredeki gerçek akım okunmaz, akım kaydırıcıdan verilir; ofset kayması, gürültü ve bant genişliği de yoktur. Gerçek ACS712 gürültülüdür, ofseti 2,5 V'tan sapabilir ve küçük akımlarda (0,1 A altı) güvenilmezdir. UYARI: Bu proje yalnızca düşük gerilimli (örneğin 5 V) devreleri ölçmek içindir; ŞEBEKE GERİLİMİNE (220 V) BAĞLAMAK ÖLÜMCÜL OLABİLİR, öğretmen/yetişkin gözetimi ve uygun yalıtım olmadan denenmez. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki LiquidCrystal.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Sıfır akım kalibrasyonunu yük bağlıyken yapmak (ofset yanlış olur); sensörü 3,3 V ile beslemek (5 V ister); IP+/IP−'yi yüke paralel bağlamak (sensör bozulur, akım yoluna seri girmeli); 5 A'lik modeli 5 A üstünde kullanmak; gerilimi sabit sanıp güç hesabını yanlış yapmak."
+  ],
+  [
+   "Dene",
+   "Enerji sayacını bir düğmeyle sıfırla ya da enerjiye elektrik birim fiyatı (örneğin kWh başına TL) çarparak maliyeti LCD'de göster."
+  ]
+ ],
+ "title": "60. Enerji Tüketim Ölçer"
+}

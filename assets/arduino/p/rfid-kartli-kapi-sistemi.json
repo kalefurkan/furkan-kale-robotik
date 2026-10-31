@@ -1,0 +1,85 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × RC522 RFID okuyucu modülü (kart ve anahtarlık ile)",
+  "1 × servo motor (SG90)",
+  "Jumper kablolar (12 adet)"
+ ],
+ "wiring": [
+  [
+   "3V3",
+   "RC522 3.3V (yalnızca 3,3 V ile beslenir)"
+  ],
+  [
+   "5V",
+   "Alttaki artı (+) rayı: servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: RC522 GND ve servo GND"
+  ],
+  [
+   "D9",
+   "RC522 RST"
+  ],
+  [
+   "D10",
+   "RC522 SDA (SS, çip seçme)"
+  ],
+  [
+   "D11",
+   "RC522 MOSI"
+  ],
+  [
+   "D12",
+   "RC522 MISO"
+  ],
+  [
+   "D13",
+   "RC522 SCK"
+  ],
+  [
+   "D6",
+   "Servo sinyal (SIG)"
+  ]
+ ],
+ "img": "assets/devre/rfid-kartli-kapi-sistemi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "RC522'yi a4 (3.3V), a5 (RST), a6 (GND), a7 (MISO), a8 (MOSI), a9 (SCK), a10 (SDA) deliklerine tak.",
+  "DİKKAT: RC522 yalnızca 3,3 V ile beslenir, 5 V verirsen bozulur. Arduino 3V3 pinini e4'e kablola.",
+  "RC522 kabloları: e6 → eksi rayı (GND), D9 → e5 (RST), D12 → e7 (MISO), D11 → e8 (MOSI), D13 → e9 (SCK), D10 → e10 (SDA).",
+  "Servoyu d14 (SIG), d15 (VCC), d16 (GND) deliklerine tak. b14 → D6, b15 → artı rayı, b16 → eksi rayı.",
+  "Kodu yükle (simülatörde çalıştır): RC522'yi seç, \"kart yakın\" seçeneğini aç. Kart UID'si A1B2C3D4 ise servo 90°'ye döner; başka bir UID girersen servo kıpırdamaz."
+ ],
+ "code": "// RFID kartli kapi sistemi: RC522 kart UID'sini okur, kayitli kart servoyu acar (kapi kilidi)\n#include <SPI.h>\n#include <MFRC522.h>\n#include <Servo.h>\n\nconst int SS_PIN = 10;     // RC522 SDA (SS)\nconst int RST_PIN = 9;\nconst int SERVO_PIN = 6;\n\nMFRC522 rfid(SS_PIN, RST_PIN);\nServo kapi;\n\n// kayitli kartin UID'si (4 bayt)\nbyte kayitli[4] = {0xA1, 0xB2, 0xC3, 0xD4};\n\nbool kayitliMi() {\n  if (rfid.uid.size != 4) {\n    return false;\n  }\n  for (byte i = 0; i < 4; i++) {\n    if (rfid.uid.uidByte[i] != kayitli[i]) {\n      return false;\n    }\n  }\n  return true;\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  SPI.begin();             // SPI: MOSI D11, MISO D12, SCK D13\n  rfid.PCD_Init();\n  kapi.attach(SERVO_PIN);\n  kapi.write(0);           // kapi kapali\n  Serial.println(\"Karti okutun\");\n}\n\nvoid loop() {\n  if (!rfid.PICC_IsNewCardPresent()) {\n    return;\n  }\n  if (!rfid.PICC_ReadCardSerial()) {\n    return;\n  }\n\n  Serial.print(\"UID:\");\n  for (byte i = 0; i < rfid.uid.size; i++) {\n    Serial.print(rfid.uid.uidByte[i] < 0x10 ? \" 0\" : \" \");\n    Serial.print(rfid.uid.uidByte[i], HEX);\n  }\n  Serial.println();\n\n  if (kayitliMi()) {\n    Serial.println(\"Kart kabul edildi: kapi acik\");\n    kapi.write(90);\n    delay(3000);           // 3 saniye acik kalir\n    kapi.write(0);\n    Serial.println(\"Kapi kapandi\");\n  } else {\n    Serial.println(\"Kart reddedildi\");\n  }\n\n  rfid.PICC_HaltA();       // karti durdur: ayni kart tekrar tekrar okunmasin\n  rfid.PCD_StopCrypto1();\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "RC522, kartla 13,56 MHz radyo alanı üzerinden konuşur; Arduino ile SPI üzerinden konuşur (MOSI D11, MISO D12, SCK D13, SS D10, RST D9). setup()'ta SPI.begin() ve rfid.PCD_Init() çağrılır. loop()'ta PICC_IsNewCardPresent() yeni kart var mı diye bakar, PICC_ReadCardSerial() kartın UID'sini rfid.uid içine okur (uid.size bayt sayısı, uid.uidByte[i] baytlar). UID, koddaki kayıtli[] dizisiyle bayt bayt karşılaştırılır. Eşleşirse servo 90° olur, 3 saniye sonra 0°'ye döner. PICC_HaltA() kartı durdurur; aynı kart yeniden okutulmak için çekilip tekrar yaklaştırılmalıdır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Kart yokken Seri Monitör'de yalnızca \"Karti okutun\" göründü. 1,5. saniyede A1B2C3D4 kartı yaklaşınca \"UID: A1 B2 C3 D4\" ve \"Kart kabul edildi: kapi acik\" yazıldı, servo 0°'den 90°'ye döndü, 3 saniye sonra \"Kapi kapandi\" yazılıp servo 0°'ye geri geldi. 6. saniyede başka kart (11223344) yaklaşınca \"UID: 11 22 33 44\" ve \"Kart reddedildi\" yazıldı, servo hareket etmedi. 9,5. saniyede kayıtlı kart yeniden okutulunca kapı yeniden açıldı. Gerçek kartta ve gerçek RFID etiketiyle denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde gerçek RFID alanı, anten menzili ve kart çarpışması yoktur: kart, modülün ayarlarındaki UID ve \"kart yakın\" kutusuyla temsil edilir. Yalnızca UID okunur; kart belleğine okuma/yazma ve MIFARE kimlik doğrulama simüle edilmez. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki MFRC522.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Güvenlik uyarısı",
+   "Bu proje bir öğrenme örneğidir: kart UID'leri kolayca kopyalanabilir, gerçek kapı kilidi için yeterli güvenlik sağlamaz. Servo kapıyı yalnızca temsil eder."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "RC522'yi 5 V'a bağlamak (bozulur); MOSI/MISO/SCK'yi D11/D12/D13 dışına bağlamak (Uno'da donanım SPI pinleri sabittir); SPI.begin() ya da PCD_Init() çağırmamak; SS pinini koddakiyle (10) uyumsuz bağlamak; PICC_HaltA() koymamak (aynı kart ardı ardına okunur)."
+  ],
+  [
+   "Dene",
+   "İkinci bir kayıtlı kart UID'si ekle ya da kabul edilen kartta yeşil, reddedilen kartta kırmızı LED yak."
+  ]
+ ],
+ "title": "45. RFID Kartlı Kapı Sistemi"
+}

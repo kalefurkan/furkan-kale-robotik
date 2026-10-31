@@ -1,0 +1,64 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × AS608 parmak izi sensörü",
+  "1 × servo motor (SG90)",
+  "Jumper kablolar (9 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: AS608 VCC ve servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: AS608 GND ve servo GND"
+  ],
+  [
+   "D2",
+   "AS608 TX (Arduino'nun RX'i)"
+  ],
+  [
+   "D3",
+   "AS608 RX (Arduino'nun TX'i)"
+  ],
+  [
+   "D9",
+   "Servo sinyal (SIG)"
+  ]
+ ],
+ "img": "assets/devre/parmak-iziyle-kapi-kilidi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "AS608'i a4 (VCC), a5 (GND), a6 (TX), a7 (RX) deliklerine tak. e4 → artı rayı, e5 → eksi rayı.",
+  "AS608'in TX ucu Arduino'nun RX'ine, RX ucu TX'ine gider (çapraz): D2 → e6, D3 → e7. D0/D1 USB için ayrıldığından SoftwareSerial sensorSerial(2, 3) ile ikinci bir seri hat kuruldu.",
+  "Servoyu d12 (SIG), d13 (VCC), d14 (GND) deliklerine tak. Sinyal: b12 → D9. Güç: b13 → artı rayı, b14 → eksi rayı.",
+  "Kodu yükle (simülatörde çalıştır): AS608'i seç; \"parmak sensörde\" seçeneğini aç ve kimliği 1 ya da 2 yap (kayıtlı): servo kapıyı 90°'ye açar. Kimliği 9 yaparsan parmak tanımlı olmaz."
+ ],
+ "code": "// Parmak iziyle kapi kilidi: AS608 sensoru kayitli parmagi taniyinca servo kapiyi acar\n#include <SoftwareSerial.h>\n#include <Adafruit_Fingerprint.h>\n#include <Servo.h>\n\nSoftwareSerial sensorSerial(2, 3);   // RX = D2 (AS608 TX), TX = D3 (AS608 RX)\nAdafruit_Fingerprint finger = Adafruit_Fingerprint(&sensorSerial);\nServo kapi;\n\nconst int SERVO_PIN = 9;\nconst int KAPALI_ACI = 0;\nconst int ACIK_ACI = 90;\n\n// Parmagi arar: kayitli kimligi, parmak yoksa -1, tanimsiz parmak icin -2 dondurur\nint parmakAra() {\n  uint8_t p = finger.getImage();            // sensorden goruntu al\n  if (p != FINGERPRINT_OK) {\n    return -1;                               // parmak yok\n  }\n  p = finger.image2Tz();                     // goruntuyu ozellik sablonuna cevir\n  if (p != FINGERPRINT_OK) {\n    return -1;\n  }\n  p = finger.fingerFastSearch();             // kayitli sablonlar arasinda ara\n  if (p == FINGERPRINT_NOTFOUND) {\n    return -2;\n  }\n  if (p != FINGERPRINT_OK) {\n    return -1;\n  }\n  return finger.fingerID;                    // eslesen kayit numarasi\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  kapi.attach(SERVO_PIN);\n  kapi.write(KAPALI_ACI);\n  finger.begin(57600);                       // AS608 varsayilan hizi 57600\n  if (finger.verifyPassword()) {\n    Serial.println(\"Sensor bulundu\");\n  } else {\n    Serial.println(\"Sensor bulunamadi: kablolari kontrol et\");\n    while (true) {\n      delay(1);\n    }\n  }\n  finger.getTemplateCount();\n  Serial.print(\"Kayitli parmak sayisi: \");\n  Serial.println(finger.templateCount);\n}\n\nvoid loop() {\n  int sonuc = parmakAra();\n  if (sonuc >= 0) {\n    Serial.print(\"Parmak tanindi, kimlik=\");\n    Serial.println(sonuc);\n    Serial.println(\"Kapi acik\");\n    kapi.write(ACIK_ACI);\n    delay(3000);\n    kapi.write(KAPALI_ACI);\n    Serial.println(\"Kapi kapandi\");\n  } else if (sonuc == -2) {\n    Serial.println(\"Parmak tanimli degil: giris reddedildi\");\n    delay(1500);\n  }\n  delay(100);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "AS608 sensörü parmak izi görüntüsünü kendi içinde işler ve Arduino ile seri hatla (57600 baud) konuşur. setup()'ta finger.begin(57600) ve finger.verifyPassword() sensörün bağlı olup olmadığını denetler; finger.getTemplateCount() kayıtlı parmak sayısını verir. parmakAra() üç adımda çalışır: getImage() sensörden görüntü alır (parmak yoksa FINGERPRINT_NOFINGER döner), image2Tz() görüntüyü şablona çevirir, fingerFastSearch() sensör belleğindeki şablonlarda arar; eşleşirse finger.fingerID kayıt numarasını verir, bulunamazsa FINGERPRINT_NOTFOUND döner. Tanınan parmakta servo 90°'ye döner, 3 saniye sonra 0°'ye döner."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta Seri Monitör'de \"Sensor bulundu\" ve \"Kayitli parmak sayisi: 2\" yazdı. Parmak yokken servo 0°'de kaldı. 2. saniyede kimlik 2 olan parmak sensöre konunca (yaklaşık 0,65 saniyelik okuma süresinden sonra) \"Parmak tanindi, kimlik=2\" ve \"Kapi acik\" yazıldı, servo 90°'ye döndü; 3 saniye sonra \"Kapi kapandi\" yazıldı ve servo 0°'ye geldi. 7. saniyede kayıtsız kimlik (9) ile \"Parmak tanimli degil: giris reddedildi\" yazıldı ve servo kıpırdamadı. 10. saniyede kimlik 1 ile kapı yeniden açıldı. Gerçek kartta ve gerçek parmak iziyle denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde gerçek parmak izi taraması yoktur: \"parmak sensörde\" kutusu ve parmak kimliği arayüzden verilir; aynı kimlik kayıtlı şablonla eşleşir ve güven puanı sabittir. Görüntü kalitesi, ıslak/kuru parmak, ışık ve sensörün kendi LED'i simüle edilmez. Parmak kaydı (enroll) bu projede yapılmaz: kayıtlı kimlikler (1 ve 2) sensör ayarlarında hazır verilir; gerçekte parmakları önce kaydetmen gerekir. Gerçek parmak izi kapı kilidi olarak güvenlik açısından yetersizdir, yalnızca öğrenme amaçlıdır. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki Adafruit_Fingerprint.h onların dışındadır, sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir. SoftwareSerial.h ve Servo.h izinlidir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TX/RX'i çapraz bağlamamak (\"Sensor bulunamadi\"); baud hızını 57600'den farklı seçmek; sensörü 3,3 V ile besleyip modülün 5 V istediğini unutmak (bazı kartlar 3,3 V ister, modülünün yazısına bak); getImage() sonucunu denetlemeden devam etmek; servoyu çok uzun süre açık bırakmak."
+  ],
+  [
+   "Dene",
+   "Yanlış parmak art arda 3 kez denenirse sistemi 10 saniye kilitle ya da kapı açıldığında buzzer çaldır."
+  ]
+ ],
+ "title": "55. Parmak İziyle Kapı Kilidi"
+}
