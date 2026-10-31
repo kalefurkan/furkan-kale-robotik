@@ -1,0 +1,304 @@
+{
+ "base": "https://kalefurkan.github.io/pylearn-app/learn/module/m",
+ "stages": [
+  {
+   "id": "A",
+   "name": "Temeller",
+   "sub": "Python'un temel yapı taşları",
+   "mods": [
+    {
+     "n": 1,
+     "t": "Python ile Tanışma",
+     "d": ""
+    },
+    {
+     "n": 2,
+     "t": "print() ve İlk Kod",
+     "d": ""
+    },
+    {
+     "n": 3,
+     "t": "Değişkenler ve Veri Türleri",
+     "d": ""
+    },
+    {
+     "n": 4,
+     "t": "input() ile Kullanıcıdan Veri Alma",
+     "d": ""
+    },
+    {
+     "n": 5,
+     "t": "Matematiksel İşlemler",
+     "d": "Aritmetik operatörler, bölme/kalan ve işlem sırası."
+    },
+    {
+     "n": 6,
+     "t": "Karar Yapıları",
+     "d": "if, elif, else ve mantıksal operatörlerle kararlar vermek."
+    },
+    {
+     "n": 7,
+     "t": "for ve while Döngüleri",
+     "d": "Tekrarlayan işleri otomatikleştirmek."
+    },
+    {
+     "n": 8,
+     "t": "Listeler ve Sözlükler",
+     "d": "Birden fazla değeri tek değişkende saklamak."
+    },
+    {
+     "n": 9,
+     "t": "Fonksiyonlar",
+     "d": "Kodu yeniden kullanılabilir parçalara bölmek."
+    },
+    {
+     "n": 10,
+     "t": "Hata Yönetimi",
+     "d": "try / except ile programın çökmesini önlemek."
+    },
+    {
+     "n": 11,
+     "t": "Modüller",
+     "d": "Hazır kodları import ile kullanmak."
+    },
+    {
+     "n": 12,
+     "t": "Nesne Tabanlı Programlama",
+     "d": "Sınıflar, nesneler, metotlar ve kalıtım."
+    },
+    {
+     "n": 13,
+     "t": "Dosya İşlemleri",
+     "d": "Dosyaya yazmak ve dosyadan okumak."
+    },
+    {
+     "n": 14,
+     "t": "Uygulamalı Projeler",
+     "d": "Öğrendiklerini birleştiren üç mini proje."
+    }
+   ]
+  },
+  {
+   "id": "B",
+   "name": "Veri ve metin",
+   "sub": "Metin, liste, demet, küme ve sözlük",
+   "mods": [
+    {
+     "n": 15,
+     "t": "Metinler I: İndeks ve Dilimleme",
+     "d": "Metnin harflerine ulaşmak, parçalar almak ve metinde gezinmek."
+    },
+    {
+     "n": 16,
+     "t": "Metin Metotları",
+     "d": "Metinleri temizlemek, bölmek, birleştirmek ve biçimlendirmek."
+    },
+    {
+     "n": 17,
+     "t": "Listeler II",
+     "d": "Listeleri dilimlemek, değiştirmek, sıralamak ve iç içe kullanmak."
+    },
+    {
+     "n": 18,
+     "t": "Demetler ve Kümeler",
+     "d": "Değişmeyen demetler (tuple) ve tekrarsız kümelerle (set) çalışmak."
+    },
+    {
+     "n": 19,
+     "t": "Sözlükler II",
+     "d": "get(), sayma kalıbı ve iç içe sözlüklerle gerçek veriyi modellemek."
+    },
+    {
+     "n": 20,
+     "t": "Liste ve Sözlük Üreteçleri",
+     "d": "Döngü yazmadan tek satırda liste, sözlük ve küme üretmek (comprehension)."
+    },
+    {
+     "n": 21,
+     "t": "Döngü Kalıpları",
+     "d": "enumerate, zip, iç içe döngüler ve ekrana desenler çizmek."
+    }
+   ]
+  },
+  {
+   "id": "C",
+   "name": "Fonksiyonel düşünce",
+   "sub": "Fonksiyonlar ve standart kütüphane",
+   "mods": [
+    {
+     "n": 22,
+     "t": "Fonksiyonlar II",
+     "d": "*args, **kwargs, kapsam (scope) ve lambda ile esnek fonksiyonlar yazmak."
+    },
+    {
+     "n": 23,
+     "t": "Özyineleme",
+     "d": "Kendini çağıran fonksiyonlar: faktöriyel, Fibonacci ve sınırları."
+    },
+    {
+     "n": 24,
+     "t": "map, filter ve sorted",
+     "d": "Fonksiyonları argüman olarak vermek: listeleri dönüştür, süz ve sırala."
+    },
+    {
+     "n": 25,
+     "t": "collections ve itertools",
+     "d": "Counter, defaultdict, deque ve itertools ile güçlü hazır araçlar."
+    },
+    {
+     "n": 26,
+     "t": "Tarih ve Saat",
+     "d": "datetime ile tarih oluşturmak, hesaplamak ve biçimlendirmek."
+    },
+    {
+     "n": 27,
+     "t": "Düzenli İfadeler",
+     "d": "re modülüyle metinde desen aramak, eşleştirmek ve değiştirmek."
+    },
+    {
+     "n": 28,
+     "t": "JSON ve CSV",
+     "d": "Veriyi JSON ve CSV biçiminde okumak, yazmak ve dönüştürmek."
+    }
+   ]
+  },
+  {
+   "id": "D",
+   "name": "İleri OOP ve kod kalitesi",
+   "sub": "Sınıflar, test ve okunabilir kod",
+   "mods": [
+    {
+     "n": 29,
+     "t": "OOP II: Özel Metotlar ve property",
+     "d": "__str__, __eq__, __add__, @property, sınıf ve statik metotlarla sınıflarını daha doğal hâle getirmek."
+    },
+    {
+     "n": 30,
+     "t": "OOP III: Çok Biçimlilik ve Soyut Sınıflar",
+     "d": "super(), çok biçimlilik, kompozisyon ve abc ile soyut sınıflar."
+    },
+    {
+     "n": 31,
+     "t": "dataclass, enum ve Tip İpuçları",
+     "d": "Veri sınıfları, sabit değer kümeleri (enum) ve tip ipuçları (typing)."
+    },
+    {
+     "n": 32,
+     "t": "İstisnalar II ve Hata Ayıklama",
+     "d": "raise, özel hata sınıfları, assert ve hata ayıklama teknikleri."
+    },
+    {
+     "n": 33,
+     "t": "Test Yazma",
+     "d": "assert, unittest ve doctest ile kodunun doğruluğunu otomatik denetlemek."
+    },
+    {
+     "n": 34,
+     "t": "Okunabilir Kod",
+     "d": "PEP 8, anlamlı isimler, docstring ve yeniden düzenleme (refactoring)."
+    },
+    {
+     "n": 35,
+     "t": "Dekoratörler ve with",
+     "d": "Fonksiyonları sarmalayan dekoratörler ve context manager (with)."
+    },
+    {
+     "n": 36,
+     "t": "Üreteçler ve İteratörler",
+     "d": "yield ile tembel (lazy) veri üreten fonksiyonlar ve iteratör protokolü."
+    }
+   ]
+  },
+  {
+   "id": "E",
+   "name": "Algoritmalar",
+   "sub": "Arama, sıralama ve veri yapıları",
+   "mods": [
+    {
+     "n": 37,
+     "t": "Arama ve Sıralama Algoritmaları",
+     "d": "Doğrusal ve ikili arama; kabarcık, seçmeli ve araya ekleme sıralaması."
+    },
+    {
+     "n": 38,
+     "t": "Yığın, Kuyruk ve Bağlı Liste",
+     "d": "Temel veri yapılarını kendin kur: stack, queue ve linked list."
+    },
+    {
+     "n": 39,
+     "t": "Algoritmik Düşünme",
+     "d": "Sözde kod, problemi parçalama ve karmaşıklık (Big-O) fikri."
+    },
+    {
+     "n": 40,
+     "t": "Sayılar ve Sayı Oyunları",
+     "d": "Asal sayılar, Fibonacci, OBEB/OKEK, statistics ve fractions."
+    }
+   ]
+  },
+  {
+   "id": "F",
+   "name": "tkinter",
+   "sub": "Pencereli uygulamalar",
+   "mods": [
+    {
+     "n": 41,
+     "t": "tkinter'a Giriş",
+     "d": "İlk pencereni aç: Tk(), başlık, boyut, Label ve mainloop. Pencereyi ekranda gör."
+    },
+    {
+     "n": 42,
+     "t": "Düğmeler ve Olaylar",
+     "d": "Button, command, Entry ve StringVar ile tıklanabilir uygulamalar."
+    },
+    {
+     "n": 43,
+     "t": "Yerleşim: pack, grid, place",
+     "d": "Bileşenleri Frame'lerle düzenle ve pencereyi güzel yerleştir."
+    },
+    {
+     "n": 44,
+     "t": "Seçim Bileşenleri",
+     "d": "Checkbutton, Radiobutton, Listbox, Scale, Spinbox ve Combobox."
+    },
+    {
+     "n": 45,
+     "t": "Menüler ve Açılır Pencereler",
+     "d": "Menu, messagebox ve Toplevel ile menü çubuğu, uyarı kutuları ve ek pencereler."
+    },
+    {
+     "n": 46,
+     "t": "Canvas ve Animasyon",
+     "d": "Canvas ile şekil çiz, nesneleri hareket ettir ve after() ile canlandır."
+    },
+    {
+     "n": 47,
+     "t": "tkinter Projesi",
+     "d": "Hesap makinesi, yapılacaklar listesi ve sınıfla yazılmış bir uygulama."
+    }
+   ]
+  },
+  {
+   "id": "G",
+   "name": "Projeler",
+   "sub": "Oyun, uygulama ve bitirme projesi",
+   "mods": [
+    {
+     "n": 48,
+     "t": "Proje: Metin Tabanlı Oyun",
+     "d": "Taş-kağıt-makas, adam asmaca ve tic-tac-toe: oyun mantığını fonksiyonlara böl."
+    },
+    {
+     "n": 49,
+     "t": "Proje: Not Takip Sistemi",
+     "d": "Sınıflar, JSON ile saklama ve istatistiklerle bir not takip programı."
+    },
+    {
+     "n": 50,
+     "t": "Bitirme Projesi",
+     "d": "Kendi pencereli uygulamanı tasarla: tkinter + OOP + veri saklama."
+    }
+   ]
+  }
+ ]
+}
