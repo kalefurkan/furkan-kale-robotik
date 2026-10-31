@@ -1,0 +1,60 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × kırmızı, 1 × sarı, 1 × yeşil LED",
+  "3 × 220 Ω direnç",
+  "Jumper kablolar (7 adet)"
+ ],
+ "wiring": [
+  [
+   "D8",
+   "Kırmızı LED anot"
+  ],
+  [
+   "D9",
+   "Sarı LED anot"
+  ],
+  [
+   "D10",
+   "Yeşil LED anot"
+  ],
+  [
+   "Her LED'in katodu",
+   "220 Ω direnç, sonra ortak GND rayı"
+  ],
+  [
+   "GND rayı",
+   "Arduino GND"
+  ]
+ ],
+ "img": "assets/devre/trafik-lambasi.png",
+ "steps": [
+  "Devreyi enerjisiz kur. Üç LED'i breadboard'a aralıklı tak (kırmızı, sarı, yeşil).",
+  "Her LED'in anot sütununa ilgili pinden kablo çek: kırmızıya D8, sarıya D9, yeşile D10.",
+  "Her LED'in katot sütunundan başlayarak birer 220 Ω direnç tak.",
+  "Her direncin diğer ucunu bir kabloyla breadboard'un GND rayına bağla.",
+  "GND rayını bir kabloyla Arduino'nun GND pinine bağla.",
+  "Kodu yükle: kırmızı 5 sn, kırmızı+sarı 1,5 sn, yeşil 5 sn, sarı 2 sn yanar ve döngü başa döner."
+ ],
+ "code": "// Trafik lambası: kırmızı -> kırmızı+sarı -> yeşil -> sarı\nconst int KIRMIZI = 8;\nconst int SARI = 9;\nconst int YESIL = 10;\n\nvoid setup() {\n  pinMode(KIRMIZI, OUTPUT);\n  pinMode(SARI, OUTPUT);\n  pinMode(YESIL, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(KIRMIZI, HIGH);          // dur\n  delay(5000);\n\n  digitalWrite(SARI, HIGH);             // kırmızı + sarı: hazırlan\n  delay(1500);\n\n  digitalWrite(KIRMIZI, LOW);\n  digitalWrite(SARI, LOW);\n  digitalWrite(YESIL, HIGH);            // geç\n  delay(5000);\n\n  digitalWrite(YESIL, LOW);\n  digitalWrite(SARI, HIGH);             // yavaşla\n  delay(2000);\n  digitalWrite(SARI, LOW);\n}\n",
+ "notes": [
+  [
+   "Sıra neden böyle?",
+   "Kırmızı + sarı birlikte \"hazırlan\" anlamına gelir. Yeşilden sonra sarı \"yavaşla\" der, sonra kırmızıya dönülür."
+  ],
+  [
+   "Ortak GND rayı",
+   "Her LED için ayrı GND kablosu çekmek yerine katotları breadboard rayında birleştirip tek kabloyla Arduino'ya bağlarız."
+  ],
+  [
+   "Zamanlama",
+   "delay() süresince Arduino başka iş yapmaz. Butonlu yaya geçidi gibi eklemeler için ilerde millis() ile zamanlama öğrenilir."
+  ],
+  [
+   "Dene",
+   "3. projedeki butonu ekle: butona basılınca kırmızı yanıp yaya geçişi için süre uzasın."
+  ]
+ ],
+ "title": "2. Trafik Lambası"
+}

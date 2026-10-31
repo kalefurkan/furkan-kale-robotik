@@ -1,0 +1,860 @@
+{
+ "levels": [
+  {
+   "id": 1,
+   "name": "Başlangıç",
+   "sub": "LED, buton, direnç, buzzer ve temel sensörler"
+  },
+  {
+   "id": 2,
+   "name": "Temel uygulamalar",
+   "sub": "Ekranlar, motorlar, sensörler ve kullanıcı etkileşimi"
+  },
+  {
+   "id": 3,
+   "name": "Orta seviye",
+   "sub": "Kablosuz haberleşme, veri kaydı ve birden fazla modül"
+  },
+  {
+   "id": 4,
+   "name": "İleri seviye",
+   "sub": "Robotik, IoT, otomasyon ve çoklu sensör sistemleri"
+  },
+  {
+   "id": 5,
+   "name": "Uzman",
+   "sub": "Otonom sistemler, yapay zekâ entegrasyonu ve karmaşık robotik uygulamalar"
+  }
+ ],
+ "projects": [
+  {
+   "n": 1,
+   "id": "led-yakma",
+   "t": "LED Yakıp Söndürme",
+   "comps": "LED, 220Ω direnç",
+   "lv": 1,
+   "ready": true,
+   "d": "Arduino'nun \"Merhaba Dünya\"sı: D13 pinine bağlı LED her saniye yanar ve söner. pinMode, digitalWrite ve delay komutlarını tanıtır."
+  },
+  {
+   "n": 2,
+   "id": "trafik-lambasi",
+   "t": "Trafik Lambası",
+   "comps": "3 LED, 3 direnç",
+   "lv": 1,
+   "ready": true,
+   "d": "Kırmızı, sarı ve yeşil LED ile gerçek bir kavşak sırası: kırmızı, kırmızı+sarı, yeşil, sarı. Birden fazla çıkışı ve zamanlamayı birlikte kullanır."
+  },
+  {
+   "n": 3,
+   "id": "buton-led",
+   "t": "Butonla LED Kontrolü",
+   "comps": "Buton, LED, direnç",
+   "lv": 1,
+   "ready": true,
+   "d": "Arduino'nun ilk giriş-çıkış devresi: butona her basışta LED açılır ya da kapanır. INPUT_PULLUP ve buton titreşimi (debounce) bu projede öğreniliyor."
+  },
+  {
+   "n": 4,
+   "id": "rgb-led",
+   "t": "RGB LED Renk Oluşturucu",
+   "comps": "RGB LED, dirençler",
+   "lv": 1,
+   "ready": true,
+   "d": "Tek bir LED içinde kırmızı, yeşil ve mavi çip bulunur. analogWrite ile üç kanalı karıştırıp yedi renk üretiriz."
+  },
+  {
+   "n": 5,
+   "id": "pot-led",
+   "t": "Potansiyometre ile LED Parlaklığı",
+   "comps": "Potansiyometre, LED",
+   "lv": 1,
+   "ready": true,
+   "d": "Potansiyometreyi çevirdikçe LED'in parlaklığı değişir. Analog okuma (analogRead) ve PWM ile analog çıkış (analogWrite) birlikte kullanılır."
+  },
+  {
+   "n": 6,
+   "id": "led-ile-isik-siddeti-gostergesi",
+   "t": "LED ile Işık Şiddeti Göstergesi",
+   "comps": "LDR, LED'ler",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 7,
+   "id": "akilli-lamba",
+   "t": "Gece Lambası",
+   "comps": "LDR, LED",
+   "lv": 1,
+   "ready": true,
+   "d": "LDR ile ortamın ışığını ölçüp karanlıkta LED'i yakan sistem. Analog okuma ve gerilim bölücü mantığını gösterir."
+  },
+  {
+   "n": 8,
+   "id": "buzzer-ile-melodi-calma",
+   "t": "Buzzer ile Melodi Çalma",
+   "comps": "Pasif buzzer",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 9,
+   "id": "butonlu-elektronik-piyano",
+   "t": "Butonlu Elektronik Piyano",
+   "comps": "Butonlar, pasif buzzer",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 10,
+   "id": "dijital-zar",
+   "t": "Dijital Zar",
+   "comps": "7 LED, buton",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 11,
+   "id": "led-bar-grafik",
+   "t": "LED Bar Grafik",
+   "comps": "10 LED, dirençler",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 12,
+   "id": "reaksiyon-hiz-testi",
+   "t": "Reaksiyon Hız Testi",
+   "comps": "LED, buton, buzzer",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 13,
+   "id": "sicaklik-olcer",
+   "t": "Sıcaklık Ölçer",
+   "comps": "LM35 sensörü",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 14,
+   "id": "ortam-sicaklik-ve-nem-olcer",
+   "t": "Ortam Sıcaklık ve Nem Ölçer",
+   "comps": "DHT11",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 15,
+   "id": "ultrasonik-mesafe-olcer",
+   "t": "Ultrasonik Mesafe Ölçer",
+   "comps": "HC-SR04",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 16,
+   "id": "dokunmatik-led-kontrolu",
+   "t": "Dokunmatik LED Kontrolü",
+   "comps": "TTP223, LED",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 17,
+   "id": "servo-pot",
+   "t": "Servo Motor Kontrolü",
+   "comps": "SG90 servo, potansiyometre",
+   "lv": 1,
+   "ready": true,
+   "d": "Potansiyometreyi çevirince servo kolu 0–180° arasında onu takip eder. Analog okuma, map() ve Servo kütüphanesi."
+  },
+  {
+   "n": 18,
+   "id": "isikla-kontrol-edilen-buzzer",
+   "t": "Işıkla Kontrol Edilen Buzzer",
+   "comps": "LDR, buzzer",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 19,
+   "id": "egilme-algilayici-alarm",
+   "t": "Eğilme Algılayıcı Alarm",
+   "comps": "Tilt sensörü, buzzer",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 20,
+   "id": "mini-elektronik-sayac",
+   "t": "Mini Elektronik Sayaç",
+   "comps": "Buton, 16x2 LCD",
+   "lv": 1,
+   "ready": false
+  },
+  {
+   "n": 21,
+   "id": "dijital-termometre",
+   "t": "Dijital Termometre",
+   "comps": "DHT11, LCD",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 22,
+   "id": "otomatik-fan-sistemi",
+   "t": "Otomatik Fan Sistemi",
+   "comps": "DHT11, DC fan, transistor",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 23,
+   "id": "akilli-gece-lambasi",
+   "t": "Akıllı Gece Lambası",
+   "comps": "LDR, RGB LED",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 24,
+   "id": "mesafe-alarmi",
+   "t": "Park Sensörü",
+   "comps": "HC-SR04, buzzer, LED",
+   "lv": 2,
+   "ready": true,
+   "d": "Ultrasonik sensörle mesafe ölçüp 30 cm içine giren nesnelerde buzzer çalan alarm. Nesne yaklaştıkça bip sıklaşır."
+  },
+  {
+   "n": 25,
+   "id": "otomatik-kapi-sistemi",
+   "t": "Otomatik Kapı Sistemi",
+   "comps": "HC-SR04, servo",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 26,
+   "id": "sifreli-kapi-kilidi",
+   "t": "Şifreli Kapı Kilidi",
+   "comps": "4x4 keypad, servo, LCD",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 27,
+   "id": "elektronik-kasa",
+   "t": "Elektronik Kasa",
+   "comps": "Keypad, servo, buzzer",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 28,
+   "id": "su-seviye-olcer",
+   "t": "Su Seviye Ölçer",
+   "comps": "Su seviye sensörü, LCD",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 29,
+   "id": "yagmur-algilama-sistemi",
+   "t": "Yağmur Algılama Sistemi",
+   "comps": "Yağmur sensörü, buzzer",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 30,
+   "id": "toprak-nem-olcer",
+   "t": "Toprak Nem Ölçer",
+   "comps": "Kapasitif nem sensörü, LCD",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 31,
+   "id": "otomatik-bitki-sulama",
+   "t": "Otomatik Bitki Sulama",
+   "comps": "Nem sensörü, mini pompa, röle",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 32,
+   "id": "akilli-cop-kutusu",
+   "t": "Akıllı Çöp Kutusu",
+   "comps": "HC-SR04, servo",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 33,
+   "id": "otomatik-el-dezenfektani",
+   "t": "Otomatik El Dezenfektanı",
+   "comps": "IR sensör, mini pompa",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 34,
+   "id": "hirsiz-alarm-sistemi",
+   "t": "Hırsız Alarm Sistemi",
+   "comps": "PIR sensör, buzzer",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 35,
+   "id": "pir-hareket",
+   "t": "Hareket Algılayan Gece Lambası",
+   "comps": "PIR, LED",
+   "lv": 2,
+   "ready": true,
+   "d": "HC-SR501 PIR sensörü ortamdaki kızılötesi değişimi, yani hareketi algılar. Hareket olunca LED yanar ve Seri Çizici'ye mesaj yazılır."
+  },
+  {
+   "n": 36,
+   "id": "elektronik-kronometre",
+   "t": "Elektronik Kronometre",
+   "comps": "LCD, butonlar",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 37,
+   "id": "dijital-geri-sayim-sayaci",
+   "t": "Dijital Geri Sayım Sayacı",
+   "comps": "LCD, keypad",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 38,
+   "id": "akilli-park-yeri-gostergesi",
+   "t": "Akıllı Park Yeri Göstergesi",
+   "comps": "IR sensör, LED, LCD",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 39,
+   "id": "mini-ruzgar-hiz-olcer",
+   "t": "Mini Rüzgâr Hız Ölçer",
+   "comps": "Hall sensörü, mıknatıs",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 40,
+   "id": "elektronik-pusula",
+   "t": "Elektronik Pusula",
+   "comps": "HMC5883L, LCD",
+   "lv": 2,
+   "ready": false
+  },
+  {
+   "n": 41,
+   "id": "bluetooth-kontrollu-led",
+   "t": "Bluetooth Kontrollü LED",
+   "comps": "HC-05, LED",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 42,
+   "id": "bluetooth-kontrollu-robot-araba",
+   "t": "Bluetooth Kontrollü Robot Araba",
+   "comps": "HC-05, L298N, DC motorlar",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 43,
+   "id": "joystick-kontrollu-servo",
+   "t": "Joystick Kontrollü Servo",
+   "comps": "Joystick, servo",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 44,
+   "id": "kablosuz-sicaklik-istasyonu",
+   "t": "Kablosuz Sıcaklık İstasyonu",
+   "comps": "HC-05, DHT11, LCD",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 45,
+   "id": "rfid-kartli-kapi-sistemi",
+   "t": "RFID Kartlı Kapı Sistemi",
+   "comps": "RC522, RFID kart, servo",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 46,
+   "id": "rfid-personel-giris-sistemi",
+   "t": "RFID Personel Giriş Sistemi",
+   "comps": "RC522, LCD, buzzer",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 47,
+   "id": "sd-karta-veri-kaydedici",
+   "t": "SD Karta Veri Kaydedici",
+   "comps": "SD kart modülü, DHT11",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 48,
+   "id": "gercek-zamanli-saat",
+   "t": "Gerçek Zamanlı Saat",
+   "comps": "DS3231, LCD",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 49,
+   "id": "alarm-saat",
+   "t": "Alarm Saat",
+   "comps": "DS3231, buzzer, LCD",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 50,
+   "id": "gps-konum-takip-sistemi",
+   "t": "GPS Konum Takip Sistemi",
+   "comps": "NEO-6M GPS, LCD",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 51,
+   "id": "kablosuz-kumandali-led",
+   "t": "Kablosuz Kumandalı LED",
+   "comps": "NRF24L01, buton, LED",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 52,
+   "id": "kablosuz-sensor-agi",
+   "t": "Kablosuz Sensör Ağı",
+   "comps": "2x NRF24L01, sensörler",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 53,
+   "id": "akilli-ev-kontrol-paneli",
+   "t": "Akıllı Ev Kontrol Paneli",
+   "comps": "4 kanal röle, LCD, buton",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 54,
+   "id": "ses-kontrollu-isik-sistemi",
+   "t": "Ses Kontrollü Işık Sistemi",
+   "comps": "Ses sensörü, röle",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 55,
+   "id": "parmak-iziyle-kapi-kilidi",
+   "t": "Parmak İziyle Kapı Kilidi",
+   "comps": "AS608, servo",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 56,
+   "id": "elektronik-terazi",
+   "t": "Elektronik Terazi",
+   "comps": "HX711, load cell, LCD",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 57,
+   "id": "hava-kalitesi-olcer",
+   "t": "Hava Kalitesi Ölçer",
+   "comps": "MQ-135, LCD",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 58,
+   "id": "gaz-kacagi-alarmi",
+   "t": "Gaz Kaçağı Alarmı",
+   "comps": "MQ-2, buzzer",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 59,
+   "id": "deprem-algilama-ve-uyari",
+   "t": "Deprem Algılama ve Uyarı",
+   "comps": "SW-420, buzzer, LCD",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 60,
+   "id": "enerji-tuketim-olcer",
+   "t": "Enerji Tüketim Ölçer",
+   "comps": "ACS712, LCD",
+   "lv": 3,
+   "ready": false
+  },
+  {
+   "n": 61,
+   "id": "cizgi-izleyen-robot",
+   "t": "Çizgi İzleyen Robot",
+   "comps": "IR sensör dizisi, motor sürücü",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 62,
+   "id": "engelden-kacan-robot",
+   "t": "Engelden Kaçan Robot",
+   "comps": "HC-SR04, L298N, motorlar",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 63,
+   "id": "bluetooth-kontrollu-akilli-robot",
+   "t": "Bluetooth Kontrollü Akıllı Robot",
+   "comps": "HC-05, L298N, motorlar",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 64,
+   "id": "uzaktan-kumandali-robot",
+   "t": "Uzaktan Kumandalı Robot",
+   "comps": "IR alıcı, kumanda, motor sürücü",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 65,
+   "id": "mini-sumo-robot",
+   "t": "Mini Sumo Robot",
+   "comps": "IR sensör, mesafe sensörü, motorlar",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 66,
+   "id": "dort-ayakli-yuruyen-robot",
+   "t": "Dört Ayaklı Yürüyen Robot",
+   "comps": "8 servo, gövde",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 67,
+   "id": "robot-kol",
+   "t": "Robot Kol",
+   "comps": "4–6 servo, joystick",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 68,
+   "id": "otomatik-engel-algilayan-robot-kol",
+   "t": "Otomatik Engel Algılayan Robot Kol",
+   "comps": "Servo, HC-SR04",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 69,
+   "id": "denge-robotu",
+   "t": "Denge Robotu",
+   "comps": "MPU6050, motor sürücü",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 70,
+   "id": "2-tekerlekli-otonom-robot",
+   "t": "2 Tekerlekli Otonom Robot",
+   "comps": "MPU6050, enkoderli motorlar",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 71,
+   "id": "wi-fi-kontrollu-akilli-ev",
+   "t": "Wi-Fi Kontrollü Akıllı Ev",
+   "comps": "ESP8266, röle modülü",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 72,
+   "id": "internet-uzerinden-sensor-izleme",
+   "t": "İnternet Üzerinden Sensör İzleme",
+   "comps": "ESP8266, DHT22",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 73,
+   "id": "web-tabanli-akilli-sulama",
+   "t": "Web Tabanlı Akıllı Sulama",
+   "comps": "ESP8266, nem sensörü, pompa",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 74,
+   "id": "iot-hava-durumu-istasyonu",
+   "t": "IoT Hava Durumu İstasyonu",
+   "comps": "ESP8266, BME280",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 75,
+   "id": "mqtt-akilli-ev-sistemi",
+   "t": "MQTT Akıllı Ev Sistemi",
+   "comps": "ESP8266, röle, sensörler",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 76,
+   "id": "nfc-kontrollu-erisim-sistemi",
+   "t": "NFC Kontrollü Erişim Sistemi",
+   "comps": "PN532, LCD",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 77,
+   "id": "otomatik-akvaryum-kontrolu",
+   "t": "Otomatik Akvaryum Kontrolü",
+   "comps": "Sıcaklık sensörü, pompa, röle",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 78,
+   "id": "akilli-sera-otomasyonu",
+   "t": "Akıllı Sera Otomasyonu",
+   "comps": "DHT22, nem sensörü, fan, pompa",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 79,
+   "id": "gunes-takip-sistemi",
+   "t": "Güneş Takip Sistemi",
+   "comps": "LDR, servo, güneş paneli",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 80,
+   "id": "otomatik-atik-ayristirma-sistemi",
+   "t": "Otomatik Atık Ayrıştırma Sistemi",
+   "comps": "Renk sensörü, servo, IR sensör",
+   "lv": 4,
+   "ready": false
+  },
+  {
+   "n": 81,
+   "id": "gps-destekli-otonom-arac",
+   "t": "GPS Destekli Otonom Araç",
+   "comps": "GPS, pusula, motor sürücü",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 82,
+   "id": "otonom-depo-robotu",
+   "t": "Otonom Depo Robotu",
+   "comps": "IR sensör, RFID, motorlar",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 83,
+   "id": "akilli-tarim-robotu",
+   "t": "Akıllı Tarım Robotu",
+   "comps": "Nem sensörü, motorlar, pompa",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 84,
+   "id": "cok-katli-akilli-otopark",
+   "t": "Çok Katlı Akıllı Otopark",
+   "comps": "Ultrasonik sensörler, servo, LCD",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 85,
+   "id": "mini-cnc-plotter",
+   "t": "Mini CNC Plotter",
+   "comps": "2 step motor, A4988, servo",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 86,
+   "id": "lazer-gravur-makinesi",
+   "t": "Lazer Gravür Makinesi",
+   "comps": "Step motorlar, lazer modülü, sürücüler",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 87,
+   "id": "3-eksenli-robot-kol",
+   "t": "3 Eksenli Robot Kol",
+   "comps": "Step motorlar, servo, joystick",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 88,
+   "id": "nesne-takip-eden-robot",
+   "t": "Nesne Takip Eden Robot",
+   "comps": "Kamera modülü, motorlar",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 89,
+   "id": "goruntu-islemeli-akilli-kapi",
+   "t": "Görüntü İşlemeli Akıllı Kapı",
+   "comps": "ESP32-CAM, servo",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 90,
+   "id": "yuz-tanima-kontrollu-kapi",
+   "t": "Yüz Tanıma Kontrollü Kapı",
+   "comps": "ESP32-CAM, servo",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 91,
+   "id": "sesle-kontrol-edilen-robot",
+   "t": "Sesle Kontrol Edilen Robot",
+   "comps": "Ses tanıma modülü, motor sürücü",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 92,
+   "id": "akilli-ev-enerji-yonetimi",
+   "t": "Akıllı Ev Enerji Yönetimi",
+   "comps": "ESP32, enerji sensörleri, röle",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 93,
+   "id": "kablosuz-hava-kalitesi-agi",
+   "t": "Kablosuz Hava Kalitesi Ağı",
+   "comps": "ESP32, MQ sensörleri, Wi-Fi",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 94,
+   "id": "akilli-yangin-sondurme-robotu",
+   "t": "Akıllı Yangın Söndürme Robotu",
+   "comps": "Alev sensörleri, pompa, motorlar",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 95,
+   "id": "otonom-yangin-algilama-araci",
+   "t": "Otonom Yangın Algılama Aracı",
+   "comps": "ESP32-CAM, alev sensörü, motorlar",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 96,
+   "id": "mini-hava-istasyonu-ve-veri-sunucusu",
+   "t": "Mini Hava İstasyonu ve Veri Sunucusu",
+   "comps": "ESP32, BME280, SD kart",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 97,
+   "id": "cok-sensorlu-akilli-guvenlik-sistemi",
+   "t": "Çok Sensörlü Akıllı Güvenlik Sistemi",
+   "comps": "PIR, RFID, kamera, ESP32",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 98,
+   "id": "iot-kontrollu-akilli-laboratuvar",
+   "t": "IoT Kontrollü Akıllı Laboratuvar",
+   "comps": "ESP32, röleler, sensörler",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 99,
+   "id": "robotik-haritalama-ve-navigasyon-sistemi",
+   "t": "Robotik Haritalama ve Navigasyon Sistemi",
+   "comps": "LiDAR, enkoder, IMU, motorlar",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": 100,
+   "id": "otonom-akilli-robot-platformu",
+   "t": "Otonom Akıllı Robot Platformu",
+   "comps": "ESP32, LiDAR, kamera, IMU, motor sürücüler",
+   "lv": 5,
+   "ready": false
+  },
+  {
+   "n": null,
+   "id": "karasimsek",
+   "t": "Karaşimşek devresi",
+   "comps": "6 LED, direnç",
+   "lv": 1,
+   "ready": true,
+   "extra": true,
+   "d": "Altı LED üzerinde ışık gidip gelir. Dizi (array) ve for döngüsü ile çok sayıda pini tek kod bloğunda yönetmeyi öğretir."
+  },
+  {
+   "n": null,
+   "id": "ntc-sicaklik",
+   "t": "NTC ile sıcaklık ölçme",
+   "comps": "NTC termistör, LED",
+   "lv": 2,
+   "ready": true,
+   "extra": true,
+   "d": "NTC termistörün direnci sıcaklıkla değişir. Gerilim bölücü ile okuyup yaklaşık sıcaklığı hesaplar, 30 °C üstünde LED'i yakarız."
+  }
+ ]
+}

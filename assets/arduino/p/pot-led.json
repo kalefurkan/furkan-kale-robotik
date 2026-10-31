@@ -1,0 +1,60 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × 10 kΩ potansiyometre",
+  "1 × LED",
+  "1 × 220 Ω direnç",
+  "Jumper kablolar"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Potansiyometre bir dış bacak"
+  ],
+  [
+   "GND",
+   "Potansiyometre diğer dış bacak"
+  ],
+  [
+   "A0",
+   "Potansiyometre orta bacak"
+  ],
+  [
+   "D9 (~)",
+   "LED anot (uzun bacak)"
+  ],
+  [
+   "LED katot (kısa bacak)",
+   "220 Ω direnç, direncin diğer ucu GND"
+  ]
+ ],
+ "img": "assets/devre/pot-led.png",
+ "steps": [
+  "Devreyi enerjisiz kur. LED'i ve 220 Ω direnci breadboard'a tak: D9 → LED anot, LED katot → 220 Ω → GND.",
+  "Potansiyometreyi breadboard'a tak; üç bacağı ayrı sütunlarda olsun.",
+  "Bir dış bacağın sütunundan 5V'a, diğer dış bacağın sütunundan GND'ye, orta bacağın sütunundan A0'a kablo çek.",
+  "Kodu yükle ve Seri Çizici'yi aç (9600 baud).",
+  "Potansiyometreyi yavaşça çevir: LED'in parlaklığı ve Seri Çizici'deki 0–255 arası değer birlikte değişir."
+ ],
+ "code": "// Potansiyometre ile LED parlaklığı\nconst int POT = A0;\nconst int LED = 9;      // PWM pini (~ işaretli)\n\nvoid setup() {\n  pinMode(LED, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int deger = analogRead(POT);                 // 0 ... 1023\n  int parlaklik = map(deger, 0, 1023, 0, 255); // 0 ... 255\n  analogWrite(LED, parlaklik);\n\n  Serial.println(parlaklik);\n  delay(50);\n}\n",
+ "notes": [
+  [
+   "İki farklı aralık",
+   "analogRead 0–1023 arasında (10 bit) değer okur. analogWrite ise 0–255 arasında (8 bit) değer kabul eder. map() ile birini diğerine orantılarız."
+  ],
+  [
+   "PWM nedir?",
+   "Arduino pine gerçek bir ara gerilim vermez. Pini çok hızlı açıp kapar; açık kalma oranı (görev oranı) parlaklığı belirler. Uno'da PWM pinleri 3, 5, 6, 9, 10 ve 11'dir (~ işaretli)."
+  ],
+  [
+   "Potansiyometre",
+   "Üç bacaklı ayarlı dirençtir: dış bacaklar 5V ve GND arasındadır, orta bacak dönme açısına göre 0–5 V arası gerilim verir."
+  ],
+  [
+   "Dene",
+   "Parlaklığı ters çevir: map(deger, 0, 1023, 255, 0)."
+  ]
+ ],
+ "title": "5. Potansiyometre ile LED Parlaklığı"
+}

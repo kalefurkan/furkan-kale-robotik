@@ -1,0 +1,67 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "1 × küçük servo (SG90 türü)",
+  "1 × 10 kΩ potansiyometre",
+  "Breadboard",
+  "Jumper kablolar"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Breadboard + (artı) rayı"
+  ],
+  [
+   "+ rayı",
+   "Potansiyometre bir dış bacak ve servo kırmızı kablo (VCC)"
+  ],
+  [
+   "GND",
+   "Potansiyometre diğer dış bacak"
+  ],
+  [
+   "GND (ikinci GND pini)",
+   "Servo kahverengi ya da siyah kablo"
+  ],
+  [
+   "A0",
+   "Potansiyometre orta bacak"
+  ],
+  [
+   "D9",
+   "Servo sinyal (turuncu ya da sarı)"
+  ]
+ ],
+ "img": "assets/devre/servo-pot.png",
+ "steps": [
+  "Devreyi enerjisiz kur. Potansiyometreyi breadboard'a tak; üç bacağı ayrı sütunlarda olsun.",
+  "Arduino'nun 5V pinini breadboard'un + rayına bağla. Potansiyometrenin bir dış bacağını bu raya, diğer dış bacağını GND'ye bağla. Orta bacağı A0'a bağla.",
+  "Servonun kablolarını renklerine göre bağla: kırmızı + rayına, kahverengi ya da siyah GND'ye, turuncu ya da sarı D9'a.",
+  "Kodu yükle. Servo kütüphanesi Arduino IDE ile birlikte gelir, ayrıca kurmana gerek yok.",
+  "Potansiyometreyi yavaşça çevir: servo kolu 0°–180° arasında hareket eder."
+ ],
+ "code": "// Potansiyometre ile servo kontrolü\n#include <Servo.h>\n\nconst int POT = A0;\nconst int SERVO_PIN = 9;\n\nServo servo;\n\nvoid setup() {\n  servo.attach(SERVO_PIN);\n}\n\nvoid loop() {\n  int deger = analogRead(POT);            // 0 ... 1023\n  int aci = map(deger, 0, 1023, 0, 180);  // 0 ... 180 derece\n  servo.write(aci);\n  delay(15);                              // servonun hedefe gitmesi için süre\n}\n",
+ "notes": [
+  [
+   "map() ne yapar?",
+   "analogRead 0–1023 arasında değer verir. map(deger, 0, 1023, 0, 180) bu aralığı servonun 0–180° aralığına orantılar."
+  ],
+  [
+   "Servo nasıl çalışır?",
+   "Servo, sinyal pinindeki darbenin genişliğine göre açı alır (genelde 1–2 ms, 20 ms'de bir). Bu darbeleri Servo kütüphanesi üretir."
+  ],
+  [
+   "Güç uyarısı",
+   "Küçük servolar Uno'nun 5V'una bağlanabilir. Yük altında çok akım çekerlerse kart resetlenebilir. Daha büyük ya da birden fazla servo için ayrı 5V besleme kullan ve GND'leri ortak yap."
+  ],
+  [
+   "Uno'da PWM notu",
+   "Servo kütüphanesi Uno'da Timer1'i kullanır; kullanıldığı sürece 9 ve 10 numaralı pinlerde analogWrite() (PWM) çalışmaz."
+  ],
+  [
+   "Dene",
+   "Potansiyometre yerine LDR (önceki proje) ile servoyu ışığa göre hareket ettir."
+  ]
+ ],
+ "title": "17. Servo Motor Kontrolü"
+}

@@ -1,0 +1,52 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "6 × LED (tercihen kırmızı)",
+  "1 × 220 Ω direnç",
+  "Jumper kablolar (14 adet)"
+ ],
+ "wiring": [
+  [
+   "D8, D9, D10, D11, D12, D13",
+   "Sırayla 1.–6. LED'in anotları"
+  ],
+  [
+   "6 LED'in katodu",
+   "Breadboard GND rayı"
+  ],
+  [
+   "GND rayı",
+   "220 Ω direnç üzerinden Arduino GND"
+  ]
+ ],
+ "img": "assets/devre/karasimsek.png",
+ "steps": [
+  "Devreyi enerjisiz kur. Altı LED'i breadboard'a aynı yönde, aralıklı tak (üst sıra).",
+  "D8'den D13'e kadar altı pini sırayla LED'lerin anot sütunlarına bağla.",
+  "Her LED'in katot sütunundan breadboard'un GND rayına bir kablo çek.",
+  "GND rayını tek bir 220 Ω direnç üzerinden Arduino GND'sine bağla.",
+  "Kodu yükle: ışık soldan sağa, sonra sağdan sola gidip gelir.",
+  "BEKLEME değerini küçültüp büyüterek hızı değiştir."
+ ],
+ "code": "// Karaşimşek: ışık 6 LED üzerinde gidip gelir\nconst int LEDLER[] = {8, 9, 10, 11, 12, 13};\nconst int SAYI = 6;\nconst int BEKLEME = 80;   // ms; küçültürsen hızlanır\n\nvoid setup() {\n  for (int i = 0; i < SAYI; i++) {\n    pinMode(LEDLER[i], OUTPUT);\n  }\n}\n\nvoid loop() {\n  // ileri: 0 -> 5\n  for (int i = 0; i < SAYI; i++) {\n    digitalWrite(LEDLER[i], HIGH);\n    delay(BEKLEME);\n    digitalWrite(LEDLER[i], LOW);\n  }\n  // geri: 4 -> 1 (uçlar iki kez yanmasın)\n  for (int i = SAYI - 2; i > 0; i--) {\n    digitalWrite(LEDLER[i], HIGH);\n    delay(BEKLEME);\n    digitalWrite(LEDLER[i], LOW);\n  }\n}\n",
+ "notes": [
+  [
+   "Dizi ve döngü",
+   "LEDLER[] dizisi pin numaralarını tutar. for döngüsü her pini sırayla yakıp söndürür; altı ayrı satır yazmak gerekmez."
+  ],
+  [
+   "Neden tek direnç?",
+   "Aynı anda yalnızca bir LED yandığı için akımın tamamı tek dirençten geçer. Birden fazla LED aynı anda yanacaksa her LED'e ayrı direnç gerekir."
+  ],
+  [
+   "Geri dönüş",
+   "Geri sayımda 4'ten 1'e inilir; böylece uçlardaki LED'ler iki kez üst üste yanmaz ve hareket akıcı görünür."
+  ],
+  [
+   "Dene",
+   "Hızı bir potansiyometreyle (4. proje) ayarla."
+  ]
+ ],
+ "title": "Karaşimşek devresi"
+}

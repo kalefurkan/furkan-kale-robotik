@@ -1,0 +1,67 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × LDR (foto direnç)",
+  "1 × 10 kΩ direnç",
+  "1 × LED",
+  "1 × 220 Ω direnç",
+  "Jumper kablolar"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "LDR'nin bir ucu"
+  ],
+  [
+   "LDR'nin diğer ucu",
+   "A0 ve 10 kΩ direncin bir ucu (aynı sütun)"
+  ],
+  [
+   "10 kΩ direncin diğer ucu",
+   "GND"
+  ],
+  [
+   "D9",
+   "LED anot (uzun bacak)"
+  ],
+  [
+   "LED katot (kısa bacak)",
+   "220 Ω direncin bir ucu"
+  ],
+  [
+   "Direncin diğer ucu",
+   "GND"
+  ]
+ ],
+ "img": "assets/devre/akilli-lamba.png",
+ "steps": [
+  "Devreyi enerjisiz kur. LDR ile 10 kΩ direnci breadboard'da aynı sütunda uç uça birleştir; bu bir gerilim bölücüdür.",
+  "LDR'nin serbest ucunu 5V'a, 10 kΩ direncin serbest ucunu GND'ye bağla.",
+  "İki parçanın birleştiği sütundan A0'a bir kablo çek.",
+  "LED devresini kur: D9 → LED anot, LED katot → 220 Ω direnç → GND.",
+  "Kodu yükle ve Arduino IDE'de Seri Çizici'yi aç (9600 baud).",
+  "LDR'nin önünü elinle kapat ve aç. Okunan değerin nasıl değiştiğini izle.",
+  "Karanlıkta okuduğun değerle aydınlıkta okuduğun değerin arasında bir sayı seç ve koddaki ESIK'e yaz."
+ ],
+ "code": "// Işığa duyarlı akıllı lamba: ortam karanlıksa LED yanar\nconst int LDR_PIN = A0;   // 5V - LDR - A0 - 10k - GND\nconst int LED = 9;\nconst int ESIK = 400;     // bu değerin altı \"karanlık\" (kendi ortamına göre ayarla)\n\nvoid setup() {\n  pinMode(LED, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int isik = analogRead(LDR_PIN);   // 0 (karanlık) ... 1023 (çok aydınlık)\n\n  if (isik < ESIK) {\n    digitalWrite(LED, HIGH);\n  } else {\n    digitalWrite(LED, LOW);\n  }\n\n  Serial.println(isik);   // Seri Çizici'de değeri izleyip ESIK'i ayarla\n  delay(100);\n}\n",
+ "notes": [
+  [
+   "Gerilim bölücü",
+   "A0'daki gerilim: V = 5 V × 10 kΩ / (R_LDR + 10 kΩ). Aydınlıkta LDR'nin direnci düşer, A0 yükselir; karanlıkta direnç artar, A0 düşer. Bu yüzden \"eşiğin altı = karanlık\"."
+  ],
+  [
+   "Eşik değeri neden ayarlanıyor?",
+   "LDR'lerin direnç değerleri modele ve ortama göre değişir. Sabit bir doğru sayı yoktur; kendi ortamında Seri Çizici'den ölç."
+  ],
+  [
+   "Dene",
+   "LED'i açıp kapamak yerine kademeli parlaklık ver: analogWrite(LED, map(isik, 0, 1023, 255, 0)); (D9 bir PWM pinidir, üzerinde ~ işareti vardır)."
+  ],
+  [
+   "Eşikte titriyorsa",
+   "Işık eşiğe çok yakınsa LED hızla yanıp sönebilir. İki farklı eşik kullan: biri yakmak, diğeri söndürmek için (histerezis)."
+  ]
+ ],
+ "title": "7. Gece Lambası"
+}

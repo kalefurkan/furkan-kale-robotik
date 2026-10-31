@@ -1,0 +1,68 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "HC-SR04 ultrasonik mesafe sensörü",
+  "1 × aktif buzzer",
+  "Breadboard",
+  "Jumper kablolar"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "HC-SR04 VCC"
+  ],
+  [
+   "GND",
+   "HC-SR04 GND"
+  ],
+  [
+   "D7",
+   "HC-SR04 TRIG"
+  ],
+  [
+   "D6",
+   "HC-SR04 ECHO"
+  ],
+  [
+   "D8",
+   "Buzzer + (uzun bacak)"
+  ],
+  [
+   "GND",
+   "Buzzer − (kısa bacak)"
+  ]
+ ],
+ "img": "assets/devre/mesafe-alarmi.png",
+ "steps": [
+  "Devreyi enerjisiz kur. HC-SR04'ü breadboard'a tak; iki \"göz\" ileri baksın, dört bacak ayrı sütunlarda olsun.",
+  "VCC bacağını 5V'a, GND bacağını GND'ye bağla.",
+  "TRIG bacağını D7'ye, ECHO bacağını D6'ya bağla.",
+  "Aktif buzzer'ı breadboard'a tak. Uzun (+) bacağın sütunundan D8'e, kısa bacağın sütunundan GND'ye kablo çek.",
+  "Kodu yükle ve Seri Çizici'yi aç. Elini sensörün önünde yaklaştırıp uzaklaştır; cm değerinin değiştiğini gör.",
+  "30 cm içine girince buzzer öter; nesne yaklaştıkça bip aralığı kısalır."
+ ],
+ "code": "// Mesafe alarmı: nesne yaklaştıkça buzzer daha sık öter\nconst int TRIG = 7;\nconst int ECHO = 6;\nconst int BUZZER = 8;   // aktif buzzer\nconst int ALARM_CM = 30;\n\nfloat mesafeOlc() {\n  digitalWrite(TRIG, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(TRIG, LOW);\n\n  long sure = pulseIn(ECHO, HIGH, 30000);   // en fazla 30 ms bekle\n  if (sure == 0) return -1;                  // yankı gelmedi\n  return sure * 0.0343 / 2.0;                // ses hızı: 0,0343 cm/µs, gidiş-dönüş /2\n}\n\nvoid setup() {\n  pinMode(TRIG, OUTPUT);\n  pinMode(ECHO, INPUT);\n  pinMode(BUZZER, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  float cm = mesafeOlc();\n  Serial.println(cm);\n\n  if (cm > 0 && cm < ALARM_CM) {\n    digitalWrite(BUZZER, HIGH);\n    delay(40);\n    digitalWrite(BUZZER, LOW);\n    // yakınsa kısa, uzaksa uzun ara\n    delay(map((long)cm, 2, ALARM_CM, 40, 500));\n  } else {\n    digitalWrite(BUZZER, LOW);\n    delay(100);\n  }\n}\n",
+ "notes": [
+  [
+   "Sensör nasıl ölçer?",
+   "TRIG'e verilen 10 µs'lik darbe, sensörden ultrason çıkarır. ECHO pini ses geri dönene kadar HIGH kalır; bu süreyi pulseIn ile ölçeriz."
+  ],
+  [
+   "Mesafe formülü",
+   "mesafe = süre × 0,0343 / 2. Ses yaklaşık 343 m/s hızla gider (0,0343 cm/µs); gidiş-dönüş olduğu için ikiye böleriz."
+  ],
+  [
+   "Zaman aşımı",
+   "pulseIn 30 ms bekler (yaklaşık 5 m). Yankı gelmezse 0 döner; kod bunu \"nesne yok\" sayar (−1)."
+  ],
+  [
+   "Aktif buzzer",
+   "İçinde osilatör vardır; HIGH verince öter. Pasif buzzer olsaydı tone() ile frekans üretmek gerekirdi."
+  ],
+  [
+   "Doğruluk",
+   "HC-SR04 yaklaşık 2–400 cm aralığında çalışır. Kumaş gibi yumuşak ya da sensöre açılı duran yüzeyler yankıyı zayıflatır."
+  ]
+ ],
+ "title": "24. Park Sensörü"
+}

@@ -1,0 +1,62 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × 10 kΩ NTC termistör",
+  "1 × 10 kΩ direnç",
+  "1 × LED",
+  "1 × 220 Ω direnç",
+  "Jumper kablolar"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "10 kΩ direncin bir ucu"
+  ],
+  [
+   "10 kΩ direncin diğer ucu",
+   "A0 ve NTC'nin bir ucu (aynı sütun)"
+  ],
+  [
+   "NTC'nin diğer ucu",
+   "GND"
+  ],
+  [
+   "D8",
+   "LED anot (uzun bacak)"
+  ],
+  [
+   "LED katot (kısa bacak)",
+   "220 Ω direnç, direncin diğer ucu GND"
+  ]
+ ],
+ "img": "assets/devre/ntc-sicaklik.png",
+ "steps": [
+  "Devreyi enerjisiz kur. 10 kΩ direnç ile NTC'yi breadboard'da aynı sütunda uç uça birleştir (gerilim bölücü).",
+  "10 kΩ direncin serbest ucunu 5V'a, NTC'nin serbest ucunu GND'ye bağla.",
+  "İki parçanın birleştiği sütundan A0'a kablo çek.",
+  "LED devresini kur: D8 → LED anot, LED katot → 220 Ω → GND.",
+  "Kodu yükle ve Seri Çizici'yi aç. Parmağınla NTC'yi ısıt; değerin değiştiğini izle.",
+  "Sıcaklık 30 °C'ye ulaşınca LED yanar."
+ ],
+ "code": "// NTC ile sıcaklık ölçme (yaklaşık): 30 °C ve üstünde LED yanar\nconst int NTC_PIN = A0;   // 5V - 10k direnç - A0 - NTC - GND\nconst int LED = 8;\nconst float ESIK = 30.0;  // °C\n\nvoid setup() {\n  pinMode(LED, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int adc = analogRead(NTC_PIN);\n\n  // İki kalibrasyon noktası: 20 °C ≈ 569, 40 °C ≈ 355 (10 kΩ NTC, B=3950)\n  // Aralarında doğrusal yaklaşım yapıyoruz (20-40 °C arası yaklaşık doğru)\n  float sicaklik = 20.0 + (569.0 - adc) * 20.0 / (569.0 - 355.0);\n\n  Serial.print(\"ADC: \");\n  Serial.print(adc);\n  Serial.print(\"  Sicaklik: \");\n  Serial.println(sicaklik);\n\n  if (sicaklik >= ESIK) {\n    digitalWrite(LED, HIGH);\n  } else {\n    digitalWrite(LED, LOW);\n  }\n  delay(500);\n}\n",
+ "notes": [
+  [
+   "NTC nedir?",
+   "Negatif sıcaklık katsayılı dirençtir: ısındıkça direnci düşer. Bu 10 kΩ'luk NTC 25 °C'de 10 kΩ, daha sıcakta daha düşük değer verir."
+  ],
+  [
+   "Gerilim bölücü",
+   "NTC alt tarafta olduğu için sıcaklık arttıkça A0 gerilimi düşer. 20 °C'de yaklaşık 569, 40 °C'de yaklaşık 355 okunur."
+  ],
+  [
+   "Bu hesap yaklaşık",
+   "Kodda 20 °C ve 40 °C noktaları arasında doğrusal ara değer buluyoruz. NTC doğrusal değildir; bu aralıkta ±1 °C hata normaldir, aralığın dışında hata artar. Daha doğru ölçüm için Steinhart-Hart ya da B parametresi denklemi ve log() fonksiyonu kullanılır."
+  ],
+  [
+   "Kalibrasyon",
+   "569 ve 355 değerleri B=3950 olan 10 kΩ bir NTC ve 10 kΩ direnç için hesaplandı. Farklı bir NTC kullanırsan bir termometreyle iki noktada ölçüp bu iki sayıyı kendin güncelle."
+  ]
+ ],
+ "title": "NTC ile sıcaklık ölçme"
+}

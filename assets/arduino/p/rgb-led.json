@@ -1,0 +1,55 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × RGB LED (ortak katot)",
+  "3 × 220 Ω direnç",
+  "Jumper kablolar"
+ ],
+ "wiring": [
+  [
+   "D9 (~)",
+   "220 Ω direnç, sonra RGB LED kırmızı (R) bacağı"
+  ],
+  [
+   "D10 (~)",
+   "220 Ω direnç, sonra RGB LED yeşil (G) bacağı"
+  ],
+  [
+   "D11 (~)",
+   "220 Ω direnç, sonra RGB LED mavi (B) bacağı"
+  ],
+  [
+   "RGB LED ortak katot (en uzun bacak)",
+   "GND"
+  ]
+ ],
+ "img": "assets/devre/rgb-led.png",
+ "steps": [
+  "Devreyi enerjisiz kur. RGB LED'i breadboard'a tak. Sırayla kırmızı, ortak katot (en uzun bacak), yeşil, mavi bacaklar yan yana gelir.",
+  "Ortak katot bacağını bir kabloyla GND'ye bağla.",
+  "Kırmızı, yeşil ve mavi bacakların her birine birer 220 Ω direnç tak.",
+  "Her direncin diğer ucunu sırayla D9, D10 ve D11'e kablola.",
+  "Kodu yükle: LED sırayla kırmızı, yeşil, mavi, sarı, mor, turkuaz ve beyaz yanar."
+ ],
+ "code": "// RGB LED (ortak katot): renk karışımı\nconst int KIRMIZI = 9;\nconst int YESIL = 10;\nconst int MAVI = 11;\n\nvoid renk(int k, int y, int m) {\n  analogWrite(KIRMIZI, k);\n  analogWrite(YESIL, y);\n  analogWrite(MAVI, m);\n}\n\nvoid setup() {\n  pinMode(KIRMIZI, OUTPUT);\n  pinMode(YESIL, OUTPUT);\n  pinMode(MAVI, OUTPUT);\n}\n\nvoid loop() {\n  renk(255, 0, 0);       // kırmızı\n  delay(1000);\n  renk(0, 255, 0);       // yeşil\n  delay(1000);\n  renk(0, 0, 255);       // mavi\n  delay(1000);\n  renk(255, 255, 0);     // sarı\n  delay(1000);\n  renk(255, 0, 255);     // mor\n  delay(1000);\n  renk(0, 255, 255);     // turkuaz\n  delay(1000);\n  renk(255, 255, 255);   // beyaz\n  delay(1000);\n}\n",
+ "notes": [
+  [
+   "Renk karışımı",
+   "Kırmızı + yeşil = sarı, kırmızı + mavi = mor, yeşil + mavi = turkuaz, üçü birden = beyaz. analogWrite değerini 0–255 arasında ayarlayarak aradaki tonları da elde edersin."
+  ],
+  [
+   "Ortak katot / ortak anot",
+   "Bu devrede üç rengin eksi bacağı ortaktır (ortak katot): HIGH yakar. Ortak anot LED alırsan ortak bacak 5V'a gider ve değerler ters çalışır (0 yakar, 255 söndürür)."
+  ],
+  [
+   "Neden üç direnç?",
+   "Her renk çipi ayrı bir LED'dir ve kendi akım sınırlayıcısına ihtiyaç duyar."
+  ],
+  [
+   "Dene",
+   "Üç potansiyometre ile renk karıştırıcı yap: her biri bir kanalı kontrol etsin."
+  ]
+ ],
+ "title": "4. RGB LED Renk Oluşturucu"
+}

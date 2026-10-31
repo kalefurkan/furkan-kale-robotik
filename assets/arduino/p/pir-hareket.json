@@ -1,0 +1,60 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "HC-SR501 PIR hareket sensörü",
+  "Breadboard",
+  "1 × LED",
+  "1 × 220 Ω direnç",
+  "Jumper kablolar"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "PIR VCC"
+  ],
+  [
+   "GND",
+   "PIR GND"
+  ],
+  [
+   "D2",
+   "PIR OUT"
+  ],
+  [
+   "D8",
+   "LED anot (uzun bacak)"
+  ],
+  [
+   "LED katot (kısa bacak)",
+   "220 Ω direnç, direncin diğer ucu GND"
+  ]
+ ],
+ "img": "assets/devre/pir-hareket.png",
+ "steps": [
+  "Devreyi enerjisiz kur. PIR sensörünü breadboard'a tak; VCC, OUT ve GND bacakları ayrı sütunlarda olsun (isimleri kartın üzerinde yazar).",
+  "VCC sütunundan 5V'a, GND sütunundan GND'ye, OUT sütunundan D2'ye kablo çek.",
+  "LED devresini kur: D8 → LED anot, LED katot → 220 Ω → GND.",
+  "Kodu yükle ve Seri Çizici'yi aç.",
+  "Sensörün önünde elini hareket ettir: LED yanar ve \"Hareket var\" yazılır. Hareket durunca bir süre sonra LED söner."
+ ],
+ "code": "// PIR hareket sensörü: hareket algılanınca LED yanar\nconst int PIR = 2;\nconst int LED = 8;\n\nvoid setup() {\n  pinMode(PIR, INPUT);\n  pinMode(LED, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  if (digitalRead(PIR) == HIGH) {\n    digitalWrite(LED, HIGH);\n    Serial.println(\"Hareket var\");\n  } else {\n    digitalWrite(LED, LOW);\n  }\n  delay(100);\n}\n",
+ "notes": [
+  [
+   "PIR nasıl çalışır?",
+   "Sensör, vücut sıcaklığındaki nesnelerin yaydığı kızılötesi ışımadaki değişimi algılar. Hareketsiz duran birini ya da ısı farkı oluşturmayan hareketi algılamayabilir."
+  ],
+  [
+   "Isınma süresi",
+   "Güç verdikten sonra sensörün ortama alışması için yaklaşık 30–60 saniye gerekir; bu sürede yanlış alarm verebilir."
+  ],
+  [
+   "Ayar potları",
+   "HC-SR501 üzerinde iki küçük pot vardır: biri algılama mesafesini, diğeri OUT'un kaç saniye HIGH kalacağını ayarlar."
+  ],
+  [
+   "Dene",
+   "LED yerine aktif buzzer bağla ve basit bir hırsız alarmı yap."
+  ]
+ ],
+ "title": "35. Hareket Algılayan Gece Lambası"
+}

@@ -1,0 +1,52 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × LED (5 mm)",
+  "1 × 220 Ω direnç",
+  "2 × jumper kablo"
+ ],
+ "wiring": [
+  [
+   "D13",
+   "LED anot (uzun bacak)"
+  ],
+  [
+   "LED katot (kısa bacak)",
+   "220 Ω direncin bir ucu"
+  ],
+  [
+   "Direncin diğer ucu",
+   "GND"
+  ]
+ ],
+ "img": "assets/devre/led-yakma.png",
+ "steps": [
+  "USB kablosunu çıkar; devreyi her zaman enerjisiz kur.",
+  "LED'i breadboard'a tak: uzun bacağı (anot) bir sütuna, kısa bacağı (katot) yanındaki sütuna.",
+  "LED'in anot sütununa D13 pininden gelen bir kablo bağla.",
+  "LED'in katot sütunundan başlayarak 220 Ω direnci tak; direncin diğer ucunu bir kabloyla GND'ye ver.",
+  "Kodu yükle (Arduino IDE'de Dosya → Örnekler → 01.Basics → Blink ile aynıdır).",
+  "LED bir saniye yanıp bir saniye söner. delay değerlerini değiştirip hızı dene."
+ ],
+ "code": "// LED yakma: D13'teki LED her saniye yanar ve söner\nconst int LED = 13;\n\nvoid setup() {\n  pinMode(LED, OUTPUT);\n}\n\nvoid loop() {\n  digitalWrite(LED, HIGH);   // LED yansın\n  delay(1000);               // 1 saniye bekle\n  digitalWrite(LED, LOW);    // LED sönsün\n  delay(1000);\n}\n",
+ "notes": [
+  [
+   "Komutlar",
+   "pinMode(LED, OUTPUT) pini çıkış yapar. digitalWrite(LED, HIGH) pine 5 V verir (LED yanar), LOW 0 V verir (söner). delay(1000) kodu 1000 milisaniye bekletir."
+  ],
+  [
+   "Neden D13?",
+   "Uno kartında D13 pini, kart üzerindeki küçük \"L\" LED'ine de bağlıdır. Dış LED bağlamasan bile o LED yanıp söner."
+  ],
+  [
+   "LED yönü",
+   "LED yalnızca bir yönde akım geçirir: uzun bacak (anot) artı, kısa bacak (katot) eksi tarafa gider. Ters takarsan yanmaz, zarar da görmez."
+  ],
+  [
+   "Dene",
+   "Üç kısa, üç uzun, üç kısa yanıp sönerek SOS sinyali ver."
+  ]
+ ],
+ "title": "1. LED Yakıp Söndürme"
+}
