@@ -283,7 +283,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <a class="btn btn-ghost" href="#uygulamalar">Uygulamalarım</a>
       </div>
       <ul class="topics" aria-label="Konular">
-        <li>Arduino</li><li>ESP32</li><li>Raspberry Pi</li><li>ROS 2</li><li>Python</li><li>OpenCV</li><li>PID</li>
+        <li>Scratch Jr.</li><li>Scratch</li><li>Kodu Game Lab</li><li>Minecraft</li><li>Tinkercad</li><li>SPIKE</li><li>Arduino</li><li>Python</li>
       </ul>
     </div>
     <figure class="sim" style="margin:0">
@@ -324,74 +324,13 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <div class="eyebrow">U2 · Uygulamalarım</div>
-        <h2>Atölyede ihtiyaç duyup yazdığım araçlar</h2>
-        <p>Her biri bir projede karşılaştığım sorunu çözmek için başladı. Ücretsiz deneyebilirsin.</p>
+        <div class="eyebrow">U2 · Araçlar ve uygulamalar</div>
+        <h2>Her sınıf kademesinde kullandığımız araçlar</h2>
+        <p>2026-2027 yıllık kodlama ve robotik planından: 5 yaştan 7. sınıfa kadar hangi uygulamayla ne çalışıyoruz.</p>
       </div>
     </div>
-    <div class="apps">
-      <article class="app">
-        <div class="app-screen">
-          <div class="m-servo" aria-hidden="true">
-            <div class="m-row"><span>J1</span><div class="m-track"><b style="width:52%"></b></div><span>94°</span></div>
-            <div class="m-row"><span>J2</span><div class="m-track"><b style="width:30%"></b></div><span>54°</span></div>
-            <div class="m-row"><span>J3</span><div class="m-track"><b style="width:74%"></b></div><span>133°</span></div>
-            <div class="m-row"><span>GR</span><div class="m-track"><b style="width:12%"></b></div><span>22°</span></div>
-          </div>
-        </div>
-        <div class="app-body">
-          <div class="app-title"><h3>ServoLab</h3><span class="status live">Yayında</span></div>
-          <p>Bluetooth ile robot kolunu telefondan sür, her servonun sınırlarını kalibre et ve hareketleri kaydedip tekrar oynat.</p>
-          <ul class="feat">
-            <li>HC-05 ve ESP32 BLE desteği</li>
-            <li>Kaydedilen hareketi Arduino koduna dönüştürme</li>
-            <li>Servo başına min/max darbe ayarı</li>
-          </ul>
-          <div class="app-foot"><span class="platforms">Android · iOS</span><a href="https://play.google.com" target="_blank" rel="noopener">İndir →</a></div>
-        </div>
-      </article>
-      <article class="app">
-        <div class="app-screen">
-          <div aria-hidden="true">
-            <div class="m-pins">
-              <span></span><span class="p"></span><span></span><span class="p"></span><span class="a"></span><span class="a"></span><span></span><span class="i"></span><span class="i"></span><span></span>
-              <span></span><span></span><span class="p"></span><span></span><span class="a"></span><span></span><span class="p"></span><span></span><span></span><span class="a"></span>
-            </div>
-            <div class="m-legend"><span><i style="background:var(--gold)"></i>PWM</span><span><i style="background:var(--mask)"></i>ADC</span><span><i style="background:var(--info)"></i>I²C</span></div>
-          </div>
-        </div>
-        <div class="app-body">
-          <div class="app-title"><h3>PinHarita</h3><span class="status beta">Beta</span></div>
-          <p>Kartını seç, hangi pinin PWM, ADC, I²C ya da SPI desteklediğini tek ekranda gör. Önyükleme sırasında sorun çıkaran pinler ayrıca işaretli.</p>
-          <ul class="feat">
-            <li>Uno R4, ESP32-S3, Pico 2, Raspberry Pi 5</li>
-            <li>Çakışma uyarısı: aynı pine iki görev atanınca</li>
-            <li>Çevrimdışı çalışır</li>
-          </ul>
-          <div class="app-foot"><span class="platforms">Web</span><a href="https://github.com" target="_blank" rel="noopener">Dene →</a></div>
-        </div>
-      </article>
-      <article class="app">
-        <div class="app-screen">
-          <div class="m-blocks" aria-hidden="true">
-            <div class="b1">tekrarla 4 kez</div>
-            <div class="b2">ileri git 20 cm</div>
-            <div class="b3">sağa dön 90°</div>
-            <div class="b1">bitti</div>
-          </div>
-        </div>
-        <div class="app-body">
-          <div class="app-title"><h3>RoboBlok</h3><span class="status dev">Geliştiriliyor</span></div>
-          <p>Çocuklar ve yeni başlayanlar için blok tabanlı kodlama. Bloklar arka planda gerçek Arduino koduna çevrilir, kod yan panelde görünür.</p>
-          <ul class="feat">
-            <li>Bloktan C++ koduna anlık çeviri</li>
-            <li>Sınıflar için hazır görev kartları</li>
-            <li>Türkçe arayüz</li>
-          </ul>
-          <div class="app-foot"><span class="platforms">Web · Tablet</span><a href="#iletisim">Bekleme listesi →</a></div>
-        </div>
-      </article>
-    </div>
+    <div id="lvl" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px"></div>
+    <div class="apps" id="toolgrid"></div>
   </div>
 </section>
 
@@ -759,6 +698,38 @@ ledcWrite(PIN, ${ledc});</pre>`;
       : 'Geçerli bir e-posta adresi gir, örneğin ad@ornek.com.';
   });
 })();
+
+  const LEVELS = ['5 Yaş','1. Sınıf','2. Sınıf','3. Sınıf','4. Sınıf','5. Sınıf','6. Sınıf','7. Sınıf'];
+  const TOOLS = [
+    { n: 'Scratch Jr.', d: 'Blok tabanlı kodlamaya ilk adım.', l: [0,1,2], f: ['Blok kodlama','Serbest etkinlik ve STEM çalışmaları'] },
+    { n: 'Scratch', d: 'Blok tabanlı programlama ortamı.', l: [3,4], f: ['Scratch projeleri','Zamanlama, mesajlaşma blokları, değişken ve fonksiyon'] },
+    { n: 'Kodu Game Lab', d: 'Oyun tasarımı ve programlama.', l: [1,2], f: ['Dijital oyun tasarımı modülü','Draw Your Game ile birlikte'] },
+    { n: 'Draw Your Game', d: 'Çizerek oyun yapma uygulaması.', l: [1,2], f: ['Dijital oyun tasarımı modülü'] },
+    { n: 'Minecraft', d: 'Oyun dünyası ve oyun tasarımı.', l: [3,4,5,6,7], f: ['Görev sistemi, oyun kuralları ve senaryo','Oyun mekaniği, skor ve seviye tasarımı','Oyun projesi'] },
+    { n: 'Tinkercad', d: '3B nesne tasarımı.', l: [3,4], f: ['Tinkercad arayüzü','Basit 3B şekillerden model oluşturma','Dijital ürün tasarımı projesi'] },
+    { n: 'SPIKE', d: 'Robotik yolculuğu: yapılandırılmış proje serisi.', l: [0,1,2,3,4], f: ['Basit makineler (5 yaşta LEGO parçalarıyla)','Sensör ve motor, robot hareket kontrolü','Engel algılama ve basit robot görevleri'] },
+    { n: 'Arduino', d: 'Fiziksel hesaplama ve elektronik.', l: [6], f: ['Sensör verisi okuma, LED ve motor kontrolü','Sensör tabanlı karar, basit IoT mantığı','Akıllı lamba, mesafe alarmı, ışığa duyarlı sistem'] },
+    { n: 'Python', d: 'Metin tabanlı programlamaya geçiş.', l: [5,6,7], f: ['Değişken, veri türleri, koşul ve döngü','Fonksiyon, liste ve diziler','Python ile sınıflandırma ve veri işleme'] },
+    { n: 'TaleBot', d: 'Robotla kodlama.', l: [0], f: ['TaleBot ile kodlama','TaleBot ile 23 Nisan etkinliği'] },
+    { n: 'Cognimates', d: 'Yapay zekâ ile blok kodlama.', l: [2], f: ['Yapay zekâ + blok kodlama'] },
+    { n: 'Code Spark · Kidlo Coding · ABCya', d: 'Küçük yaşlar için kodlama oyunları.', l: [0], f: ['Diziler ve döngüler (Kidlo Coding)','Fare kullanımı ve etkinlik oyunları'] }
+  ];
+  (function () {
+    const bar = document.getElementById('lvl'), grid = document.getElementById('toolgrid');
+    if (!bar || !grid) return;
+    let sel = -1;
+    const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+    function render() {
+      bar.innerHTML = ['Tümü', ...LEVELS].map((t, i) => `<button type="button" class="filter-btn" aria-pressed="${i - 1 === sel}" data-i="${i - 1}">${t}</button>`).join('');
+      const list = TOOLS.filter(t => sel < 0 || t.l.includes(sel));
+      grid.innerHTML = list.map(t => `<article class="app"><div class="app-body">
+        <div class="app-title"><h3>${esc(t.n)}</h3></div><p>${esc(t.d)}</p>
+        <ul class="feat">${t.f.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+        <div class="app-foot"><span class="platforms">${t.l.map(i => LEVELS[i]).join(' · ')}</span></div></div></article>`).join('');
+    }
+    bar.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; sel = +b.dataset.i; render(); });
+    render();
+  })();
 </script>
 
 </body></html>
