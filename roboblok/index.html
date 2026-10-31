@@ -4,35 +4,44 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RoboBlok · Blokla robot kodla</title>
-<meta name="description" content="Blokları sıraya diz, robotu tarayıcıda çalıştır, Arduino C++ kodunu al.">
+<meta name="description" content="Blokları sıraya diz, görevleri çöz, robotu tarayıcıda çalıştır ve Arduino C++ kodunu al.">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-:root{--bg:#F1F5F1;--surface:#fff;--sunken:#E6EDE7;--ink:#10241B;--muted:#53675C;--line:#D2DCD4;--mask:#1C6A4C;--on-mask:#fff;--gold:#C8961C;--warn:#B3541E;
- --c-move:#1C6A4C;--c-turn:#2A6FA8;--c-wait:#7A5800;--c-loop:#8A3F9E;--c-if:#B3541E;--c-io:#4A5B52;
+:root{--bg:#F1F5F1;--surface:#fff;--sunken:#E6EDE7;--ink:#10241B;--muted:#53675C;--line:#D2DCD4;--mask:#1C6A4C;--on-mask:#fff;--gold:#C8961C;--ok:#1C6A4C;
+ --c-move:#1C6A4C;--c-turn:#2A6FA8;--c-wait:#8A6410;--c-loop:#8A3F9E;--c-if:#B3541E;--c-io:#4A5B52;
+ --floor:#E9EFE8;--floor2:#E1E9E0;--wall:#1F2D26;
  --f-display:"Chakra Petch","Arial Narrow",system-ui,sans-serif;--f-body:Figtree,system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
-@media (prefers-color-scheme:dark){:root{--bg:#0A1C14;--surface:#0F271C;--sunken:#0C2118;--ink:#E3EEE6;--muted:#96AE9F;--line:#20402F;--mask:#45B484;--on-mask:#05200F;--gold:#E2B647;--warn:#E8905A;
- --c-move:#2E8A63;--c-turn:#3F86C4;--c-wait:#A57C14;--c-loop:#A55BB8;--c-if:#C9703A;--c-io:#5E7367}}
+@media (prefers-color-scheme:dark){:root{--bg:#0A1C14;--surface:#0F271C;--sunken:#0C2118;--ink:#E3EEE6;--muted:#96AE9F;--line:#20402F;--mask:#45B484;--on-mask:#05200F;--gold:#E2B647;--ok:#45B484;
+ --c-move:#2E8A63;--c-turn:#3F86C4;--c-wait:#A57C14;--c-loop:#A55BB8;--c-if:#C9703A;--c-io:#5E7367;--floor:#10281D;--floor2:#0D2217;--wall:#CFE3D6}}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
 header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+header .logo{display:flex;align-items:center;gap:10px}
 header h1{font:700 22px var(--f-display);margin:0}
 header a{color:var(--mask);font-weight:600;text-decoration:none;font-size:14px}
+header .sub{color:var(--muted);font-size:14px}
 header .sp{flex:1}
-main{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:16px;padding:16px 20px;max-width:1280px;margin:0 auto}
+main{display:grid;grid-template-columns:minmax(300px,400px) minmax(0,1fr);gap:16px;padding:16px 20px;max-width:1320px;margin:0 auto}
 @media (max-width:900px){main{grid-template-columns:1fr}}
-.stage,.panel{min-width:0}
-.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
-.panel h2{font:600 15px var(--f-display);margin:0 0 10px;letter-spacing:.02em}
+.col{display:grid;gap:16px;align-content:start;min-width:0}
+.panel{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.panel h2{font:600 15px var(--f-display);margin:0 0 10px;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.panel h2 .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--mask);color:var(--on-mask);font-size:12px}
+.grp{font:500 11px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:10px 0 5px}
+.grp:first-child{margin-top:0}
 .pal{display:flex;flex-wrap:wrap;gap:6px}
-.pal button,.btn{font:600 13px var(--f-body);border:0;border-radius:6px;padding:7px 11px;cursor:pointer;color:#fff}
+.pal button,.btn{font:600 13px var(--f-body);border:0;border-radius:7px;padding:7px 11px;cursor:pointer;color:#fff;display:inline-flex;align-items:center;gap:6px}
+.pal button .ic,.blk .ic{font:700 14px var(--f-mono);opacity:.9}
+.pal button:hover{filter:brightness(1.1)}
 .btn{background:var(--mask);color:var(--on-mask)}
 .btn.alt{background:var(--sunken);color:var(--ink);border:1px solid var(--line)}
 .btn:disabled{opacity:.5;cursor:default}
-.pal button:focus-visible,.btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.pal button:focus-visible,.btn:focus-visible,.mis button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .k-move{background:var(--c-move)}.k-turn{background:var(--c-turn)}.k-wait{background:var(--c-wait)}.k-loop{background:var(--c-loop)}.k-if{background:var(--c-if)}.k-io{background:var(--c-io)}
 #ws{min-height:120px;display:grid;gap:6px;align-content:start}
-.blk{border-radius:8px;color:#fff;padding:7px 9px}
+.blk{border-radius:9px;color:#fff;padding:7px 9px;box-shadow:0 1px 0 rgba(0,0,0,.18)}
+.blk.run{outline:3px solid var(--gold);outline-offset:1px}
 .blk .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-weight:600;font-size:13px}
 .blk input[type=number]{width:62px;border:0;border-radius:4px;padding:3px 5px;font:500 13px var(--f-mono)}
 .blk .ctl{margin-left:auto;display:flex;gap:2px}
@@ -41,110 +50,177 @@ main{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:16
 .blk .ctl button:focus-visible{outline:2px solid #fff}
 .body{margin:6px 0 2px 10px;padding:6px;border-left:3px solid rgba(255,255,255,.5);display:grid;gap:6px;min-height:30px;border-radius:0 6px 6px 0;cursor:pointer}
 .body.sel{background:rgba(255,255,255,.18);outline:2px dashed #fff}
-.body:empty::after{content:"(boş: buraya blok eklemek için tıkla, sonra soldan blok seç)";font-size:11px;font-weight:500;opacity:.85}
+.body:empty::after{content:"(boş: tıkla, sonra soldan blok seç)";font-size:11px;font-weight:500;opacity:.85}
 .hint{color:var(--muted);font-size:12px;margin:8px 0 0}
-.stage{display:grid;gap:10px}
-canvas{width:100%;max-width:560px;aspect-ratio:1;background:var(--sunken);border:1px solid var(--line);border-radius:10px;display:block}
 .tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .tools label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
-select{font:500 13px var(--f-body);padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
-#msg{font-size:13px;color:var(--muted);min-height:20px}
-pre{margin:0;background:#0E1F17;color:#D7E8DC;border-radius:8px;padding:12px;font:12.5px/1.5 var(--f-mono);overflow:auto;max-height:420px;white-space:pre}
-.codehead{display:flex;align-items:center;gap:8px;margin-bottom:8px}.codehead h2{margin:0}.codehead .sp{flex:1}
-.note{font-size:12px;color:var(--muted);margin-top:8px}
+select{font:500 13px var(--f-body);padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink);max-width:100%}
+/* görevler */
+.mis{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.mis button{all:unset;cursor:pointer;font:600 12.5px var(--f-body);padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:inline-flex;gap:6px;align-items:center}
+.mis button[aria-pressed=true]{background:var(--mask);color:var(--on-mask);border-color:var(--mask)}
+.mis .done::after{content:"★";color:var(--gold)}
+.mis button[aria-pressed=true].done::after{color:#ffe08a}
+.brief{background:var(--sunken);border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:13.5px;margin-bottom:10px}
+.brief b{font-family:var(--f-display)}
+.brief .tip{color:var(--muted);font-size:12.5px;margin-top:2px}
+canvas{width:100%;max-width:640px;aspect-ratio:1;background:var(--floor);border:1px solid var(--line);border-radius:12px;display:block}
+#msg{font-size:13.5px;min-height:22px;margin-top:8px;color:var(--muted)}
+#msg.ok{color:var(--ok);font-weight:600}
+pre{margin:0;background:#0E1F17;color:#D7E8DC;border-radius:10px;padding:12px;font:12.5px/1.55 var(--f-mono);overflow:auto;max-height:440px;white-space:pre}
+pre .c{color:#7FA38C}pre .k{color:#F0B96B}pre .n{color:#8EC7F0}pre .f{color:#9FE0B8}
+.codehead{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}.codehead h2{margin:0}.codehead .sp{flex:1}.codehead small{color:var(--muted);font:500 12px var(--f-mono)}
+.note{font-size:12.5px;color:var(--muted);margin-top:8px}
+details.build summary{cursor:pointer;font:600 15px var(--f-display);list-style:none;display:flex;align-items:center;gap:8px}
+details.build summary::-webkit-details-marker{display:none}
+details.build summary::after{content:"+";margin-left:auto;font:500 18px var(--f-mono);color:var(--muted)}
+details.build[open] summary::after{content:"−"}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0 10px}
+th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
+th{font:500 11px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+td code{font:500 12px var(--f-mono)}
+ul.parts{margin:6px 0 10px;padding-left:20px;font-size:13.5px}
+.rel{display:flex;gap:8px;flex-wrap:wrap}
+.rel a{font-size:13px;color:var(--mask);font-weight:600;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.rel a:hover{background:var(--sunken)}
 </style>
 </head>
 <body>
 <header>
-  <h1>RoboBlok</h1>
-  <span style="color:var(--muted);font-size:14px">Blokla kodla · robotu tarayıcıda çalıştır · Arduino kodunu al</span>
+  <div class="logo"><svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect x="4" y="9" width="24" height="17" rx="5" fill="#1C6A4C"/><circle cx="12" cy="17" r="3" fill="#fff"/><circle cx="20" cy="17" r="3" fill="#fff"/><rect x="14" y="3" width="4" height="6" rx="2" fill="#C8961C"/><rect x="1" y="14" width="3" height="7" rx="1.5" fill="#1C6A4C"/><rect x="28" y="14" width="3" height="7" rx="1.5" fill="#1C6A4C"/></svg><h1>RoboBlok</h1></div>
+  <span class="sub">Blokla kodla · görevleri çöz · Arduino kodunu al</span>
   <span class="sp"></span>
   <a href="../index.html#araclar">← Siteye dön</a>
 </header>
 <main>
-  <section class="panel" aria-label="Program">
-    <h2>1 · Blokları seç</h2>
-    <div class="pal" id="pal"></div>
-    <h2 style="margin-top:16px">2 · Programın</h2>
-    <div id="ws" aria-live="polite"></div>
-    <p class="hint">Tekrarla / Eğer bloklarının içine blok eklemek için önce içindeki çizgili alana tıkla, sonra soldaki bir blok düğmesine bas.</p>
-    <div class="tools" style="margin-top:10px">
-      <select id="ex" aria-label="Hazır örnek"><option value="">Hazır örnek yükle…</option></select>
-      <button class="btn alt" id="clear" type="button">Temizle</button>
-    </div>
-  </section>
-  <section class="stage">
-    <div class="panel">
-      <h2>3 · Robotu çalıştır</h2>
-      <canvas id="cv" width="560" height="560" aria-label="Robot simülasyon alanı"></canvas>
+  <div class="col">
+    <section class="panel" aria-label="Bloklar">
+      <h2><span class="n">1</span>Blokları seç</h2>
+      <div id="pal"></div>
+    </section>
+    <section class="panel" aria-label="Program">
+      <h2><span class="n">2</span>Programın</h2>
+      <div id="ws" aria-live="polite"></div>
+      <p class="hint">Tekrarla, Eğer ve Sonsuza dek bloklarının içine blok eklemek için önce içindeki çizgili alana tıkla, sonra soldan bir blok seç.</p>
+      <div class="tools" style="margin-top:10px">
+        <select id="ex" aria-label="Hazır örnek"><option value="">Hazır örnek yükle…</option></select>
+        <button class="btn alt" id="share" type="button">Bağlantı kopyala</button>
+        <button class="btn alt" id="clear" type="button">Temizle</button>
+      </div>
+    </section>
+  </div>
+  <div class="col">
+    <section class="panel" aria-label="Simülasyon">
+      <h2><span class="n">3</span>Görev seç ve robotu çalıştır</h2>
+      <div class="mis" id="mis" role="group" aria-label="Görevler"></div>
+      <div class="brief" id="brief"></div>
+      <canvas id="cv" width="640" height="640" aria-label="Robot simülasyon alanı"></canvas>
       <div class="tools" style="margin-top:10px">
         <button class="btn" id="run" type="button">▶ Çalıştır</button>
         <button class="btn alt" id="stop" type="button" disabled>■ Durdur</button>
         <button class="btn alt" id="reset" type="button">↺ Başa al</button>
-        <label>Alan <select id="scene"><option value="open">Açık alan</option><option value="wall">Önde duvar</option><option value="room">Odalı labirent</option></select></label>
         <label>Hız <select id="spd"><option value="1">×1</option><option value="2" selected>×2</option><option value="4">×4</option></select></label>
       </div>
       <div id="msg" role="status"></div>
-    </div>
-    <div class="panel">
-      <div class="codehead"><h2>Arduino C++ kodu</h2><span class="sp"></span><button class="btn alt" id="copy" type="button">Kopyala</button></div>
+    </section>
+    <section class="panel" aria-label="Kod">
+      <div class="codehead"><h2><span class="n">4</span>Arduino C++ kodu</h2><small id="lines"></small><span class="sp"></span><button class="btn alt" id="copy" type="button">Kopyala</button></div>
       <pre id="code" tabindex="0" aria-label="Üretilen Arduino kodu"></pre>
-      <p class="note">Kod, bloklardan otomatik üretilir. Varsayılan donanım: L298N sürücü + 2 DC motor, HC-SR04, LED ve buzzer; pinler kodun başında. <b>Önemli:</b> <code>MS_CM</code> (1 cm için ms) ve <code>MS_DERECE</code> (1° için ms) değerleri robotuna göre ölçülerek ayarlanmalıdır. Kod bu sayfada derlenmez ve gerçek bir robotta denenmemiştir.</p>
-    </div>
-  </section>
+      <p class="note">Kod bloklardan otomatik üretilir. <b>Bu sayfada derlenmez ve gerçek bir robotta denenmemiştir.</b> <code>MS_CM</code> ve <code>MS_DERECE</code> değerlerini kendi robotuna göre ölçerek ayarla.</p>
+    </section>
+    <section class="panel">
+      <details class="build">
+        <summary>Robotu nasıl kurarım?</summary>
+        <p class="hint" style="margin-top:8px">Üretilen kodun varsayılan donanımı budur; pinler kodun başındaki sabitlerle birebir aynıdır.</p>
+        <ul class="parts">
+          <li>Arduino Uno ve 2 tekerlekli şasi (2 DC motor, bir bilye tekerlek)</li>
+          <li>L298N motor sürücü ve 7,4 V pil ya da 4×AA pil kutusu (motor gücü)</li>
+          <li>HC-SR04 ultrasonik mesafe sensörü (eğer mesafe bloğu için)</li>
+          <li>TCRT5000 çizgi sensörü modülü (çizgi bloğu için, isteğe bağlı)</li>
+          <li>LED + 220 Ω direnç, pasif buzzer (isteğe bağlı)</li>
+        </ul>
+        <table>
+          <thead><tr><th>Parça</th><th>Parça pini</th><th>Arduino</th></tr></thead>
+          <tbody>
+            <tr><td>L298N</td><td>ENA, IN1, IN2</td><td><code>D9, D4, D5</code> (sol motor)</td></tr>
+            <tr><td>L298N</td><td>ENB, IN3, IN4</td><td><code>D10, D6, D7</code> (sağ motor)</td></tr>
+            <tr><td>L298N</td><td>GND</td><td>Arduino GND ve pil eksisi (ortak GND)</td></tr>
+            <tr><td>L298N</td><td>12V / 5V</td><td>pil artısı / Arduino VIN (5V çıkışı jumper takılıyken kullanılabilir)</td></tr>
+            <tr><td>HC-SR04</td><td>TRIG, ECHO, VCC, GND</td><td><code>D11, D12</code>, 5V, GND</td></tr>
+            <tr><td>Çizgi sensörü</td><td>OUT, VCC, GND</td><td><code>D2</code>, 5V, GND</td></tr>
+            <tr><td>LED</td><td>anot (220 Ω ile)</td><td><code>D13</code>, katot GND</td></tr>
+            <tr><td>Buzzer</td><td>+</td><td><code>D8</code>, − GND</td></tr>
+          </tbody>
+        </table>
+        <p class="hint">Çizgi sensörü modülünün çıkışı modele göre ters çalışabilir; kodda <code>HIGH</code> yerine <code>LOW</code> yaz. Sol/sağ motor yönü ters çıkarsa motor kablolarını L298N çıkışında değiştir.</p>
+        <div class="grp">Sitedeki ilgili projeler</div>
+        <div class="rel">
+          <a href="../index.html#arduino/engelden-kacan-robot">Engelden Kaçan Robot</a>
+          <a href="../index.html#arduino/cizgi-izleyen-robot">Çizgi İzleyen Robot</a>
+          <a href="../index.html#arduino/bluetooth-kontrollu-robot-araba">Bluetooth Robot Araba</a>
+          <a href="../index.html#arduino/mini-sumo-robot">Mini Sumo Robot</a>
+        </div>
+      </details>
+    </section>
+  </div>
 </main>
 <script>
 (() => {
 'use strict';
+const $ = id => document.getElementById(id);
 /* ---------- Blok tanımları ---------- */
 const DEF = {
-  fwd:   {cls:'k-move', label:'ileri git',  unit:'cm', n:20, min:1, max:200},
-  back:  {cls:'k-move', label:'geri git',   unit:'cm', n:20, min:1, max:200},
-  right: {cls:'k-turn', label:'sağa dön',   unit:'°',  n:90, min:1, max:360},
-  left:  {cls:'k-turn', label:'sola dön',   unit:'°',  n:90, min:1, max:360},
-  wait:  {cls:'k-wait', label:'bekle',      unit:'sn', n:1,  min:0.1, max:30, step:0.1},
-  rep:   {cls:'k-loop', label:'tekrarla',   unit:'kez', n:4, min:1, max:100, body:true},
-  fev:   {cls:'k-loop', label:'sonsuza dek tekrarla', body:true},
-  if:    {cls:'k-if',   label:'eğer mesafe <', unit:'cm', n:25, min:2, max:200, body:true, els:true},
-  led1:  {cls:'k-io',   label:'LED yak'},
-  led0:  {cls:'k-io',   label:'LED söndür'},
-  beep:  {cls:'k-io',   label:'buzzer öt', unit:'sn', n:0.3, min:0.1, max:5, step:0.1}
+  fwd:   {cls:'k-move', ic:'↑', label:'ileri git',  unit:'cm', n:20, min:1, max:200, g:'Hareket'},
+  back:  {cls:'k-move', ic:'↓', label:'geri git',   unit:'cm', n:20, min:1, max:200, g:'Hareket'},
+  right: {cls:'k-turn', ic:'↷', label:'sağa dön',   unit:'°',  n:90, min:1, max:360, g:'Hareket'},
+  left:  {cls:'k-turn', ic:'↶', label:'sola dön',   unit:'°',  n:90, min:1, max:360, g:'Hareket'},
+  speed: {cls:'k-move', ic:'»', label:'hızı ayarla', unit:'%', n:80, min:20, max:100, g:'Hareket'},
+  wait:  {cls:'k-wait', ic:'◷', label:'bekle',      unit:'sn', n:1,  min:0.1, max:30, step:0.1, g:'Kontrol'},
+  rep:   {cls:'k-loop', ic:'⟳', label:'tekrarla',   unit:'kez', n:4, min:1, max:100, body:true, g:'Kontrol'},
+  fev:   {cls:'k-loop', ic:'∞', label:'sonsuza dek tekrarla', body:true, g:'Kontrol'},
+  if:    {cls:'k-if',   ic:'?', label:'eğer mesafe <', unit:'cm', n:25, min:2, max:200, body:true, els:true, g:'Sensör'},
+  ifl:   {cls:'k-if',   ic:'▬', label:'eğer çizgi görünüyorsa', body:true, els:true, g:'Sensör'},
+  led1:  {cls:'k-io',   ic:'●', label:'LED yak', g:'Çıkış'},
+  led0:  {cls:'k-io',   ic:'○', label:'LED söndür', g:'Çıkış'},
+  beep:  {cls:'k-io',   ic:'♪', label:'buzzer öt', unit:'sn', n:0.3, min:0.1, max:5, step:0.1, g:'Çıkış'}
 };
-const PAL = ['fwd','back','right','left','wait','rep','fev','if','led1','led0','beep'];
 const mk = t => { const d = DEF[t], b = {t}; if (d.n !== undefined) b.n = d.n; if (d.body) b.body = []; if (d.els) b.els = []; return b; };
-let prog = [];
-let target = null;      // seçili kapsayıcı dizi (null = ana program)
-const ESIK_BOS = '(boş)';
+let prog = [], target = null;
 
 /* ---------- Hazır örnekler ---------- */
 const EX = {
-  kare: ['Kare çiz', () => [{t:'rep', n:4, body:[{t:'fwd', n:30}, {t:'right', n:90}]}]],
-  ucgen: ['Eşkenar üçgen', () => [{t:'rep', n:3, body:[{t:'fwd', n:30}, {t:'right', n:120}]}]],
+  kare:   ['Kare çiz', () => [{t:'rep', n:4, body:[{t:'fwd', n:30}, {t:'right', n:90}]}]],
+  ucgen:  ['Eşkenar üçgen', () => [{t:'rep', n:3, body:[{t:'fwd', n:30}, {t:'right', n:120}]}]],
   yildiz: ['Yıldız (5 köşe)', () => [{t:'rep', n:5, body:[{t:'fwd', n:35}, {t:'right', n:144}]}]],
-  kacan: ['Engelden kaç', () => [{t:'fev', body:[{t:'if', n:25, body:[{t:'back', n:8}, {t:'right', n:90}], els:[{t:'fwd', n:10}]}]}]],
-  isik: ['LED ve buzzer', () => [{t:'led1'}, {t:'beep', n:0.3}, {t:'fwd', n:20}, {t:'led0'}]]
+  kacan:  ['Engelden kaç', () => [{t:'fev', body:[{t:'if', n:25, body:[{t:'back', n:8}, {t:'right', n:90}], els:[{t:'fwd', n:6}]}]}]],
+  cizgi:  ['Çizgi izle', () => [{t:'fev', body:[{t:'ifl', body:[{t:'fwd', n:2}], els:[{t:'right', n:6}]}]}]],
+  isik:   ['LED ve buzzer', () => [{t:'led1'}, {t:'beep', n:0.3}, {t:'fwd', n:20}, {t:'led0'}]],
+  yavas:  ['Yavaş ve hızlı', () => [{t:'speed', n:40}, {t:'fwd', n:20}, {t:'speed', n:100}, {t:'fwd', n:20}]]
 };
-const exSel = document.getElementById('ex');
-Object.entries(EX).forEach(([k, v]) => exSel.insertAdjacentHTML('beforeend', `<option value="${k}">${v[0]}</option>`));
-exSel.addEventListener('change', () => { if (exSel.value) { prog = EX[exSel.value][1](); target = null; exSel.value = ''; stopRun(); rerender(); } });
+Object.entries(EX).forEach(([k, v]) => $('ex').insertAdjacentHTML('beforeend', `<option value="${k}">${v[0]}</option>`));
+$('ex').addEventListener('change', () => { const v = $('ex').value; if (v) { prog = EX[v][1](); target = null; $('ex').value = ''; stopRun(); rerender(); } });
 
-/* ---------- Çalışma alanı çizimi ---------- */
-const ws = document.getElementById('ws');
-const pal = document.getElementById('pal');
-PAL.forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.className = DEF[t].cls; b.textContent = DEF[t].label + (DEF[t].unit ? ' …' : ''); b.addEventListener('click', () => add(t)); pal.appendChild(b); });
-function add(t) { (target || prog).push(mk(t)); rerender(); }
-function listEl(arr, owner) {
-  const wrap = document.createElement('div'); wrap.style.display = 'contents';
-  arr.forEach((b, i) => wrap.appendChild(blockEl(b, arr, i)));
-  return wrap;
-}
+/* ---------- Palet ve çalışma alanı ---------- */
+const pal = $('pal'), ws = $('ws');
+['Hareket', 'Kontrol', 'Sensör', 'Çıkış'].forEach(g => {
+  pal.insertAdjacentHTML('beforeend', `<div class="grp">${g}</div>`);
+  const row = document.createElement('div'); row.className = 'pal';
+  Object.keys(DEF).filter(t => DEF[t].g === g).forEach(t => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = DEF[t].cls;
+    b.innerHTML = `<span class="ic">${DEF[t].ic}</span>${DEF[t].label}`;
+    b.addEventListener('click', () => { (target || prog).push(mk(t)); rerender(); });
+    row.appendChild(b);
+  }); pal.appendChild(row);
+});
+const listEl = arr => { const w = document.createElement('div'); w.style.display = 'contents'; arr.forEach((b, i) => w.appendChild(blockEl(b, arr, i))); return w; };
+function containsArr(b, a) { return !!a && [b.body, b.els].some(x => x && (x === a || x.some(c => containsArr(c, a)))); }
 function blockEl(b, arr, i) {
-  const d = DEF[b.t], el = document.createElement('div'); el.className = 'blk ' + d.cls;
+  const d = DEF[b.t], el = document.createElement('div'); el.className = 'blk ' + d.cls; b._el = el;
   const row = document.createElement('div'); row.className = 'row';
-  row.appendChild(document.createTextNode(d.label + ' '));
+  row.insertAdjacentHTML('beforeend', `<span class="ic">${d.ic}</span>`); row.appendChild(document.createTextNode(d.label + ' '));
   if (d.n !== undefined) {
     const inp = document.createElement('input'); inp.type = 'number'; inp.value = b.n; inp.min = d.min; inp.max = d.max; inp.step = d.step || 1; inp.setAttribute('aria-label', d.label + ' değeri');
-    inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (!isNaN(v)) { b.n = Math.min(d.max, Math.max(d.min, v)); genCode(); } });
+    inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (!isNaN(v)) { b.n = Math.min(d.max, Math.max(d.min, v)); genCode(); save(); } });
     inp.addEventListener('change', () => { inp.value = b.n; });
     row.appendChild(inp); row.appendChild(document.createTextNode(' ' + d.unit));
   }
@@ -160,7 +236,6 @@ function blockEl(b, arr, i) {
   }
   return el;
 }
-function containsArr(b, a) { if (!a) return false; return [b.body, b.els].some(x => x && (x === a || x.some(c => containsArr(c, a)))); }
 function bodyEl(arr) {
   const el = document.createElement('div'); el.className = 'body' + (arr === target ? ' sel' : ''); el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'Bu alana blok ekle');
   el.appendChild(listEl(arr));
@@ -168,56 +243,73 @@ function bodyEl(arr) {
   el.addEventListener('click', pick); el.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target === el) pick(e); });
   return el;
 }
-function rerender() { ws.innerHTML = ''; ws.appendChild(listEl(prog)); if (!prog.length) ws.innerHTML = '<p class="hint" style="margin:0">Henüz blok yok. Soldan bir blok seç ya da hazır örnek yükle.</p>'; genCode(); }
+function rerender() { ws.innerHTML = ''; ws.appendChild(listEl(prog)); if (!prog.length) ws.innerHTML = '<p class="hint" style="margin:0">Henüz blok yok. Yukarıdan bir blok seç ya da hazır örnek yükle.</p>'; genCode(); save(); }
 ws.addEventListener('click', e => { if (e.target === ws || e.target.tagName === 'P') { target = null; rerender(); } });
-document.getElementById('clear').addEventListener('click', () => { prog = []; target = null; stopRun(); rerender(); });
+$('clear').addEventListener('click', () => { prog = []; target = null; stopRun(); rerender(); });
 
-/* ---------- Arduino kodu üretimi ---------- */
+/* ---------- Kaydet / paylaş ---------- */
+const strip = a => a.map(b => { const o = {t: b.t}; if (b.n !== undefined) o.n = b.n; if (b.body) o.body = strip(b.body); if (b.els) o.els = strip(b.els); return o; });
+const validate = a => Array.isArray(a) && a.length < 400 && a.every(b => b && DEF[b.t] && (!DEF[b.t].body || Array.isArray(b.body) && validate(b.body)) && (!DEF[b.t].els || Array.isArray(b.els) && validate(b.els)) && (DEF[b.t].n === undefined || typeof b.n === 'number'));
+function save() { try { localStorage.setItem('roboblok-prog', JSON.stringify(strip(prog))); } catch (e) {} }
+function load() {
+  try { const m = /^#p=(.+)$/.exec(location.hash); if (m) { const a = JSON.parse(decodeURIComponent(escape(atob(m[1])))); if (validate(a)) return a; } } catch (e) {}
+  try { const a = JSON.parse(localStorage.getItem('roboblok-prog')); if (validate(a)) return a; } catch (e) {}
+  return null;
+}
+$('share').addEventListener('click', async () => {
+  const url = location.href.split('#')[0] + '#p=' + btoa(unescape(encodeURIComponent(JSON.stringify(strip(prog)))));
+  const b = $('share'); history.replaceState(null, '', url);
+  try { await navigator.clipboard.writeText(url); b.textContent = 'Kopyalandı ✓'; } catch (e) { b.textContent = 'Adres çubuğundan kopyala'; }
+  setTimeout(() => b.textContent = 'Bağlantı kopyala', 1800);
+});
+
+/* ---------- Arduino kodu ---------- */
+let lastCode = '';
 function genCode() {
-  let uses = {led: false, beep: false, sens: false};
-  const vars = ['i', 'j', 'k', 'm', 'n'];
-  const pad = d => '  '.repeat(d);
-  function gen(arr, d, depth) {
-    return arr.map(b => {
-      const p = pad(d);
-      switch (b.t) {
-        case 'fwd': return `${p}ileri(${b.n});\n`;
-        case 'back': return `${p}geri(${b.n});\n`;
-        case 'right': return `${p}sagaDon(${b.n});\n`;
-        case 'left': return `${p}solaDon(${b.n});\n`;
-        case 'wait': return `${p}delay(${Math.round(b.n * 1000)});\n`;
-        case 'led1': uses.led = true; return `${p}digitalWrite(LED, HIGH);\n`;
-        case 'led0': uses.led = true; return `${p}digitalWrite(LED, LOW);\n`;
-        case 'beep': uses.beep = true; return `${p}tone(BUZZER, 1000, ${Math.round(b.n * 1000)});\n${p}delay(${Math.round(b.n * 1000)});\n`;
-        case 'rep': { const v = vars[Math.min(depth, vars.length - 1)] + (depth >= vars.length ? depth : ''); return `${p}for (int ${v} = 0; ${v} < ${b.n}; ${v}++) {\n${gen(b.body, d + 1, depth + 1)}${p}}\n`; }
-        case 'fev': return `${p}while (true) {\n${gen(b.body, d + 1, depth)}${p}}\n`;
-        case 'if': uses.sens = true; return `${p}if (mesafeOlc() < ${b.n}) {\n${gen(b.body, d + 1, depth)}${p}}` + (b.els.length ? ` else {\n${gen(b.els, d + 1, depth)}${p}}` : '') + '\n';
-      }
-    }).join('');
-  }
+  const u = {led: false, beep: false, sens: false, line: false, speed: false};
+  const vars = ['i', 'j', 'k', 'm', 'n'], pad = d => '  '.repeat(d);
+  const gen = (arr, d, depth) => arr.map(b => {
+    const p = pad(d), blk = x => gen(x, d + 1, depth);
+    switch (b.t) {
+      case 'fwd': return `${p}ileri(${b.n});\n`;
+      case 'back': return `${p}geri(${b.n});\n`;
+      case 'right': return `${p}sagaDon(${b.n});\n`;
+      case 'left': return `${p}solaDon(${b.n});\n`;
+      case 'speed': u.speed = true; return `${p}motorHiz = map(${b.n}, 0, 100, 0, 255);\n`;
+      case 'wait': return `${p}delay(${Math.round(b.n * 1000)});\n`;
+      case 'led1': u.led = true; return `${p}digitalWrite(LED, HIGH);\n`;
+      case 'led0': u.led = true; return `${p}digitalWrite(LED, LOW);\n`;
+      case 'beep': u.beep = true; return `${p}tone(BUZZER, 1000, ${Math.round(b.n * 1000)});\n${p}delay(${Math.round(b.n * 1000)});\n`;
+      case 'rep': { const v = vars[depth] || 'x' + depth; return `${p}for (int ${v} = 0; ${v} < ${b.n}; ${v}++) {\n${gen(b.body, d + 1, depth + 1)}${p}}\n`; }
+      case 'fev': return `${p}while (true) {\n${blk(b.body)}${p}}\n`;
+      case 'if': u.sens = true; return `${p}if (mesafeOlc() < ${b.n}) {\n${blk(b.body)}${p}}` + (b.els.length ? ` else {\n${blk(b.els)}${p}}` : '') + '\n';
+      case 'ifl': u.line = true; return `${p}if (digitalRead(CIZGI) == HIGH) {\n${blk(b.body)}${p}}` + (b.els.length ? ` else {\n${blk(b.els)}${p}}` : '') + '\n';
+    }
+  }).join('');
   const main = gen(prog, 1, 0) || '  // (program boş)\n';
-  const code =
-`// RoboBlok ile üretildi: L298N + 2 DC motor${'' }
-// Kalibrasyon: robotun 1 cm gitmesi ve 1° dönmesi için gereken süre
-const int MS_CM = 40;      // ölç ve ayarla
-const int MS_DERECE = 6;   // ölç ve ayarla
-const int MOTOR_HIZ = 200; // 0-255 (PWM)
+  lastCode =
+`// RoboBlok ile üretildi: Arduino Uno + L298N + 2 DC motor
+// Kalibrasyon: robotun 1 cm gitmesi ve 1° dönmesi için gereken süre (ms).
+// Robotunu ölç, bu iki sayıyı ona göre değiştir.
+const int MS_CM = 40;
+const int MS_DERECE = 6;
+int motorHiz = 200;                    // 0-255 (PWM)
 
 const int ENA = 9, IN1 = 4, IN2 = 5;   // sol motor
 const int ENB = 10, IN3 = 6, IN4 = 7;  // sağ motor
-${uses.sens ? 'const int TRIG = 11, ECHO = 12;           // HC-SR04\n' : ''}${uses.led ? 'const int LED = 13;\n' : ''}${uses.beep ? 'const int BUZZER = 8;\n' : ''}
+${u.sens ? 'const int TRIG = 11, ECHO = 12;           // HC-SR04\n' : ''}${u.line ? 'const int CIZGI = 2;                    // çizgi sensörü (çizgi = HIGH kabul edildi)\n' : ''}${u.led ? 'const int LED = 13;\n' : ''}${u.beep ? 'const int BUZZER = 8;\n' : ''}
 void motorlar(int sol, int sag) {      // +1 ileri, -1 geri, 0 dur
   digitalWrite(IN1, sol > 0); digitalWrite(IN2, sol < 0);
   digitalWrite(IN3, sag > 0); digitalWrite(IN4, sag < 0);
-  analogWrite(ENA, sol ? MOTOR_HIZ : 0);
-  analogWrite(ENB, sag ? MOTOR_HIZ : 0);
+  analogWrite(ENA, sol ? motorHiz : 0);
+  analogWrite(ENB, sag ? motorHiz : 0);
 }
-void ileri(int cm)     { motorlar(1, 1);   delay((long)cm * MS_CM);          motorlar(0, 0); }
-void geri(int cm)      { motorlar(-1, -1); delay((long)cm * MS_CM);          motorlar(0, 0); }
-void sagaDon(int der)  { motorlar(1, -1);  delay((long)der * MS_DERECE);     motorlar(0, 0); }
-void solaDon(int der)  { motorlar(-1, 1);  delay((long)der * MS_DERECE);     motorlar(0, 0); }
-${uses.sens ? `
-long mesafeOlc() {                     // cm, yankı yoksa çok büyük değer
+void ileri(int cm)    { motorlar(1, 1);   delay((long)cm * MS_CM);      motorlar(0, 0); }
+void geri(int cm)     { motorlar(-1, -1); delay((long)cm * MS_CM);      motorlar(0, 0); }
+void sagaDon(int der) { motorlar(1, -1);  delay((long)der * MS_DERECE); motorlar(0, 0); }
+void solaDon(int der) { motorlar(-1, 1);  delay((long)der * MS_DERECE); motorlar(0, 0); }
+${u.sens ? `
+long mesafeOlc() {                     // cm; yankı yoksa 999
   digitalWrite(TRIG, LOW);  delayMicroseconds(2);
   digitalWrite(TRIG, HIGH); delayMicroseconds(10);
   digitalWrite(TRIG, LOW);
@@ -233,7 +325,7 @@ void setup() {
   pinMode(ENA, OUTPUT); pinMode(ENB, OUTPUT);
   pinMode(IN1, OUTPUT); pinMode(IN2, OUTPUT);
   pinMode(IN3, OUTPUT); pinMode(IN4, OUTPUT);
-${uses.sens ? '  pinMode(TRIG, OUTPUT); pinMode(ECHO, INPUT);\n' : ''}${uses.led ? '  pinMode(LED, OUTPUT);\n' : ''}${uses.beep ? '  pinMode(BUZZER, OUTPUT);\n' : ''}  delay(2000);                         // başlamadan önce robotu yere koy
+${u.sens ? '  pinMode(TRIG, OUTPUT); pinMode(ECHO, INPUT);\n' : ''}${u.line ? '  pinMode(CIZGI, INPUT);\n' : ''}${u.led ? '  pinMode(LED, OUTPUT);\n' : ''}${u.beep ? '  pinMode(BUZZER, OUTPUT);\n' : ''}  delay(2000);                         // başlamadan önce robotu yere koy
   program();
 }
 
@@ -241,122 +333,179 @@ void loop() {
   // program bir kez çalışır
 }
 `;
-  document.getElementById('code').textContent = code;
+  const esc = lastCode.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  $('code').innerHTML = esc.split('\n').map(l => {
+    const ci = l.indexOf('//'); let code = ci >= 0 ? l.slice(0, ci) : l; const com = ci >= 0 ? `<span class="c">${l.slice(ci)}</span>` : '';
+    code = code.replace(/\b(const|int|long|void|if|else|for|while|return)\b/g, '<span class="k">$1</span>').replace(/\b(\d+)\b/g, '<span class="n">$1</span>').replace(/\b(digitalWrite|digitalRead|analogWrite|delay|delayMicroseconds|pinMode|pulseIn|tone|map)\b/g, '<span class="f">$1</span>');
+    return code + com;
+  }).join('\n');
+  $('lines').textContent = lastCode.split('\n').length - 1 + ' satır';
 }
-document.getElementById('copy').addEventListener('click', async () => {
-  const b = document.getElementById('copy');
-  try { await navigator.clipboard.writeText(document.getElementById('code').textContent); b.textContent = 'Kopyalandı ✓'; }
-  catch (e) { const r = document.createRange(); r.selectNodeContents(document.getElementById('code')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Seçildi, Ctrl+C'; }
+$('copy').addEventListener('click', async () => {
+  const b = $('copy');
+  try { await navigator.clipboard.writeText(lastCode); b.textContent = 'Kopyalandı ✓'; }
+  catch (e) { const r = document.createRange(); r.selectNodeContents($('code')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Seçildi, Ctrl+C'; }
   setTimeout(() => b.textContent = 'Kopyala', 1600);
 });
 
-/* ---------- Simülasyon dünyası (1 birim = 1 cm, alan 100x100 cm) ---------- */
+/* ---------- Dünya (1 birim = 1 cm, alan 100x100) ---------- */
 const W = 100, R = 4;
+const LINE = [[50, 88], [50, 55], [80, 55], [80, 84]];
 const SCENES = {
-  open: [],
-  wall: [{x: 10, y: 22, w: 80, h: 3}],
-  room: [{x: 0, y: 40, w: 60, h: 3}, {x: 40, y: 68, w: 60, h: 3}, {x: 70, y: 15, w: 3, h: 25}]
+  open:  {walls: []},
+  wall:  {walls: [{x: 10, y: 22, w: 80, h: 3}]},
+  gap:   {walls: [{x: 0, y: 42, w: 68, h: 3}]},
+  room:  {walls: [{x: 0, y: 40, w: 60, h: 3}, {x: 40, y: 68, w: 60, h: 3}, {x: 70, y: 15, w: 3, h: 25}]},
+  line:  {walls: [], line: LINE}
 };
-const cv = document.getElementById('cv'), cx = cv.getContext('2d'), S = cv.width / W;
-const msg = document.getElementById('msg');
-let pose, trail, led, beepUntil, running = false, token = 0;
-const obstacles = () => SCENES[document.getElementById('scene').value];
-function resetWorld() { pose = {x: 50, y: 88, a: 0}; trail = [[pose.x, pose.y]]; led = false; beepUntil = 0; draw(); }
-const hit = (x, y) => x < R || y < R || x > W - R || y > W - R || obstacles().some(o => x > o.x - R && x < o.x + o.w + R && y > o.y - R && y < o.y + o.h + R);
+const pathLen = t => t.reduce((s, p, i) => i ? s + Math.hypot(p[0] - t[i - 1][0], p[1] - t[i - 1][1]) : s, 0);
+const MIS = [
+  {id: 'free',  name: 'Serbest', scene: 'open', text: 'Serbest alan: istediğin gibi dene. Hazır örneklerden birini yükleyip çalıştır.', tip: 'Alanı değiştirmek için bir görev seç: görevlerin her birinin kendi alanı var.'},
+  {id: 'kare',  name: 'Kareyi çiz', scene: 'open', text: 'Robotla yaklaşık 30 cm kenarlı bir kare çiz ve başladığın yere dön.', tip: 'İpucu: tekrarla 4 kez { ileri git, sağa dön 90° }.', done: s => s.end < 6 && s.len >= 100 && s.w >= 22 && s.h >= 22},
+  {id: 'bayrak', name: 'Bayrağa git', scene: 'open', goal: [50, 18], text: 'Robotu yukarıdaki bayrağa ulaştır.', tip: 'Robot yukarı bakıyor; bayrak 70 cm ileride.'},
+  {id: 'kose', name: 'Köşeyi dön', scene: 'open', goal: [84, 60], text: 'Bayrağa ulaş: önce ileri git, sonra sağa dön.', tip: 'Önce yaklaşık 28 cm ileri, sağa 90°, sonra yaklaşık 34 cm ileri.'},
+  {id: 'duvar', name: 'Duvarı aş', scene: 'gap', goal: [30, 15], text: 'Duvarın boşluğundan geçip bayrağa ulaş.', tip: 'Duvarın sağında boşluk var. Sağa git, yukarı çık, sola dön.'},
+  {id: 'lab', name: 'Labirent', scene: 'room', goal: [85, 25], text: 'Duvarların arasından yol bulup bayrağa ulaş.', tip: 'Sol baştan dolan: sola, yukarı, sağa, yukarı.'},
+  {id: 'cizgi', name: 'Çizgiyi izle', scene: 'line', goal: [80, 82], text: 'Çizgi sensörüyle siyah çizgiyi takip et ve bayrağa ulaş.', tip: 'Hazır örnekten "Çizgi izle"yi dene: çizgi varsa ileri, yoksa sağa dön.'},
+  {id: 'kacan', name: 'Engelden kaç', scene: 'wall', text: '15 saniye boyunca duvara çarpmadan ve takılmadan dolaş.', tip: 'Hazır örnekten "Engelden kaç"ı dene: mesafe < 25 cm ise geri git ve dön.', survive: 15}
+];
+let mis = MIS[0], doneSet = new Set();
+try { doneSet = new Set(JSON.parse(localStorage.getItem('roboblok-done')) || []); } catch (e) {}
+const sceneOf = () => SCENES[mis.scene];
+function drawMis() {
+  $('mis').innerHTML = '';
+  MIS.forEach(m => { const b = document.createElement('button'); b.type = 'button'; b.textContent = m.name; b.className = doneSet.has(m.id) ? 'done' : ''; b.setAttribute('aria-pressed', String(m === mis)); b.addEventListener('click', () => { mis = m; stopRun(); drawMis(); resetWorld(); msg('', ''); }); $('mis').appendChild(b); });
+  $('brief').innerHTML = `<b>${mis.name}</b>: ${mis.text}<div class="tip">${mis.tip}</div>`;
+}
+const cv = $('cv'), cx = cv.getContext('2d');
+const DPR = Math.min(2, window.devicePixelRatio || 1); cv.width = cv.height = 640 * DPR;
+const S = cv.width / W;
+let pose, trail, led, beepUntil, running = false, token = 0, spdPct = 80, cone = false, reached = false;
+function msg(t, cls) { const m = $('msg'); m.textContent = t; m.className = cls || ''; }
+const startPose = () => mis.scene === 'line' ? {x: 50, y: 86, a: 0} : {x: 50, y: 88, a: 0};
+function resetWorld() { pose = startPose(); trail = [[pose.x, pose.y]]; led = false; beepUntil = 0; spdPct = 80; cone = false; reached = false; draw(); }
+const hit = (x, y) => x < R || y < R || x > W - R || y > W - R || sceneOf().walls.some(o => x > o.x - R && x < o.x + o.w + R && y > o.y - R && y < o.y + o.h + R);
 function sensor() {
   const rad = pose.a * Math.PI / 180, dx = Math.sin(rad), dy = -Math.cos(rad);
-  for (let d = R; d <= 200; d += 0.5) {
-    const x = pose.x + dx * d, y = pose.y + dy * d;
-    if (x < 0 || y < 0 || x > W || y > W || obstacles().some(o => x >= o.x && x <= o.x + o.w && y >= o.y && y <= o.y + o.h)) return d - R;
-  }
+  for (let d = R; d <= 200; d += 0.5) { const x = pose.x + dx * d, y = pose.y + dy * d;
+    if (x < 0 || y < 0 || x > W || y > W || sceneOf().walls.some(o => x >= o.x && x <= o.x + o.w && y >= o.y && y <= o.y + o.h)) return d - R; }
   return 999;
 }
+const segDist = (px, py, a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], t = Math.max(0, Math.min(1, ((px - a[0]) * dx + (py - a[1]) * dy) / (dx * dx + dy * dy))); return Math.hypot(px - a[0] - t * dx, py - a[1] - t * dy); };
+function onLine() { const ln = sceneOf().line; if (!ln) return false; const rad = pose.a * Math.PI / 180, x = pose.x + Math.sin(rad) * 3, y = pose.y - Math.cos(rad) * 3; return ln.slice(1).some((p, i) => segDist(x, y, ln[i], p) < 2.2); }
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function rr(x, y, w, h, r) { cx.beginPath(); cx.moveTo(x + r, y); cx.arcTo(x + w, y, x + w, y + h, r); cx.arcTo(x + w, y + h, x, y + h, r); cx.arcTo(x, y + h, x, y, r); cx.arcTo(x, y, x + w, y, r); cx.closePath(); }
 function draw() {
-  cx.clearRect(0, 0, cv.width, cv.height);
-  cx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--line'); cx.lineWidth = 1;
-  for (let i = 10; i < W; i += 10) { cx.beginPath(); cx.moveTo(i * S, 0); cx.lineTo(i * S, cv.height); cx.moveTo(0, i * S); cx.lineTo(cv.width, i * S); cx.stroke(); }
-  const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink'), mask = getComputedStyle(document.documentElement).getPropertyValue('--mask');
-  cx.fillStyle = ink; obstacles().forEach(o => cx.fillRect(o.x * S, o.y * S, o.w * S, o.h * S));
-  cx.strokeStyle = mask; cx.lineWidth = 3; cx.lineJoin = 'round'; cx.beginPath(); trail.forEach((p, i) => i ? cx.lineTo(p[0] * S, p[1] * S) : cx.moveTo(p[0] * S, p[1] * S)); cx.stroke();
-  cx.save(); cx.translate(pose.x * S, pose.y * S); cx.rotate(pose.a * Math.PI / 180);
-  cx.fillStyle = mask; cx.fillRect(-R * S, -R * S, 2 * R * S, 2 * R * S);
-  cx.fillStyle = '#C8961C'; cx.beginPath(); cx.moveTo(0, -R * S - 6); cx.lineTo(-7, -R * S + 5); cx.lineTo(7, -R * S + 5); cx.fill();
-  if (led) { cx.fillStyle = '#ffd23f'; cx.beginPath(); cx.arc(0, 0, 7, 0, 7); cx.fill(); }
+  const sc = sceneOf(), W_ = cv.width;
+  cx.clearRect(0, 0, W_, W_);
+  cx.fillStyle = css('--floor'); cx.fillRect(0, 0, W_, W_);
+  cx.fillStyle = css('--floor2'); for (let i = 0; i < 10; i++) for (let j = 0; j < 10; j++) if ((i + j) % 2) cx.fillRect(i * 10 * S, j * 10 * S, 10 * S, 10 * S);
+  cx.fillStyle = css('--muted'); cx.font = `${9 * DPR}px "JetBrains Mono",monospace`; cx.globalAlpha = .7;
+  for (let i = 20; i < W; i += 20) { cx.fillText(i, i * S + 3 * DPR, 10 * DPR); cx.fillText(i, 3 * DPR, i * S - 3 * DPR); }
+  cx.fillText('cm', 3 * DPR, 10 * DPR); cx.globalAlpha = 1;
+  if (sc.line) { cx.strokeStyle = '#161d19'; cx.lineWidth = 3.4 * S; cx.lineCap = 'butt'; cx.lineJoin = 'miter'; cx.beginPath(); sc.line.forEach((p, i) => i ? cx.lineTo(p[0] * S, p[1] * S) : cx.moveTo(p[0] * S, p[1] * S)); cx.stroke(); }
+  sc.walls.forEach(o => { cx.fillStyle = 'rgba(0,0,0,.18)'; cx.fillRect(o.x * S + 2 * DPR, o.y * S + 3 * DPR, o.w * S, o.h * S); cx.fillStyle = css('--wall'); cx.fillRect(o.x * S, o.y * S, o.w * S, o.h * S);
+    cx.save(); cx.beginPath(); cx.rect(o.x * S, o.y * S, o.w * S, o.h * S); cx.clip(); cx.strokeStyle = 'rgba(255,200,60,.85)'; cx.lineWidth = 1.2 * S; for (let k = -20; k < Math.max(o.w, o.h) + 40; k += 5) { cx.beginPath(); cx.moveTo((o.x + k) * S, o.y * S); cx.lineTo((o.x + k - 6) * S, (o.y + o.h) * S); cx.stroke(); } cx.restore(); });
+  cx.lineWidth = 2 * DPR; cx.strokeStyle = css('--line'); cx.strokeRect(0, 0, W_, W_);
+  /* başlangıç noktası */
+  const st = startPose(); cx.setLineDash([4 * DPR, 4 * DPR]); cx.strokeStyle = css('--muted'); cx.lineWidth = DPR; cx.beginPath(); cx.arc(st.x * S, st.y * S, 6 * S, 0, 7); cx.stroke(); cx.setLineDash([]);
+  /* iz */
+  if (trail.length > 1) { cx.strokeStyle = css('--mask'); cx.globalAlpha = .85; cx.lineWidth = 2.2 * DPR; cx.lineJoin = 'round'; cx.lineCap = 'round'; cx.beginPath(); trail.forEach((p, i) => i ? cx.lineTo(p[0] * S, p[1] * S) : cx.moveTo(p[0] * S, p[1] * S)); cx.stroke(); cx.globalAlpha = 1; }
+  /* bayrak */
+  if (mis.goal) { const [gx, gy] = mis.goal; cx.fillStyle = 'rgba(200,150,28,.18)'; cx.beginPath(); cx.arc(gx * S, gy * S, 7 * S, 0, 7); cx.fill(); cx.strokeStyle = '#8A6410'; cx.lineWidth = 2 * DPR; cx.beginPath(); cx.moveTo(gx * S - 3 * S, gy * S + 5 * S); cx.lineTo(gx * S - 3 * S, gy * S - 6 * S); cx.stroke(); cx.fillStyle = reached ? css('--ok') : '#D8A21B'; cx.beginPath(); cx.moveTo(gx * S - 3 * S, gy * S - 6 * S); cx.lineTo(gx * S + 5 * S, gy * S - 3.5 * S); cx.lineTo(gx * S - 3 * S, gy * S - 1 * S); cx.fill(); }
+  /* sensör konisi */
+  if (cone) { const d = Math.min(sensor(), 60); cx.save(); cx.translate(pose.x * S, pose.y * S); cx.rotate(pose.a * Math.PI / 180); cx.fillStyle = 'rgba(70,160,220,.16)'; cx.beginPath(); cx.moveTo(0, -R * S); cx.arc(0, -R * S, (d) * S, -Math.PI / 2 - .21, -Math.PI / 2 + .21); cx.closePath(); cx.fill(); cx.restore(); }
+  /* robot */
+  cx.save(); cx.translate(pose.x * S, pose.y * S); cx.rotate(pose.a * Math.PI / 180); const u = S;
+  cx.fillStyle = 'rgba(0,0,0,.2)'; rr(-3.6 * u + 1.2 * u, -4.4 * u + 1.6 * u, 7.2 * u, 8.8 * u, 1.6 * u); cx.fill();
+  cx.fillStyle = '#10241B'; rr(-5 * u, -3.4 * u, 1.9 * u, 5.4 * u, .7 * u); cx.fill(); rr(3.1 * u, -3.4 * u, 1.9 * u, 5.4 * u, .7 * u); cx.fill();
+  cx.fillStyle = css('--mask'); rr(-3.6 * u, -4.4 * u, 7.2 * u, 8.8 * u, 1.6 * u); cx.fill();
+  cx.fillStyle = 'rgba(255,255,255,.18)'; rr(-2.6 * u, -1.4 * u, 5.2 * u, 4.4 * u, .8 * u); cx.fill();
+  cx.fillStyle = '#E8EEE9'; cx.beginPath(); cx.arc(-1.9 * u, -4.4 * u, 1.35 * u, 0, 7); cx.arc(1.9 * u, -4.4 * u, 1.35 * u, 0, 7); cx.fill();
+  cx.fillStyle = '#10241B'; cx.beginPath(); cx.arc(-1.9 * u, -4.4 * u, .75 * u, 0, 7); cx.arc(1.9 * u, -4.4 * u, .75 * u, 0, 7); cx.fill();
+  cx.fillStyle = '#C8961C'; cx.beginPath(); cx.moveTo(0, -2.6 * u); cx.lineTo(-1.1 * u, -.8 * u); cx.lineTo(1.1 * u, -.8 * u); cx.fill();
+  cx.fillStyle = led ? '#ffd23f' : '#3a463f'; if (led) { cx.shadowColor = '#ffd23f'; cx.shadowBlur = 14 * DPR; } cx.beginPath(); cx.arc(0, 1.8 * u, .85 * u, 0, 7); cx.fill(); cx.shadowBlur = 0;
   cx.restore();
-  if (performance.now() < beepUntil) { cx.fillStyle = ink; cx.font = '600 20px sans-serif'; cx.fillText('♪ bip', 12, 28); }
+  if (performance.now() < beepUntil) { cx.fillStyle = css('--ink'); cx.font = `600 ${18 * DPR}px "Figtree",sans-serif`; cx.fillText('♪ bip bip', pose.x * S + 24 * DPR, pose.y * S - 14 * DPR); }
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const speed = () => +document.getElementById('spd').value;
-function frame() { return new Promise(r => requestAnimationFrame(r)); }
-async function animate(total, step, my) {         // total: cm veya derece
+const speed = () => +$('spd').value, frame = () => new Promise(r => requestAnimationFrame(r));
+function checkGoal() { if (mis.goal && !reached && Math.hypot(pose.x - mis.goal[0], pose.y - mis.goal[1]) < 7) { reached = true; return true; } return false; }
+async function animate(total, step, my, tick) {
   let done = 0, last = performance.now();
   while (done < total) {
     await frame(); if (my !== token) return false;
     const now = performance.now(), dt = Math.min(now - last, 60) / 1000; last = now;
-    const inc = Math.min(total - done, step * speed() * dt);
-    if (!(await tick(inc))) return false;
-    done += inc; draw();
+    const inc = Math.min(total - done, step * (spdPct / 80) * speed() * dt);
+    if (!tick(inc)) { draw(); return 'blocked'; }
+    done += inc; draw(); if (checkGoal()) return 'goal';
   }
   return true;
 }
-let tick = null;
-async function doMove(dist, my) {                 // dist işaretli
-  const dir = dist < 0 ? -1 : 1, rad0 = () => pose.a * Math.PI / 180;
-  let blocked = false;
-  tick = async inc => {
-    const nx = pose.x + Math.sin(rad0()) * inc * dir, ny = pose.y - Math.cos(rad0()) * inc * dir;
-    if (hit(nx, ny)) { blocked = true; return false; }
-    pose.x = nx; pose.y = ny; trail.push([nx, ny]); return true;
-  };
-  const ok = await animate(Math.abs(dist), 40, my);
-  if (blocked) msg.textContent = 'Robot engele çarptı, o hareket yarıda kaldı.';
-  return ok || blocked;
+let bumps = 0;
+async function doMove(dist, my) {
+  const dir = dist < 0 ? -1 : 1;
+  const r = await animate(Math.abs(dist), 40, my, inc => { const rad = pose.a * Math.PI / 180, nx = pose.x + Math.sin(rad) * inc * dir, ny = pose.y - Math.cos(rad) * inc * dir; if (hit(nx, ny)) return false; pose.x = nx; pose.y = ny; trail.push([nx, ny]); return true; });
+  if (r === 'blocked') { bumps++; msg('Robot engele çarptı, o hareket yarıda kaldı.', ''); return true; }
+  return r;
 }
-async function doTurn(deg, my) {
-  tick = async inc => { pose.a = (pose.a + deg / Math.abs(deg) * inc + 360) % 360; trail.push([pose.x, pose.y]); return true; };
-  return animate(Math.abs(deg), 180, my);
-}
-let budget = 0;
+const doTurn = (deg, my) => animate(Math.abs(deg), 180, my, inc => { pose.a = (pose.a + Math.sign(deg) * inc + 360) % 360; trail.push([pose.x, pose.y]); return true; });
+let budget = 0, t0 = 0;
+function mark(b, on) { if (b._el) b._el.classList.toggle('run', on); }
 async function runList(arr, my) {
   for (const b of arr) {
     if (my !== token) return false;
-    if (++budget > 4000) { msg.textContent = 'Adım sınırına (4000) ulaşıldı, program durduruldu.'; return false; }
-    let ok = true;
+    if (mis.survive && (performance.now() - t0) * speed() / 1000 >= mis.survive) return 'time';
+    if (++budget > 6000) { msg('Adım sınırına (6000) ulaşıldı, program durduruldu.', ''); return false; }
+    mark(b, true); let r = true;
     switch (b.t) {
-      case 'fwd': ok = await doMove(b.n, my); break;
-      case 'back': ok = await doMove(-b.n, my); break;
-      case 'right': ok = await doTurn(b.n, my); break;
-      case 'left': ok = await doTurn(-b.n, my); break;
+      case 'fwd': r = await doMove(b.n, my); break;
+      case 'back': r = await doMove(-b.n, my); break;
+      case 'right': r = await doTurn(b.n, my); break;
+      case 'left': r = await doTurn(-b.n, my); break;
+      case 'speed': spdPct = b.n; break;
       case 'wait': await sleep(b.n * 1000 / speed()); break;
       case 'led1': led = true; draw(); break;
       case 'led0': led = false; draw(); break;
       case 'beep': beepUntil = performance.now() + b.n * 1000 / speed(); draw(); await sleep(b.n * 1000 / speed()); draw(); break;
-      case 'rep': for (let i = 0; i < b.n; i++) { if (!(await runList(b.body, my))) return false; } break;
-      case 'fev': for (;;) { if (!(await runList(b.body, my))) return false; if (!b.body.length) { await sleep(50); } }
-      case 'if': ok = await runList(sensor() < b.n ? b.body : b.els, my); break;
+      case 'rep': for (let i = 0; i < b.n && r === true; i++) r = await runList(b.body, my); break;
+      case 'fev': for (;;) { r = await runList(b.body, my); if (r !== true) break; if (!b.body.length) await sleep(50); } break;
+      case 'if': cone = true; draw(); r = await runList(sensor() < b.n ? b.body : b.els, my); break;
+      case 'ifl': r = await runList(onLine() ? b.body : b.els, my); break;
     }
-    if (!ok) return false;
+    mark(b, false); if (r !== true) return r;
     await sleep(0);
   }
   return true;
 }
-const runBtn = document.getElementById('run'), stopBtn = document.getElementById('stop');
-function stopRun() { token++; running = false; runBtn.disabled = false; stopBtn.disabled = true; }
+const runBtn = $('run'), stopBtn = $('stop');
+function clearMarks(a) { a.forEach(b => { mark(b, false); if (b.body) clearMarks(b.body); if (b.els) clearMarks(b.els); }); }
+function stopRun() { token++; running = false; runBtn.disabled = false; stopBtn.disabled = true; clearMarks(prog); }
+function win() { doneSet.add(mis.id); try { localStorage.setItem('roboblok-done', JSON.stringify([...doneSet])); } catch (e) {} drawMis(); msg('★ Görev tamam! Tebrikler.', 'ok'); }
 runBtn.addEventListener('click', async () => {
   if (running) return;
-  if (!prog.length) { msg.textContent = 'Önce birkaç blok ekle.'; return; }
-  resetWorld(); msg.textContent = 'Çalışıyor…'; running = true; runBtn.disabled = true; stopBtn.disabled = false; budget = 0;
-  const my = ++token, fin = await runList(prog, my);
-  if (my === token) { running = false; runBtn.disabled = false; stopBtn.disabled = true; if (fin) msg.textContent = 'Program bitti.'; }
+  if (!prog.length) { msg('Önce birkaç blok ekle.', ''); return; }
+  resetWorld(); msg('Çalışıyor…', ''); running = true; runBtn.disabled = true; stopBtn.disabled = false; budget = 0; bumps = 0; t0 = performance.now();
+  const my = ++token, r = await runList(prog, my);
+  if (my !== token) return;
+  stopRun(); draw();
+  const w = Math.max(...trail.map(p => p[0])) - Math.min(...trail.map(p => p[0])), h = Math.max(...trail.map(p => p[1])) - Math.min(...trail.map(p => p[1]));
+  const stats = {len: pathLen(trail), end: Math.hypot(trail[trail.length - 1][0] - trail[0][0], trail[trail.length - 1][1] - trail[0][1]), w, h};
+  if (reached) win();
+  else if (mis.survive && r === 'time' && bumps === 0) win();
+  else if (mis.survive && r === 'time') msg(`${mis.survive} saniye doldu ama ${bumps} kez engele çarptın. Tekrar dene.`, '');
+  else if (mis.done && mis.done(stats)) win();
+  else if (mis.goal) msg('Program bitti ama bayrağa ulaşamadı. Mesafeleri ve dönüşleri ayarla, tekrar dene.', '');
+  else if (mis.done) msg('Program bitti ama görev tamamlanmadı. Ipucuna bak, tekrar dene.', '');
+  else msg('Program bitti.', '');
 });
-stopBtn.addEventListener('click', () => { stopRun(); msg.textContent = 'Durduruldu.'; });
-document.getElementById('reset').addEventListener('click', () => { stopRun(); resetWorld(); msg.textContent = ''; });
-document.getElementById('scene').addEventListener('change', () => { stopRun(); resetWorld(); msg.textContent = ''; });
+stopBtn.addEventListener('click', () => { stopRun(); msg('Durduruldu.', ''); });
+$('reset').addEventListener('click', () => { stopRun(); resetWorld(); msg('', ''); });
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change', draw);
 
 /* test için */
-window.__rb = {get prog() { return prog; }, set prog(v) { prog = v; rerender(); }, get pose() { return pose; }, get trail() { return trail; }, get code() { return document.getElementById('code').textContent; }};
-prog = EX.kare[1](); rerender(); resetWorld();
+window.__rb = {get prog() { return prog; }, set prog(v) { prog = v; rerender(); }, setMis(id) { mis = MIS.find(m => m.id === id); drawMis(); resetWorld(); }, get pose() { return pose; }, get trail() { return trail; }, get code() { return lastCode; }, get done() { return [...doneSet]; }};
+prog = load() || EX.kare[1](); drawMis(); rerender(); resetWorld();
 })();
 </script>
 </body>
