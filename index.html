@@ -590,9 +590,10 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     { t: "TaleBot ile kodlama", d: "5 yaş grubunda robotla kodlama etkinlikleri ve 23 Nisan etkinliği.", tag: "TaleBot", f: 'Uygulama' },
     { t: "Cognimates ile yapay zekâ ve blok kodlama", d: "Yapay zekâyı blok kodlamayla birleştiren uygulama.", tag: "Cognimates", f: 'Uygulama' },
     { t: "Draw Your Game ile çizerek oyun yapma", d: "Dijital oyun tasarımı modülünde Scratch Jr. ve Kodu Game Lab ile birlikte kullanılıyor.", tag: "Draw Your Game", f: 'Uygulama' },
+    { t: "MakeCode Arcade ile retro oyun yapma", d: "Tarayıcıda çalışan, blok ya da JavaScript ile kodlanan oyun tasarım ortamı. Karakter, skor ve seviye gibi oyun mantığını piksel sanatı tarzı oyunlarla öğretmek için kullanılır.", tag: "MakeCode Arcade", f: "Uygulama" },
     { t: "Code Spark, Kidlo Coding ve ABCya", d: "Küçük yaşlar için kodlama oyunları: diziler ve döngüler, fare kullanımı ve etkinlik oyunları.", tag: "Code Spark", f: 'Uygulama' }
   ];
-  const TAGS = ['Tümü', 'Arduino', 'ESP32', 'Python', 'Raspberry Pi', 'Scratch Jr.', 'Scratch', 'Kodu Game Lab', 'Minecraft', 'Tinkercad', 'SPIKE', 'TaleBot', 'Cognimates', 'Draw Your Game', 'Code Spark'];
+  const TAGS = ['Tümü', 'Arduino', 'ESP32', 'Python', 'Raspberry Pi', 'Scratch Jr.', 'Scratch', 'Kodu Game Lab', 'Minecraft', 'Tinkercad', 'SPIKE', 'TaleBot', 'Cognimates', 'Draw Your Game', 'MakeCode Arcade', 'Code Spark'];
   const LV = ['', 'Başlangıç', 'Orta', 'İleri'];
   let tag = 'Tümü', q = '';
   try { const s = localStorage.getItem('fk-tag'); if (TAGS.includes(s)) tag = s; } catch (e) {}
