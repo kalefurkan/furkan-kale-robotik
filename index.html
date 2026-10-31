@@ -264,20 +264,6 @@ dialog#detail::backdrop{background:rgba(5,20,13,.6)}
   .path h3{margin-top:8px}
 }
 
-/* Atölye notları */
-.notes-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:48px}
-@media (max-width:900px){.notes-grid{grid-template-columns:1fr;gap:24px}}
-.notes{list-style:none;padding:0;margin:0;border-left:2px solid var(--line)}
-.notes li{position:relative;padding:0 0 26px 24px}
-.notes li::before{content:"";position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--mask)}
-.notes time{font:500 12px var(--f-mono);color:var(--muted)}
-.notes p{margin-top:4px;max-width:62ch}
-.notes .t{font:500 12px var(--f-mono);color:var(--mask);margin-top:6px;display:block}
-.compose{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;gap:12px;align-self:start}
-.compose textarea{width:100%;min-height:96px;resize:vertical;font:400 15px/1.5 var(--f-body);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:10px}
-.compose textarea:focus{outline:none;border-color:var(--mask)}
-.compose .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font:500 12px var(--f-mono);color:var(--muted)}
-
 /* Hakkımda */
 .about{display:grid;grid-template-columns:1fr;align-items:start}
 .about-text{display:grid;gap:16px;max-width:60ch}
@@ -305,7 +291,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;scroll-behavior:auto!important}}
 </style>
 
-<div class="preview-note"><div class="wrap">Tasarım önizlemesi: yazılar, uygulamalar ve notlar örnek içeriktir. Kendi içeriklerinle değiştirilmek üzere hazırlandı.</div></div>
+<div class="preview-note"><div class="wrap">Tasarım önizlemesi: yazılar ve uygulamalar örnek içeriktir. Kendi içeriklerinle değiştirilmek üzere hazırlandı.</div></div>
 
 <header class="top">
   <div class="wrap">
@@ -318,7 +304,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <a href="#uygulamalar">Uygulamalar</a>
       <a href="#araclar">Platformlarım</a>
       <a href="#yol">Öğrenme yolu</a>
-      <a href="#notlar">Atölye notları</a>
       <a href="#hakkimda">Hakkımda</a>
       <a href="#iletisim">İletişim</a>
     </nav>
@@ -498,26 +483,10 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   </div>
 </section>
 
-<section id="notlar">
-  <div class="wrap notes-grid">
-    <div>
-      <div class="eyebrow">U5 · Atölye notları</div>
-      <h2 style="font-size:clamp(28px,4vw,40px);margin-top:12px">Kısa paylaşımlar</h2>
-      <p style="color:var(--muted);margin-top:10px;max-width:44ch">Uzun bir yazıya dönüşmeyen ama işe yarayan bulgular: bir hata, bir ipucu, masadan bir fotoğraf.</p>
-      <form class="compose" id="compose" style="margin-top:24px">
-        <label for="note" class="mono" style="font-size:12px;color:var(--muted)">Yeni not (önizleme)</label>
-        <textarea id="note" placeholder="Bugün atölyede ne öğrendin?"></textarea>
-        <div class="row"><span id="cnt">0 / 280</span><button class="btn btn-primary" type="submit" style="padding:10px 14px">Paylaş</button></div>
-      </form>
-    </div>
-    <ol class="notes" id="notes" reversed></ol>
-  </div>
-</section>
-
 <section id="hakkimda">
   <div class="wrap about">
     <div class="about-text">
-      <div class="eyebrow">U6 · Hakkımda</div>
+      <div class="eyebrow">U5 · Hakkımda</div>
       <h2>Merhaba, ben Furkan.</h2>
       <p>Robotik ve gömülü sistemler üzerine çalışıyor, öğrendiklerimi Türkçe kaynak olarak paylaşıyorum. Amacım, bir robotu ilk kez hareket ettirmek isteyen herkesin takıldığı yerde elinde çalışan bir örnek olması.</p>
       <p>Yazılarda kullandığım her devreyi önce kendi masamda kuruyorum. Kodlar GitHub'da açık; hata bulursan ya da bir konu önermek istersen yazman yeterli.</p>
@@ -777,26 +746,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     if (py) { if (PYD) renderPy(); else fetch('assets/python/modules.json').then(r => r.json()).then(d => { PYD = d; renderPy(); }); } else renderPath();
   });
   document.addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) openDetail(b.dataset.open); });
-
-  /* ---------- Atölye notları ---------- */
-  const NOTES = [
-    { d: '2026-10-28', p: 'MG996R servolar 5 V USB beslemesinden çalışınca ESP32 sürekli resetliyordu. Servolara ayrı 6 V hat ve ortak GND ile sorun bitti.', t: '#güç #servo' },
-    { d: '2026-10-21', p: 'ROS 2 Jazzy\'de colcon build sırasında "setup.py install is deprecated" uyarısı zararsız. setuptools sürümünü düşürmeye gerek yok.', t: '#ros2' },
-    { d: '2026-10-14', p: 'Çizgi izleyende Kd değerini 0,8\'den 1,5\'e çıkarınca virajlardaki salınım neredeyse tamamen kayboldu. Videosu yakında.', t: '#pid' },
-    { d: '2026-10-05', p: 'PinHarita\'ya Raspberry Pi Pico 2 eklendi. Beta testine katılan herkese teşekkürler.', t: '#uygulama' }
-  ];
-  const notesEl = document.getElementById('notes');
-  const dateTR = s => new Date(s + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
-  const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const renderNotes = () => notesEl.innerHTML = NOTES.map(n => `<li><time datetime="${n.d}">${dateTR(n.d)}</time><p>${esc(n.p)}</p><span class="t">${esc(n.t)}</span></li>`).join('');
-  renderNotes();
-  const note = document.getElementById('note'), cnt = document.getElementById('cnt');
-  note.addEventListener('input', () => { if (note.value.length > 280) note.value = note.value.slice(0, 280); cnt.textContent = note.value.length + ' / 280'; });
-  document.getElementById('compose').addEventListener('submit', e => {
-    e.preventDefault(); const v = note.value.trim(); if (!v) { note.focus(); return; }
-    NOTES.unshift({ d: new Date().toISOString().slice(0, 10), p: v, t: '#önizleme · yalnızca bu tarayıcıda görünür' });
-    renderNotes(); note.value = ''; cnt.textContent = '0 / 280';
-  });
 
   /* ---------- Bülten ---------- */
   document.getElementById('nl').addEventListener('submit', e => {
