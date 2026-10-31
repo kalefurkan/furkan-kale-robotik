@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RoboBlok · Blokla robot kodla</title>
+<meta name="description" content="Blokları sıraya diz, robotu tarayıcıda çalıştır, Arduino C++ kodunu al.">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@600;700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{--bg:#F1F5F1;--surface:#fff;--sunken:#E6EDE7;--ink:#10241B;--muted:#53675C;--line:#D2DCD4;--mask:#1C6A4C;--on-mask:#fff;--gold:#C8961C;--warn:#B3541E;
+ --c-move:#1C6A4C;--c-turn:#2A6FA8;--c-wait:#7A5800;--c-loop:#8A3F9E;--c-if:#B3541E;--c-io:#4A5B52;
+ --f-display:"Chakra Petch","Arial Narrow",system-ui,sans-serif;--f-body:Figtree,system-ui,sans-serif;--f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
+@media (prefers-color-scheme:dark){:root{--bg:#0A1C14;--surface:#0F271C;--sunken:#0C2118;--ink:#E3EEE6;--muted:#96AE9F;--line:#20402F;--mask:#45B484;--on-mask:#05200F;--gold:#E2B647;--warn:#E8905A;
+ --c-move:#2E8A63;--c-turn:#3F86C4;--c-wait:#A57C14;--c-loop:#A55BB8;--c-if:#C9703A;--c-io:#5E7367}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body)}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:12px 20px;border-bottom:1px solid var(--line);background:var(--surface)}
+header h1{font:700 22px var(--f-display);margin:0}
+header a{color:var(--mask);font-weight:600;text-decoration:none;font-size:14px}
+header .sp{flex:1}
+main{display:grid;grid-template-columns:minmax(300px,380px) minmax(0,1fr);gap:16px;padding:16px 20px;max-width:1280px;margin:0 auto}
+@media (max-width:900px){main{grid-template-columns:1fr}}
+.stage,.panel{min-width:0}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px}
+.panel h2{font:600 15px var(--f-display);margin:0 0 10px;letter-spacing:.02em}
+.pal{display:flex;flex-wrap:wrap;gap:6px}
+.pal button,.btn{font:600 13px var(--f-body);border:0;border-radius:6px;padding:7px 11px;cursor:pointer;color:#fff}
+.btn{background:var(--mask);color:var(--on-mask)}
+.btn.alt{background:var(--sunken);color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.5;cursor:default}
+.pal button:focus-visible,.btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.k-move{background:var(--c-move)}.k-turn{background:var(--c-turn)}.k-wait{background:var(--c-wait)}.k-loop{background:var(--c-loop)}.k-if{background:var(--c-if)}.k-io{background:var(--c-io)}
+#ws{min-height:120px;display:grid;gap:6px;align-content:start}
+.blk{border-radius:8px;color:#fff;padding:7px 9px}
+.blk .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-weight:600;font-size:13px}
+.blk input[type=number]{width:62px;border:0;border-radius:4px;padding:3px 5px;font:500 13px var(--f-mono)}
+.blk .ctl{margin-left:auto;display:flex;gap:2px}
+.blk .ctl button{all:unset;cursor:pointer;width:22px;height:22px;display:grid;place-items:center;border-radius:4px;background:rgba(255,255,255,.2);font-size:12px}
+.blk .ctl button:hover{background:rgba(255,255,255,.35)}
+.blk .ctl button:focus-visible{outline:2px solid #fff}
+.body{margin:6px 0 2px 10px;padding:6px;border-left:3px solid rgba(255,255,255,.5);display:grid;gap:6px;min-height:30px;border-radius:0 6px 6px 0;cursor:pointer}
+.body.sel{background:rgba(255,255,255,.18);outline:2px dashed #fff}
+.body:empty::after{content:"(boş: buraya blok eklemek için tıkla, sonra soldan blok seç)";font-size:11px;font-weight:500;opacity:.85}
+.hint{color:var(--muted);font-size:12px;margin:8px 0 0}
+.stage{display:grid;gap:10px}
+canvas{width:100%;max-width:560px;aspect-ratio:1;background:var(--sunken);border:1px solid var(--line);border-radius:10px;display:block}
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tools label{font-size:13px;color:var(--muted);display:flex;gap:6px;align-items:center}
+select{font:500 13px var(--f-body);padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+#msg{font-size:13px;color:var(--muted);min-height:20px}
+pre{margin:0;background:#0E1F17;color:#D7E8DC;border-radius:8px;padding:12px;font:12.5px/1.5 var(--f-mono);overflow:auto;max-height:420px;white-space:pre}
+.codehead{display:flex;align-items:center;gap:8px;margin-bottom:8px}.codehead h2{margin:0}.codehead .sp{flex:1}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>RoboBlok</h1>
+  <span style="color:var(--muted);font-size:14px">Blokla kodla · robotu tarayıcıda çalıştır · Arduino kodunu al</span>
+  <span class="sp"></span>
+  <a href="../index.html#araclar">← Siteye dön</a>
+</header>
+<main>
+  <section class="panel" aria-label="Program">
+    <h2>1 · Blokları seç</h2>
+    <div class="pal" id="pal"></div>
+    <h2 style="margin-top:16px">2 · Programın</h2>
+    <div id="ws" aria-live="polite"></div>
+    <p class="hint">Tekrarla / Eğer bloklarının içine blok eklemek için önce içindeki çizgili alana tıkla, sonra soldaki bir blok düğmesine bas.</p>
+    <div class="tools" style="margin-top:10px">
+      <select id="ex" aria-label="Hazır örnek"><option value="">Hazır örnek yükle…</option></select>
+      <button class="btn alt" id="clear" type="button">Temizle</button>
+    </div>
+  </section>
+  <section class="stage">
+    <div class="panel">
+      <h2>3 · Robotu çalıştır</h2>
+      <canvas id="cv" width="560" height="560" aria-label="Robot simülasyon alanı"></canvas>
+      <div class="tools" style="margin-top:10px">
+        <button class="btn" id="run" type="button">▶ Çalıştır</button>
+        <button class="btn alt" id="stop" type="button" disabled>■ Durdur</button>
+        <button class="btn alt" id="reset" type="button">↺ Başa al</button>
+        <label>Alan <select id="scene"><option value="open">Açık alan</option><option value="wall">Önde duvar</option><option value="room">Odalı labirent</option></select></label>
+        <label>Hız <select id="spd"><option value="1">×1</option><option value="2" selected>×2</option><option value="4">×4</option></select></label>
+      </div>
+      <div id="msg" role="status"></div>
+    </div>
+    <div class="panel">
+      <div class="codehead"><h2>Arduino C++ kodu</h2><span class="sp"></span><button class="btn alt" id="copy" type="button">Kopyala</button></div>
+      <pre id="code" tabindex="0" aria-label="Üretilen Arduino kodu"></pre>
+      <p class="note">Kod, bloklardan otomatik üretilir. Varsayılan donanım: L298N sürücü + 2 DC motor, HC-SR04, LED ve buzzer; pinler kodun başında. <b>Önemli:</b> <code>MS_CM</code> (1 cm için ms) ve <code>MS_DERECE</code> (1° için ms) değerleri robotuna göre ölçülerek ayarlanmalıdır. Kod bu sayfada derlenmez ve gerçek bir robotta denenmemiştir.</p>
+    </div>
+  </section>
+</main>
+<script>
+(() => {
+'use strict';
+/* ---------- Blok tanımları ---------- */
+const DEF = {
+  fwd:   {cls:'k-move', label:'ileri git',  unit:'cm', n:20, min:1, max:200},
+  back:  {cls:'k-move', label:'geri git',   unit:'cm', n:20, min:1, max:200},
+  right: {cls:'k-turn', label:'sağa dön',   unit:'°',  n:90, min:1, max:360},
+  left:  {cls:'k-turn', label:'sola dön',   unit:'°',  n:90, min:1, max:360},
+  wait:  {cls:'k-wait', label:'bekle',      unit:'sn', n:1,  min:0.1, max:30, step:0.1},
+  rep:   {cls:'k-loop', label:'tekrarla',   unit:'kez', n:4, min:1, max:100, body:true},
+  fev:   {cls:'k-loop', label:'sonsuza dek tekrarla', body:true},
+  if:    {cls:'k-if',   label:'eğer mesafe <', unit:'cm', n:25, min:2, max:200, body:true, els:true},
+  led1:  {cls:'k-io',   label:'LED yak'},
+  led0:  {cls:'k-io',   label:'LED söndür'},
+  beep:  {cls:'k-io',   label:'buzzer öt', unit:'sn', n:0.3, min:0.1, max:5, step:0.1}
+};
+const PAL = ['fwd','back','right','left','wait','rep','fev','if','led1','led0','beep'];
+const mk = t => { const d = DEF[t], b = {t}; if (d.n !== undefined) b.n = d.n; if (d.body) b.body = []; if (d.els) b.els = []; return b; };
+let prog = [];
+let target = null;      // seçili kapsayıcı dizi (null = ana program)
+const ESIK_BOS = '(boş)';
+
+/* ---------- Hazır örnekler ---------- */
+const EX = {
+  kare: ['Kare çiz', () => [{t:'rep', n:4, body:[{t:'fwd', n:30}, {t:'right', n:90}]}]],
+  ucgen: ['Eşkenar üçgen', () => [{t:'rep', n:3, body:[{t:'fwd', n:30}, {t:'right', n:120}]}]],
+  yildiz: ['Yıldız (5 köşe)', () => [{t:'rep', n:5, body:[{t:'fwd', n:35}, {t:'right', n:144}]}]],
+  kacan: ['Engelden kaç', () => [{t:'fev', body:[{t:'if', n:25, body:[{t:'back', n:8}, {t:'right', n:90}], els:[{t:'fwd', n:10}]}]}]],
+  isik: ['LED ve buzzer', () => [{t:'led1'}, {t:'beep', n:0.3}, {t:'fwd', n:20}, {t:'led0'}]]
+};
+const exSel = document.getElementById('ex');
+Object.entries(EX).forEach(([k, v]) => exSel.insertAdjacentHTML('beforeend', `<option value="${k}">${v[0]}</option>`));
+exSel.addEventListener('change', () => { if (exSel.value) { prog = EX[exSel.value][1](); target = null; exSel.value = ''; stopRun(); rerender(); } });
+
+/* ---------- Çalışma alanı çizimi ---------- */
+const ws = document.getElementById('ws');
+const pal = document.getElementById('pal');
+PAL.forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.className = DEF[t].cls; b.textContent = DEF[t].label + (DEF[t].unit ? ' …' : ''); b.addEventListener('click', () => add(t)); pal.appendChild(b); });
+function add(t) { (target || prog).push(mk(t)); rerender(); }
+function listEl(arr, owner) {
+  const wrap = document.createElement('div'); wrap.style.display = 'contents';
+  arr.forEach((b, i) => wrap.appendChild(blockEl(b, arr, i)));
+  return wrap;
+}
+function blockEl(b, arr, i) {
+  const d = DEF[b.t], el = document.createElement('div'); el.className = 'blk ' + d.cls;
+  const row = document.createElement('div'); row.className = 'row';
+  row.appendChild(document.createTextNode(d.label + ' '));
+  if (d.n !== undefined) {
+    const inp = document.createElement('input'); inp.type = 'number'; inp.value = b.n; inp.min = d.min; inp.max = d.max; inp.step = d.step || 1; inp.setAttribute('aria-label', d.label + ' değeri');
+    inp.addEventListener('input', () => { const v = parseFloat(inp.value); if (!isNaN(v)) { b.n = Math.min(d.max, Math.max(d.min, v)); genCode(); } });
+    inp.addEventListener('change', () => { inp.value = b.n; });
+    row.appendChild(inp); row.appendChild(document.createTextNode(' ' + d.unit));
+  }
+  const ctl = document.createElement('span'); ctl.className = 'ctl';
+  const btn = (txt, tip, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.title = tip; x.setAttribute('aria-label', tip); x.addEventListener('click', e => { e.stopPropagation(); fn(); }); ctl.appendChild(x); };
+  btn('↑', 'Yukarı taşı', () => { if (i > 0) { [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]]; rerender(); } });
+  btn('↓', 'Aşağı taşı', () => { if (i < arr.length - 1) { [arr[i + 1], arr[i]] = [arr[i], arr[i + 1]]; rerender(); } });
+  btn('✕', 'Sil', () => { if (arr === target || containsArr(b, target)) target = null; arr.splice(i, 1); rerender(); });
+  row.appendChild(ctl); el.appendChild(row);
+  if (d.body) {
+    el.appendChild(bodyEl(b.body));
+    if (d.els) { const e = document.createElement('div'); e.className = 'row'; e.style.marginTop = '4px'; e.textContent = 'değilse'; el.appendChild(e); el.appendChild(bodyEl(b.els)); }
+  }
+  return el;
+}
+function containsArr(b, a) { if (!a) return false; return [b.body, b.els].some(x => x && (x === a || x.some(c => containsArr(c, a)))); }
+function bodyEl(arr) {
+  const el = document.createElement('div'); el.className = 'body' + (arr === target ? ' sel' : ''); el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'Bu alana blok ekle');
+  el.appendChild(listEl(arr));
+  const pick = e => { if (e.target.closest('input,button')) return; e.stopPropagation(); target = arr; rerender(); };
+  el.addEventListener('click', pick); el.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target === el) pick(e); });
+  return el;
+}
+function rerender() { ws.innerHTML = ''; ws.appendChild(listEl(prog)); if (!prog.length) ws.innerHTML = '<p class="hint" style="margin:0">Henüz blok yok. Soldan bir blok seç ya da hazır örnek yükle.</p>'; genCode(); }
+ws.addEventListener('click', e => { if (e.target === ws || e.target.tagName === 'P') { target = null; rerender(); } });
+document.getElementById('clear').addEventListener('click', () => { prog = []; target = null; stopRun(); rerender(); });
+
+/* ---------- Arduino kodu üretimi ---------- */
+function genCode() {
+  let uses = {led: false, beep: false, sens: false};
+  const vars = ['i', 'j', 'k', 'm', 'n'];
+  const pad = d => '  '.repeat(d);
+  function gen(arr, d, depth) {
+    return arr.map(b => {
+      const p = pad(d);
+      switch (b.t) {
+        case 'fwd': return `${p}ileri(${b.n});\n`;
+        case 'back': return `${p}geri(${b.n});\n`;
+        case 'right': return `${p}sagaDon(${b.n});\n`;
+        case 'left': return `${p}solaDon(${b.n});\n`;
+        case 'wait': return `${p}delay(${Math.round(b.n * 1000)});\n`;
+        case 'led1': uses.led = true; return `${p}digitalWrite(LED, HIGH);\n`;
+        case 'led0': uses.led = true; return `${p}digitalWrite(LED, LOW);\n`;
+        case 'beep': uses.beep = true; return `${p}tone(BUZZER, 1000, ${Math.round(b.n * 1000)});\n${p}delay(${Math.round(b.n * 1000)});\n`;
+        case 'rep': { const v = vars[Math.min(depth, vars.length - 1)] + (depth >= vars.length ? depth : ''); return `${p}for (int ${v} = 0; ${v} < ${b.n}; ${v}++) {\n${gen(b.body, d + 1, depth + 1)}${p}}\n`; }
+        case 'fev': return `${p}while (true) {\n${gen(b.body, d + 1, depth)}${p}}\n`;
+        case 'if': uses.sens = true; return `${p}if (mesafeOlc() < ${b.n}) {\n${gen(b.body, d + 1, depth)}${p}}` + (b.els.length ? ` else {\n${gen(b.els, d + 1, depth)}${p}}` : '') + '\n';
+      }
+    }).join('');
+  }
+  const main = gen(prog, 1, 0) || '  // (program boş)\n';
+  const code =
+`// RoboBlok ile üretildi: L298N + 2 DC motor${'' }
+// Kalibrasyon: robotun 1 cm gitmesi ve 1° dönmesi için gereken süre
+const int MS_CM = 40;      // ölç ve ayarla
+const int MS_DERECE = 6;   // ölç ve ayarla
+const int MOTOR_HIZ = 200; // 0-255 (PWM)
+
+const int ENA = 9, IN1 = 4, IN2 = 5;   // sol motor
+const int ENB = 10, IN3 = 6, IN4 = 7;  // sağ motor
+${uses.sens ? 'const int TRIG = 11, ECHO = 12;           // HC-SR04\n' : ''}${uses.led ? 'const int LED = 13;\n' : ''}${uses.beep ? 'const int BUZZER = 8;\n' : ''}
+void motorlar(int sol, int sag) {      // +1 ileri, -1 geri, 0 dur
+  digitalWrite(IN1, sol > 0); digitalWrite(IN2, sol < 0);
+  digitalWrite(IN3, sag > 0); digitalWrite(IN4, sag < 0);
+  analogWrite(ENA, sol ? MOTOR_HIZ : 0);
+  analogWrite(ENB, sag ? MOTOR_HIZ : 0);
+}
+void ileri(int cm)     { motorlar(1, 1);   delay((long)cm * MS_CM);          motorlar(0, 0); }
+void geri(int cm)      { motorlar(-1, -1); delay((long)cm * MS_CM);          motorlar(0, 0); }
+void sagaDon(int der)  { motorlar(1, -1);  delay((long)der * MS_DERECE);     motorlar(0, 0); }
+void solaDon(int der)  { motorlar(-1, 1);  delay((long)der * MS_DERECE);     motorlar(0, 0); }
+${uses.sens ? `
+long mesafeOlc() {                     // cm, yankı yoksa çok büyük değer
+  digitalWrite(TRIG, LOW);  delayMicroseconds(2);
+  digitalWrite(TRIG, HIGH); delayMicroseconds(10);
+  digitalWrite(TRIG, LOW);
+  long sure = pulseIn(ECHO, HIGH, 30000);
+  if (sure == 0) return 999;
+  return sure * 0.0343 / 2;
+}
+` : ''}
+void program() {
+${main}}
+
+void setup() {
+  pinMode(ENA, OUTPUT); pinMode(ENB, OUTPUT);
+  pinMode(IN1, OUTPUT); pinMode(IN2, OUTPUT);
+  pinMode(IN3, OUTPUT); pinMode(IN4, OUTPUT);
+${uses.sens ? '  pinMode(TRIG, OUTPUT); pinMode(ECHO, INPUT);\n' : ''}${uses.led ? '  pinMode(LED, OUTPUT);\n' : ''}${uses.beep ? '  pinMode(BUZZER, OUTPUT);\n' : ''}  delay(2000);                         // başlamadan önce robotu yere koy
+  program();
+}
+
+void loop() {
+  // program bir kez çalışır
+}
+`;
+  document.getElementById('code').textContent = code;
+}
+document.getElementById('copy').addEventListener('click', async () => {
+  const b = document.getElementById('copy');
+  try { await navigator.clipboard.writeText(document.getElementById('code').textContent); b.textContent = 'Kopyalandı ✓'; }
+  catch (e) { const r = document.createRange(); r.selectNodeContents(document.getElementById('code')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Seçildi, Ctrl+C'; }
+  setTimeout(() => b.textContent = 'Kopyala', 1600);
+});
+
+/* ---------- Simülasyon dünyası (1 birim = 1 cm, alan 100x100 cm) ---------- */
+const W = 100, R = 4;
+const SCENES = {
+  open: [],
+  wall: [{x: 10, y: 22, w: 80, h: 3}],
+  room: [{x: 0, y: 40, w: 60, h: 3}, {x: 40, y: 68, w: 60, h: 3}, {x: 70, y: 15, w: 3, h: 25}]
+};
+const cv = document.getElementById('cv'), cx = cv.getContext('2d'), S = cv.width / W;
+const msg = document.getElementById('msg');
+let pose, trail, led, beepUntil, running = false, token = 0;
+const obstacles = () => SCENES[document.getElementById('scene').value];
+function resetWorld() { pose = {x: 50, y: 88, a: 0}; trail = [[pose.x, pose.y]]; led = false; beepUntil = 0; draw(); }
+const hit = (x, y) => x < R || y < R || x > W - R || y > W - R || obstacles().some(o => x > o.x - R && x < o.x + o.w + R && y > o.y - R && y < o.y + o.h + R);
+function sensor() {
+  const rad = pose.a * Math.PI / 180, dx = Math.sin(rad), dy = -Math.cos(rad);
+  for (let d = R; d <= 200; d += 0.5) {
+    const x = pose.x + dx * d, y = pose.y + dy * d;
+    if (x < 0 || y < 0 || x > W || y > W || obstacles().some(o => x >= o.x && x <= o.x + o.w && y >= o.y && y <= o.y + o.h)) return d - R;
+  }
+  return 999;
+}
+function draw() {
+  cx.clearRect(0, 0, cv.width, cv.height);
+  cx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--line'); cx.lineWidth = 1;
+  for (let i = 10; i < W; i += 10) { cx.beginPath(); cx.moveTo(i * S, 0); cx.lineTo(i * S, cv.height); cx.moveTo(0, i * S); cx.lineTo(cv.width, i * S); cx.stroke(); }
+  const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink'), mask = getComputedStyle(document.documentElement).getPropertyValue('--mask');
+  cx.fillStyle = ink; obstacles().forEach(o => cx.fillRect(o.x * S, o.y * S, o.w * S, o.h * S));
+  cx.strokeStyle = mask; cx.lineWidth = 3; cx.lineJoin = 'round'; cx.beginPath(); trail.forEach((p, i) => i ? cx.lineTo(p[0] * S, p[1] * S) : cx.moveTo(p[0] * S, p[1] * S)); cx.stroke();
+  cx.save(); cx.translate(pose.x * S, pose.y * S); cx.rotate(pose.a * Math.PI / 180);
+  cx.fillStyle = mask; cx.fillRect(-R * S, -R * S, 2 * R * S, 2 * R * S);
+  cx.fillStyle = '#C8961C'; cx.beginPath(); cx.moveTo(0, -R * S - 6); cx.lineTo(-7, -R * S + 5); cx.lineTo(7, -R * S + 5); cx.fill();
+  if (led) { cx.fillStyle = '#ffd23f'; cx.beginPath(); cx.arc(0, 0, 7, 0, 7); cx.fill(); }
+  cx.restore();
+  if (performance.now() < beepUntil) { cx.fillStyle = ink; cx.font = '600 20px sans-serif'; cx.fillText('♪ bip', 12, 28); }
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const speed = () => +document.getElementById('spd').value;
+function frame() { return new Promise(r => requestAnimationFrame(r)); }
+async function animate(total, step, my) {         // total: cm veya derece
+  let done = 0, last = performance.now();
+  while (done < total) {
+    await frame(); if (my !== token) return false;
+    const now = performance.now(), dt = Math.min(now - last, 60) / 1000; last = now;
+    const inc = Math.min(total - done, step * speed() * dt);
+    if (!(await tick(inc))) return false;
+    done += inc; draw();
+  }
+  return true;
+}
+let tick = null;
+async function doMove(dist, my) {                 // dist işaretli
+  const dir = dist < 0 ? -1 : 1, rad0 = () => pose.a * Math.PI / 180;
+  let blocked = false;
+  tick = async inc => {
+    const nx = pose.x + Math.sin(rad0()) * inc * dir, ny = pose.y - Math.cos(rad0()) * inc * dir;
+    if (hit(nx, ny)) { blocked = true; return false; }
+    pose.x = nx; pose.y = ny; trail.push([nx, ny]); return true;
+  };
+  const ok = await animate(Math.abs(dist), 40, my);
+  if (blocked) msg.textContent = 'Robot engele çarptı, o hareket yarıda kaldı.';
+  return ok || blocked;
+}
+async function doTurn(deg, my) {
+  tick = async inc => { pose.a = (pose.a + deg / Math.abs(deg) * inc + 360) % 360; trail.push([pose.x, pose.y]); return true; };
+  return animate(Math.abs(deg), 180, my);
+}
+let budget = 0;
+async function runList(arr, my) {
+  for (const b of arr) {
+    if (my !== token) return false;
+    if (++budget > 4000) { msg.textContent = 'Adım sınırına (4000) ulaşıldı, program durduruldu.'; return false; }
+    let ok = true;
+    switch (b.t) {
+      case 'fwd': ok = await doMove(b.n, my); break;
+      case 'back': ok = await doMove(-b.n, my); break;
+      case 'right': ok = await doTurn(b.n, my); break;
+      case 'left': ok = await doTurn(-b.n, my); break;
+      case 'wait': await sleep(b.n * 1000 / speed()); break;
+      case 'led1': led = true; draw(); break;
+      case 'led0': led = false; draw(); break;
+      case 'beep': beepUntil = performance.now() + b.n * 1000 / speed(); draw(); await sleep(b.n * 1000 / speed()); draw(); break;
+      case 'rep': for (let i = 0; i < b.n; i++) { if (!(await runList(b.body, my))) return false; } break;
+      case 'fev': for (;;) { if (!(await runList(b.body, my))) return false; if (!b.body.length) { await sleep(50); } }
+      case 'if': ok = await runList(sensor() < b.n ? b.body : b.els, my); break;
+    }
+    if (!ok) return false;
+    await sleep(0);
+  }
+  return true;
+}
+const runBtn = document.getElementById('run'), stopBtn = document.getElementById('stop');
+function stopRun() { token++; running = false; runBtn.disabled = false; stopBtn.disabled = true; }
+runBtn.addEventListener('click', async () => {
+  if (running) return;
+  if (!prog.length) { msg.textContent = 'Önce birkaç blok ekle.'; return; }
+  resetWorld(); msg.textContent = 'Çalışıyor…'; running = true; runBtn.disabled = true; stopBtn.disabled = false; budget = 0;
+  const my = ++token, fin = await runList(prog, my);
+  if (my === token) { running = false; runBtn.disabled = false; stopBtn.disabled = true; if (fin) msg.textContent = 'Program bitti.'; }
+});
+stopBtn.addEventListener('click', () => { stopRun(); msg.textContent = 'Durduruldu.'; });
+document.getElementById('reset').addEventListener('click', () => { stopRun(); resetWorld(); msg.textContent = ''; });
+document.getElementById('scene').addEventListener('change', () => { stopRun(); resetWorld(); msg.textContent = ''; });
+matchMedia('(prefers-color-scheme:dark)').addEventListener('change', draw);
+
+/* test için */
+window.__rb = {get prog() { return prog; }, set prog(v) { prog = v; rerender(); }, get pose() { return pose; }, get trail() { return trail; }, get code() { return document.getElementById('code').textContent; }};
+prog = EX.kare[1](); rerender(); resetWorld();
+})();
+</script>
+</body>
+</html>
