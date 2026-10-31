@@ -213,7 +213,8 @@
    "t": "Dijital Termometre",
    "comps": "DHT11, LCD",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "DHT11 sensörünün ölçtüğü sıcaklık ve nem 16x2 LCD ekranda gösterilir. DHT ve LiquidCrystal kütüphanelerini birlikte kullanmayı, ondalık sayı yazmayı ve sensör hatasını yakalamayı öğrenirsin."
   },
   {
    "n": 22,
@@ -221,7 +222,8 @@
    "t": "Otomatik Fan Sistemi",
    "comps": "DHT11, DC fan, transistor",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "DHT11 sıcaklık eşiğini (28 °C) aşınca NPN transistör üzerinden DC fan döner, sıcaklık düşünce durur. Motoru transistörle sürmeyi, ters (flyback) diyodu ve histerezisi öğrenirsin."
   },
   {
    "n": 23,
@@ -229,7 +231,8 @@
    "t": "Akıllı Gece Lambası",
    "comps": "LDR, RGB LED",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "LDR ve 10 kΩ'luk gerilim bölücü ortam ışığını ölçer; ortam karardıkça RGB LED'in parlaklığı analogWrite ile artar ve sıcak beyaz bir ışık verir."
   },
   {
    "n": 24,
@@ -238,7 +241,7 @@
    "comps": "HC-SR04, buzzer, LED",
    "lv": 2,
    "ready": true,
-   "d": "Ultrasonik sensörle mesafe ölçüp 30 cm içine giren nesnelerde buzzer çalan alarm. Nesne yaklaştıkça bip sıklaşır."
+   "d": "HC-SR04 ile mesafe ölçülür; nesne 30 cm'den yaklaşınca buzzer öter ve LED yanıp söner, yaklaştıkça bip ve yanıp sönme hızlanır, 8 cm'den yakında ses ve ışık sürekli olur."
   },
   {
    "n": 25,
@@ -246,7 +249,8 @@
    "t": "Otomatik Kapı Sistemi",
    "comps": "HC-SR04, servo",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "HC-SR04 biri 20 cm içine girince servo ile kapıyı açar, kişi uzaklaşıp 2 saniye geçince kapatır. Servo hareketini yumuşatmayı ve millis() ile bekleme süresi tutmayı öğrenirsin."
   },
   {
    "n": 26,
@@ -254,7 +258,8 @@
    "t": "Şifreli Kapı Kilidi",
    "comps": "4x4 keypad, servo, LCD",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "4x4 tuş takımından girilen şifre doğruysa (1234#) servo kilidi açar, LCD'de \"Sifre dogru!\" görünür; yanlışsa \"Yanlis sifre!\" yazar. Keypad kütüphanesi, iki boyutlu dizi ve analog pinleri dijital kullanma öğrenilir."
   },
   {
    "n": 27,
@@ -262,7 +267,8 @@
    "t": "Elektronik Kasa",
    "comps": "Keypad, servo, buzzer",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "Keypad'e doğru şifre (1234#) girilince servo kilidi açılır ve iki kısa bip duyulur; yanlış şifrede buzzer uzun öter, üç yanlış denemede 2 saniyelik alarm çalar."
   },
   {
    "n": 28,
@@ -270,7 +276,8 @@
    "t": "Su Seviye Ölçer",
    "comps": "Su seviye sensörü, LCD",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "Su seviye sensörünün analog değeri yüzdeye çevrilip LCD'de rakam ve 16 karakterlik çubukla gösterilir. map(), constrain() ve kalibrasyon öğrenilir."
   },
   {
    "n": 29,
@@ -278,7 +285,8 @@
    "t": "Yağmur Algılama Sistemi",
    "comps": "Yağmur sensörü, buzzer",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "Yağmur sensörünün analog (AO) ve dijital (DO) çıkışı okunur; hafif yağmurda buzzer yavaş bip, şiddetli yağmurda sürekli öter. Analog eşikler ve DO çıkışı karşılaştırılır."
   },
   {
    "n": 30,
@@ -286,7 +294,8 @@
    "t": "Toprak Nem Ölçer",
    "comps": "Kapasitif nem sensörü, LCD",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "Toprak nem sensörünün değeri yüzdeye çevrilip LCD'de \"Toprak Nem: %40\" ve Kuru/Nemli/Islak durumuyla gösterilir. Ters çalışan sensör değerini map() ile düzeltmeyi öğrenirsin."
   },
   {
    "n": 31,
@@ -294,7 +303,8 @@
    "t": "Otomatik Bitki Sulama",
    "comps": "Nem sensörü, mini pompa, röle",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "Toprak kuruyunca Arduino bir transistörle röleyi çeker, röle ayrı 6 V güç kaynağından mini pompayı çalıştırır; pompa ve röle bobininde ters diyot kullanılır. Güç ayrımı, röle ve güvenli sulama mantığı öğrenilir."
   },
   {
    "n": 32,
@@ -302,7 +312,8 @@
    "t": "Akıllı Çöp Kutusu",
    "comps": "HC-SR04, servo",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "HC-SR04 elin yaklaştığını algılayınca servo kapağı açar, el çekilince 3 saniye sonra yavaşça kapatır. Art arda ölçüm doğrulaması ve yumuşak servo hareketi öğrenilir."
   },
   {
    "n": 33,
@@ -310,7 +321,8 @@
    "t": "Otomatik El Dezenfektanı",
    "comps": "IR sensör, mini pompa",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "IR engel sensörü eli algılayınca NPN transistör üzerinden mini pompa 1,5 saniye çalışır ve el çekilene kadar tekrar çalışmaz. Transistörle pompa sürme, ters diyot ve tek seferlik tetikleme öğrenilir."
   },
   {
    "n": 34,
@@ -318,7 +330,8 @@
    "t": "Hırsız Alarm Sistemi",
    "comps": "PIR sensör, buzzer",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "PIR sensör hareket algılayınca pasif buzzer iki tonlu siren çalar ve LED yanıp söner. Başlangıç kurulum gecikmesi, tone() ile siren ve alarmı yeniden kurma öğrenilir."
   },
   {
    "n": 35,
@@ -327,7 +340,7 @@
    "comps": "PIR, LED",
    "lv": 2,
    "ready": true,
-   "d": "HC-SR501 PIR sensörü ortamdaki kızılötesi değişimi, yani hareketi algılar. Hareket olunca LED yanar ve Seri Çizici'ye mesaj yazılır."
+   "d": "HC-SR501 PIR sensörü hareketi algılayınca LED lamba yanar ve son hareketten 5 saniye sonra söner. millis() ile bekleme süresi tutmayı ve PIR çıkışını okumayı öğrenirsin."
   },
   {
    "n": 36,
@@ -335,7 +348,8 @@
    "t": "Elektronik Kronometre",
    "comps": "LCD, butonlar",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "İki butonlu kronometre: biri başlat/durdur, diğeri sıfırla; süre millis() ile ölçülüp LCD'de dakika:saniye.onda biçiminde gösterilir."
   },
   {
    "n": 37,
@@ -343,7 +357,8 @@
    "t": "Dijital Geri Sayım Sayacı",
    "comps": "LCD, keypad",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "Keypad ile saniye girilir, # ile geri sayım başlar, LCD'de dakika:saniye azalır ve süre bitince buzzer 3 kez öter. * girileni siler ve geri sayımı iptal eder."
   },
   {
    "n": 38,
@@ -351,7 +366,8 @@
    "t": "Akıllı Park Yeri Göstergesi",
    "comps": "IR sensör, LED, LCD",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "Üç park yerinin her birinde bir IR engel sensörü araç var mı diye bakar; LCD'de \"Bos: N/3\" ve her yerin durumu görünür, boş yerlerin yeşil LED'i yanar."
   },
   {
    "n": 39,
@@ -359,7 +375,8 @@
    "t": "Mini Rüzgâr Hız Ölçer",
    "comps": "Hall sensörü, mıknatıs",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "Hall sensörü, dönen kanattaki mıknatısı her turda bir kez algılar; Arduino darbeleri sayıp devir/dakikayı ve kanat ucu hızını hesaplar ve Seri Monitör'e yazar. millis() ile ölçüm penceresi ve kenar algılama öğrenilir."
   },
   {
    "n": 40,
@@ -367,7 +384,8 @@
    "t": "Elektronik Pusula",
    "comps": "HMC5883L, LCD",
    "lv": 2,
-   "ready": false
+   "ready": true,
+   "d": "HMC5883L manyetometresinden I2C ile ham X ve Y değerleri okunur, atan2() ile yön açısı bulunur ve LCD'de derece ile K/KD/D/GD/G/GB/B/KB harfi gösterilir. Wire kütüphanesi ve ham register erişimi öğrenilir."
   },
   {
    "n": 41,

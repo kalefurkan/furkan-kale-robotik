@@ -2,6 +2,7 @@
 #pragma once
 #include <cstdint>
 #include <cmath>
+#include <cstddef>
 typedef bool boolean;
 typedef uint8_t byte;
 typedef unsigned int word;
@@ -38,4 +39,5 @@ struct HardwareSerial {
   void println();
 };
 extern HardwareSerial Serial;
+double degrees(double); double radians(double);
 void setup(); void loop();

@@ -1,0 +1,86 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HMC5883L pusula modülü (I2C)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "Jumper kablolar (18 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "A4",
+   "HMC5883L SDA (I2C veri)"
+  ],
+  [
+   "A5",
+   "HMC5883L SCL (I2C saat)"
+  ]
+ ],
+ "img": "assets/devre/elektronik-pusula.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "HMC5883L'i a20 (VCC), a21 (GND), a22 (SCL), a23 (SDA) deliklerine tak. e20 → artı rayı, e21 → eksi rayı, A5 → e22 (SCL), A4 → e23 (SDA). Uno'da I2C pinleri A4 (SDA) ve A5 (SCL)'dir.",
+  "Kodu yükle (simülatörde çalıştır): sensörün yön (heading) kaydırıcısını değiştir; LCD'de \"Yon: 135\" ve \"GD\" gibi yön harfleri görünür."
+ ],
+ "code": "// Elektronik pusula: HMC5883L (I2C) ham register okumasi ile yon acisi ve yon harfi LCD'de\n#include <Wire.h>\n#include <LiquidCrystal.h>\n\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\nconst int HMC_ADRES = 0x1E;     // HMC5883L I2C adresi\n\nvoid yonuYaz(int aci) {\n  // 8 yon: K=Kuzey, D=Dogu, G=Guney, B=Bati\n  int dilim = ((aci + 22) / 45) % 8;\n  if (dilim == 0) lcd.print(\"K \");\n  else if (dilim == 1) lcd.print(\"KD\");\n  else if (dilim == 2) lcd.print(\"D \");\n  else if (dilim == 3) lcd.print(\"GD\");\n  else if (dilim == 4) lcd.print(\"G \");\n  else if (dilim == 5) lcd.print(\"GB\");\n  else if (dilim == 6) lcd.print(\"B \");\n  else lcd.print(\"KB\");\n}\n\nvoid setup() {\n  Wire.begin();                              // I2C: SDA = A4, SCL = A5\n  Wire.beginTransmission(HMC_ADRES);\n  Wire.write(0x02);                          // mod register'i\n  Wire.write(0x00);                          // 0x00 = surekli olcum\n  Wire.endTransmission();\n  lcd.begin(16, 2);\n  lcd.setCursor(0, 0);\n  lcd.print(\"Pusula HMC5883L\");\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  Wire.beginTransmission(HMC_ADRES);\n  Wire.write(0x03);                          // veri register'lari 0x03'ten baslar\n  Wire.endTransmission();\n  Wire.requestFrom(HMC_ADRES, 6);            // sira: X (MSB, LSB), Z (MSB, LSB), Y (MSB, LSB)\n\n  if (Wire.available() >= 6) {\n    int xh = Wire.read();\n    int xl = Wire.read();\n    int zh = Wire.read();\n    int zl = Wire.read();\n    int yh = Wire.read();\n    int yl = Wire.read();\n    int x = (xh << 8) | xl;                  // 16 bit isaretli sayi\n    int y = (yh << 8) | yl;\n\n    float aci = degrees(atan2(y, x));        // radyan -> derece\n    if (aci < 0) {\n      aci = aci + 360;                       // 0-360 araligina getir\n    }\n    int derece = (int)(aci + 0.5);\n    if (derece >= 360) derece = 0;\n\n    lcd.setCursor(0, 1);\n    lcd.print(\"Yon: \");\n    lcd.print(derece);\n    lcd.print(\"   \");\n    lcd.setCursor(10, 1);\n    yonuYaz(derece);\n\n    Serial.print(\"X=\");\n    Serial.print(x);\n    Serial.print(\" Y=\");\n    Serial.print(y);\n    Serial.print(\" Yon=\");\n    Serial.println(derece);\n  } else {\n    lcd.setCursor(0, 1);\n    lcd.print(\"Sensor yok!     \");\n  }\n  delay(300);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Wire.begin() I2C'yi başlatır. setup()'ta HMC5883L'in (adres 0x1E) mod register'ına (0x02) 0x00 yazılır: sürekli ölçüm. loop()'ta 0x03 register'ından başlayarak 6 bayt okunur: X (MSB, LSB), Z (MSB, LSB), Y (MSB, LSB). İki bayt (xh << 8) | xl ile 16 bitlik işaretli sayıya birleştirilir. Yön = atan2(y, x) radyandır; degrees() ile dereceye çevrilir, negatifse 360 eklenir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Yön kaydırıcısı 0 iken X = 400, Y = 0 okundu ve ekran \"Yon: 0\" K gösterdi; 45'te X = 283, Y = 283 (KD); 90'da X = 0, Y = 400 (D); 135'te X = −283, Y = 283 (GD); 180'de X = −400 (G); 270'te B; 315'te KB. Simülatör gürültü, eğim ve sapma modellemez. Gerçek derleme servisinin izinli başlıkları arasında DHT.h, LiquidCrystal.h ve Keypad.h yoktur; bu kütüphaneler yalnızca MakersHub simülatöründe çalışır, sitedeki gerçek derleme bu sketch'lerde hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Gerçek pusula uyarıları",
+   "Gerçek HMC5883L metal ve motor gibi manyetik nesnelerden etkilenir, kalibrasyon (hard/soft iron) ister, sensör yatay tutulmazsa eğim hatası yapar ve gösterdiği yön manyetik kuzeydir (coğrafi kuzeyden sapma = manyetik sapma, yerine göre birkaç derece). Bu projede bunların hiçbiri düzeltilmez."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "SDA ve SCL'yi ters bağlamak (Wire.available() 0 kalır, ekranda \"Sensor yok!\"); Z ve Y'yi sırasına karşın okumak (sıra X, Z, Y'dir); Wire.begin() unutmak; atan2'de argüman sırasını (y, x) bozmak."
+  ],
+  [
+   "Dene",
+   "Yön aralıklarını 16 yöne çıkar ya da sensörü kalibre etmek için en büyük/küçük X ve Y değerlerini kaydedip ortalama kaydırmasını çıkar."
+  ]
+ ],
+ "title": "40. Elektronik Pusula"
+}

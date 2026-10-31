@@ -1,0 +1,109 @@
+{
+ "sketch": "park_yeri",
+ "d": "Üç park yerinin her birinde bir IR engel sensörü araç var mı diye bakar; LCD'de \"Bos: N/3\" ve her yerin durumu görünür, boş yerlerin yeşil LED'i yanar.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "3 × IR engel algılama sensörü (park yerlerinde, breadboard'a takılı değil)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "4 × 220 Ω direnç (1 tanesi LCD arka ışığı, 3 tanesi LED'ler için)",
+  "3 × LED (yeşil)",
+  "Jumper kablolar (29 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D6",
+   "1. IR sensör OUT"
+  ],
+  [
+   "D7",
+   "2. IR sensör OUT"
+  ],
+  [
+   "D8",
+   "3. IR sensör OUT"
+  ],
+  [
+   "D9",
+   "1. LED anot"
+  ],
+  [
+   "D10",
+   "2. LED anot"
+  ],
+  [
+   "D13",
+   "3. LED anot"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın. IR sensörler park yerlerine konacağı için breadboard'a takılı değildir, breadboard dışında durur ve kablolarla bağlanır.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "Üç LED'i c19, c22, c25 deliklerine tak (anot soldaki bacak, katot sağdaki bacaktır). Her LED'in katot sütununa dikey bir 220 Ω direnç tak: e20–h20, e23–h23, e26–h26. Direnç çıkışlarını j20 → eksi rayı (B-17), j23 → eksi rayı (B-20), j26 → eksi rayı (B-23) kablolarıyla GND'ye bağla.",
+  "LED anot kabloları: D9 → e19, D10 → e22, D13 → e25.",
+  "Her IR sensörün VCC'sini artı rayına (B+8, B+10, B+12), GND'sini eksi rayına (B-8, B-10, B-12) kablola; OUT uçlarını D6, D7 ve D8 pinlerine bağla.",
+  "Kodu yükle (simülatörde çalıştır): sensörlerde \"engel var\" düğmesini aç-kapat; LCD'de boş yer sayısı ve P1/P2/P3 durumu (B: boş, D: dolu) güncellenir, boş yerin LED'i yanar."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "IR engel sensörü engel (araç) varken OUT'u LOW yapar. Kod üç sensörü for döngüsüyle okur (irPinleri[] ve ledPinleri[] tek boyutlu dizilerdir), dolu olmayan yerlerin LED'ini yakar, boş yer sayısını sayıp LCD'ye \"Bos: N/3\" ve \"P1:B P2:D P3:B\" olarak yazar."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Başlangıçta yalnızca 2. sensörde engel varken ekran \"Bos: 2/3\" / \"P1:B P2:D P3:B\" gösterdi ve 2. LED sönük, diğerleri yanıktı. Sırayla 1. sensöre engel konunca \"Bos: 1/3\", 2. sensörün engeli kalkınca \"Bos: 2/3\", 3. sensöre engel konunca \"Bos: 1/3\", üçünde de engel olunca \"Bos: 0/3\" yazıldı. Pin bütçesi: LCD 6 pin, IR 3 pin, LED 3 pin = 12 pin (D2–D13)."
+  ],
+  [
+   "Gerçek sensör uyarıları",
+   "Gerçek IR modüllerin algılama mesafesi karttaki potla ayarlanır ve parlak/koyu yüzeyler farklı yansıtır; güneş ışığı IR sensörü şaşırtabilir. Simülatörde engel bir düğmeyle verilir, mesafe ve yansıtma modellenmez. Gerçek derleme servisinin izinli başlıkları arasında DHT.h, LiquidCrystal.h ve Keypad.h yoktur; bu kütüphaneler yalnızca MakersHub simülatöründe çalışır, sitedeki gerçek derleme bu sketch'lerde hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "IR çıkışının ters mantık olduğunu (engelde LOW) unutmak; her LED'e ayrı direnç koymamak; sensör VCC/GND'sini yanlış rayla karıştırmak; LED katotlarını GND'ye bağlamamak."
+  ],
+  [
+   "Dene",
+   "Boş yer kalmayınca LCD'ye \"DOLU\" yazdır ve bir buzzer öttür ya da park yeri sayısını 4'e çıkarmak için bir sensör ve LED daha ekle."
+  ]
+ ],
+ "free": [
+  "ir1",
+  "ir2",
+  "ir3"
+ ]
+}

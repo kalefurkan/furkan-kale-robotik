@@ -56,7 +56,9 @@ export type Action =
   | { down: string }
   | { up: string }
   | { presses: { id: string; n: number; hold?: number; gap?: number } }
-  | { waitText: string; timeout?: number };
+  | { waitText: string; timeout?: number }
+  | { keys: { id: string; seq: string; hold?: number; gap?: number } }
+  | { waitLcd: number };
 
 export interface Project {
   /** index.json'daki kimlik */
@@ -69,5 +71,37 @@ export interface Project {
   /** node tarafı doğrulama: sanal süre ve zamanlı girdi değişiklikleri */
   sim: { runMs: number; events?: { t: number; set: Record<string, Record<string, any>> }[]; sampleMs?: number };
   /** tarayıcı tarafı: ekran görüntüsünden önce yapılacak etkileşimler */
-  shoot?: { actions: Action[]; settleMs?: number };
+  shoot?: { actions: Action[]; settleMs?: number; hideFlybackFrame?: boolean; startWaitMs?: number };
+}
+
+/**
+ * 16x2 LCD bloğu (p20 ile aynı yerleşim): LCD a2..a13, arka ışık direnci d12->d16 (A -> 220 Ω -> 5V),
+ * 5V -> B+1, GND2 -> B-1 rayları; VSS/V0/RW/K -> GND, VDD/direnç ucu -> 5V; RS/E/D4..D7 Arduino'ya.
+ * Uno'nun 5V ve GND2 pinleri bu blokla kullanılmış olur (14 kablo).
+ */
+export function lcdBlock(b: Builder, pins: { rs: string; e: string; d: [string, string, string, string] } = { rs: "D12", e: "D11", d: ["D5", "D4", "D3", "D2"] }, id = "lcd1") {
+  b.plug("a2", { id, type: "lcd16x2", pin: "VSS" });
+  b.plug("d12", { id: "rlcd", type: "resistor", pin: "A", props: { ohms: 220 } });
+  b.wire("uno.5V", "bb.B+1", RED);
+  b.wire("uno.GND2", "bb.B-1", BLK);
+  b.wire("bb.e2", "bb.B-2", BLK);    // VSS -> GND
+  b.wire("bb.e3", "bb.B+3", RED);    // VDD -> 5V
+  b.wire("bb.e4", "bb.B-4", BLK);    // V0 -> GND
+  b.wire("bb.e6", "bb.B-6", BLK);    // RW -> GND
+  b.wire("bb.e13", "bb.B-13", BLK);  // K -> GND
+  b.wire("bb.e16", "bb.B+16", RED);  // direnç ucu -> 5V
+  b.wire(`uno.${pins.rs}`, "bb.e5", YEL);
+  b.wire(`uno.${pins.e}`, "bb.e7", GRN);
+  b.wire(`uno.${pins.d[0]}`, "bb.e8", BLU);
+  b.wire(`uno.${pins.d[1]}`, "bb.e9", ORG);
+  b.wire(`uno.${pins.d[2]}`, "bb.e10", WHT);
+  b.wire(`uno.${pins.d[3]}`, "bb.e11", YEL);
+}
+
+/** Tuş takımına zamanlı tuş basışları: her tuş `hold` ms basılı kalır, aralarında `gap` ms olur. */
+export function typeKeys(id: string, seq: string, start: number, hold = 100, gap = 300) {
+  return [...seq].flatMap((k, i) => [
+    { t: start + i * (hold + gap), set: { [id]: { key: k } } },
+    { t: start + i * (hold + gap) + hold, set: { [id]: { key: "" } } },
+  ]);
 }

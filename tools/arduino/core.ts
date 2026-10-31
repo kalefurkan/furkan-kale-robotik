@@ -76,6 +76,39 @@ for (const p of __PROJECTS__) {
     if (t.length >= 2) nets.push(t.join(" "));
   }
   const v = validateCircuit(circuit);
+  // ---- güç yolu denetimi (elle kontrol edilen tutarsızlıkları otomatikleştirir) ----
+  const powerIssues: string[] = [];
+  {
+    const netOf = new Map<string, string[]>();
+    for (const m of nl.members) for (const k of m) netOf.set(k, m);
+    const has = (k: string, re: RegExp | ((k: string) => boolean)) => (netOf.get(k) ?? [k]).some((x) => (typeof re === "function" ? re(x) : re.test(x)));
+    const typeById = new Map<string, string>(circuit.components.map((c: any) => [c.id, c.type]));
+    const isMcuPin = (k: string) => /^uno\.(D\d+|A\d)$/.test(k);
+    const isPlus = (k: string) => { const [id, pn] = k.split("."); const t = typeById.get(id); return k === "uno.5V" || ((t === "psu" || t === "battery9v") && pn === "P") || (t === "relay" && ["NO", "NC", "COM"].includes(pn)); };
+    const isGnd = (k: string) => { const [id, pn] = k.split("."); const t = typeById.get(id); return /^uno\.GND\d?$/.test(k) || ((t === "psu" || t === "battery9v") && pn === "N"); };
+    for (const c of circuit.components) {
+      if (c.type === "servo") {
+        if (!has(`${c.id}.VCC`, (k) => k === "uno.5V")) powerIssues.push(`${c.id}: VCC 5V'a bağlı değil`);
+        if (!has(`${c.id}.GND`, /^uno\.GND\d?$/)) powerIssues.push(`${c.id}: GND Arduino GND'ye bağlı değil`);
+        if (has(`${c.id}.VCC`, isMcuPin) || has(`${c.id}.GND`, isMcuPin)) powerIssues.push(`${c.id}: besleme ucu bir veri pinine bağlı`);
+      }
+      if (c.type === "dcmotor" || c.type === "bulb") for (const pn of ["A", "B"]) if (has(`${c.id}.${pn}`, isMcuPin)) powerIssues.push(`${c.id}.${pn}: motor ucu doğrudan Arduino veri pinine bağlı`);
+      if (c.type === "relay") for (const pn of ["C1", "C2"]) if (has(`${c.id}.${pn}`, isMcuPin)) powerIssues.push(`${c.id}.${pn}: röle bobini doğrudan Arduino veri pinine bağlı (sürücü transistör gerekir)`);
+      if (c.type === "npn" && has(`${c.id}.B`, isMcuPin)) powerIssues.push(`${c.id}: taban doğrudan Arduino pinine bağlı (direnç gerekir)`);
+      if (c.type === "npn" && !has(`${c.id}.E`, isGnd)) powerIssues.push(`${c.id}: emitör GND'ye bağlı değil`);
+      if (c.type === "dcmotor") {
+        const diodes = circuit.components.filter((d: any) => d.type === "diode");
+        const ok = diodes.some((d: any) => (has(`${c.id}.A`, new RegExp(`^${d.id}\\.K$`)) && has(`${c.id}.B`, new RegExp(`^${d.id}\\.A$`)) && has(`${c.id}.A`, isPlus)) || (has(`${c.id}.B`, new RegExp(`^${d.id}\\.K$`)) && has(`${c.id}.A`, new RegExp(`^${d.id}\\.A$`)) && has(`${c.id}.B`, isPlus)));
+        if (!ok) powerIssues.push(`${c.id}: ters diyot yok ya da yönü yanlış (katot + tarafa bakmalı)`);
+      }
+      if (c.type === "relay") {
+        const diodes = circuit.components.filter((d: any) => d.type === "diode");
+        const ok = diodes.some((d: any) => has(`${c.id}.C1`, new RegExp(`^${d.id}\\.K$`)) && has(`${c.id}.C2`, new RegExp(`^${d.id}\\.A$`)));
+        if (!ok) powerIssues.push(`${c.id}: röle bobininde ters diyot yok ya da yönü yanlış (katot C1/+ tarafa)`);
+        if (!has(`${c.id}.C1`, /^uno\.5V$/)) powerIssues.push(`${c.id}: bobin C1 5V'a bağlı değil`);
+      }
+    }
+  }
 
   // ---- simülasyon ----
   const s = new SimulationSession(sketch, circuit);
@@ -85,6 +118,11 @@ for (const p of __PROJECTS__) {
   const toneLog: [number, string, number][] = [];
   const buzLog: [number, string, boolean][] = [];
   const ledLog: [number, string, boolean, number][] = [];
+  const servoLog: [number, string, number | null, boolean][] = [];
+  const motorLog: [number, string, number, number][] = [];
+  const relayLog: [number, string, boolean][] = [];
+  const lcdLog: [number, string][] = []; let lastLcd = "";
+  const lastServo = new Map<string, string>(), lastMotor = new Map<string, string>(), lastRelay = new Map<string, boolean>();
   const lastTone = new Map<string, number>(), lastBuz = new Map<string, boolean>(), lastLed = new Map<string, string>();
   const warnings = new Set<string>();
   let shorted = false, overcurrent = false, lcdProblem: string | null = null, last: any = null, ei = 0;
@@ -100,17 +138,22 @@ for (const p of __PROJECTS__) {
     for (const [id, tn] of f.tones) { const fr = tn.sounding ? tn.freq : 0; if (lastTone.get(id) !== fr) { lastTone.set(id, fr); toneLog.push([t, id, fr]); } }
     for (const [id, bz] of f.buzzers) if (lastBuz.get(id) !== bz.sounding) { lastBuz.set(id, bz.sounding); buzLog.push([t, id, bz.sounding]); }
     for (const [id, l] of f.leds) { const k = `${l.lit}`; if (lastLed.get(id) !== k) { lastLed.set(id, k); ledLog.push([t, id, l.lit, +l.brightness.toFixed(2)]); } }
+    for (const [id, sv] of f.servos) { const k = `${sv.angle}/${sv.powered}`; if (lastServo.get(id) !== k) { lastServo.set(id, k); servoLog.push([t, id, sv.angle, sv.powered]); } }
+    for (const [id, m] of f.motors) { const k = `${m.speed.toFixed(2)}/${m.currentMa.toFixed(0)}`; if (lastMotor.get(id) !== k) { lastMotor.set(id, k); motorLog.push([t, id, +m.speed.toFixed(2), +m.currentMa.toFixed(1)]); } }
+    for (const [id, r] of f.relays) if (lastRelay.get(id) !== r.on) { lastRelay.set(id, r.on); relayLog.push([t, id, r.on]); }
+    { const cur = [...f.lcds.values()].map((l: any) => l.rows.join("|")).join("#"); if (cur !== lastLcd) { lastLcd = cur; lcdLog.push([t, cur]); } }
     f.lcds.forEach((l) => { if (l.problem && (!l.waiting || f.timeUs > 2_000_000)) lcdProblem = l.problem; });
   }
   const lcd: Record<string, string[]> = {};
   last?.lcds.forEach((l: any, id: string) => (lcd[id] = l.rows));
   const facts = {
     id: p.id, counts, resistors, wires: circuit.wires.length, components: circuit.components.length,
-    unoPins: [...unoPins].sort(), endpointDup, holeClash, unplugged, nets,
+    unoPins: [...unoPins].sort(), powerIssues, endpointDup, holeClash, unplugged, nets,
     validator: { errors: v.errors.map((i) => i.message), warnings: v.warnings.map((i) => i.message) },
     runtime: { error: s.error, diagnostics: s.diagnostics.map((d) => `${d.severity}: ${d.message} (${d.line})`), warnings: [...warnings], shorted, overcurrent, lcdProblem },
     serial: s.serial.lines.map((l) => `${(l.t / 1000).toFixed(0)}ms ${l.text}`),
-    toneLog: toneLog.slice(0, 80), buzLog: buzLog.slice(0, 40), ledLog: ledLog.slice(0, 60),
+    toneLog: toneLog.slice(0, 80), buzLog: buzLog.slice(0, 200), ledLog: ledLog.slice(0, 60),
+    lcdLog: lcdLog.slice(0, 120), servoLog: servoLog.slice(0, 60), motorLog: motorLog.slice(0, 60), relayLog: relayLog.slice(0, 40),
     ledEnd: Object.fromEntries([...(last?.leds ?? [])].map(([id, l]: any) => [id, l.lit])),
     lcd, finished: s.finished, timeMs: s.timeUs / 1000,
   };

@@ -1,0 +1,53 @@
+{
+ "sketch": "ruzgar",
+ "d": "Hall sensörü, dönen kanattaki mıknatısı her turda bir kez algılar; Arduino darbeleri sayıp devir/dakikayı ve kanat ucu hızını hesaplar ve Seri Monitör'e yazar. millis() ile ölçüm penceresi ve kenar algılama öğrenilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × Hall efekt sensörü modülü (A3144 tipi; kanada yapıştırılacak küçük bir mıknatısla)",
+  "Jumper kablolar (3 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Hall sensörü VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Hall sensörü GND"
+  ],
+  [
+   "D2",
+   "Hall sensörü DO"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Hall sensörünü a2 (VCC), a3 (GND), a4 (DO) deliklerine tak.",
+  "Kablolar: 5V → e2, GND2 → e3, D2 → e4.",
+  "Gerçek devrede mıknatısı rüzgâr çarkının bir kanadına yapıştırırsın; kanat dönerken mıknatıs sensörün önünden her turda bir kez geçer. Simülatörde bunu Hall sensörünün \"devir/dk\" (rpm) kaydırıcısı verir.",
+  "Kodu yükle (simülatörde çalıştır) ve Seri Monitör'ü aç. 2 saniyede bir devir ve hız yazılır; rpm kaydırıcısını değiştirince değerler değişir."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Hall sensörü mıknatıs yakınken DO'yu LOW yapar. Dönen mıknatıs her turda bir LOW darbesi verir (simülatörde turun %10'u kadar sürer). Kod digitalRead ile hızlı okur ve yalnızca HIGH → LOW kenarını sayar; 2 saniyelik pencerede sayılan darbe = tur sayısı. rpm = darbe × 60000 / 2000. Simülatörde attachInterrupt desteklenmediği için okuma döngüde yapılır (delay(1) ile saniyede ~1000 okuma)."
+  ],
+  [
+   "Hız hesabı ve varsayım",
+   "Kanat ucunun çevre hızı v = 2 × π × r × (rpm / 60) formülüyle bulunur. Koddaki r = 0,05 m (5 cm) bir VARSAYIMDIR; kendi çarkının yarıçapını ölç ve YARICAP_M'yi değiştir. Bu değer kanat ucunun hızıdır, rüzgârın gerçek hızı değildir: gerçek bir anemometrenin rüzgâr hızıyla ilişkisi kanat şekline bağlı bir kalibrasyon katsayısıyla bulunur ve burada hesaplanmaz."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "600 d/dk ayarında okuma 600 d/dk (3,14 m/s), 300 d/dk ayarında 300 (1,57 m/s), 60 d/dk ayarında 60 (0,31 m/s) çıktı. 120 d/dk ayarındaki ilk 2 saniyelik pencerede 150 okundu, sonraki pencerede 120: pencere kenarına denk gelen tek bir fazla darbe 2 saniyelik pencerede ±30 d/dk hata yapar. Pencereyi uzatmak hatayı azaltır ama tepkiyi yavaşlatır."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Hall sensörünün VCC/GND'sini ters bağlamak; darbeyi LOW yerine HIGH ile saymak; döngüde uzun delay() kullanıp darbeleri kaçırmak; mıknatısın kutbunu ters yapıştırmak (bazı Hall sensörleri yalnızca tek kutba tepki verir)."
+  ],
+  [
+   "Dene",
+   "Sonucu 16x2 LCD'de göster (proje 20'deki LCD bloğunu ekle) ya da hıza göre bir LED çubuğu yak."
+  ]
+ ]
+}

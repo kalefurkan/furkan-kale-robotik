@@ -1,0 +1,72 @@
+{
+ "sketch": "hirsiz_alarm",
+ "d": "PIR sensör hareket algılayınca pasif buzzer iki tonlu siren çalar ve LED yanıp söner. Başlangıç kurulum gecikmesi, tone() ile siren ve alarmı yeniden kurma öğrenilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × PIR hareket sensörü (HC-SR501)",
+  "1 × pasif buzzer",
+  "1 × LED (kırmızı)",
+  "1 × 220 Ω direnç (LED için)",
+  "Jumper kablolar (7 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "PIR VCC"
+  ],
+  [
+   "D2",
+   "PIR OUT"
+  ],
+  [
+   "GND (GND2)",
+   "PIR GND"
+  ],
+  [
+   "D8",
+   "Pasif buzzer + (uzun bacak)"
+  ],
+  [
+   "GND (GND3)",
+   "Pasif buzzer − (kısa bacak)"
+  ],
+  [
+   "D4",
+   "LED anot (uzun bacak)"
+  ],
+  [
+   "GND (GND1)",
+   "220 Ω direncin ucu (LED katodu direnç üzerinden)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "PIR'ı a2 (VCC), a3 (OUT), a4 (GND) deliklerine tak. 5V → e2, D2 → e3, GND2 → e4.",
+  "Pasif buzzer'ı a10 (+) ve a11 (−) deliklerine tak. D8 → e10, GND3 → e11.",
+  "LED'i c16 (anot) ve c17 (katot) deliklerine tak. 220 Ω direnci d17 ile d21 arasına tak. D4 → e16, GND1 → e21.",
+  "Kodu yükle (simülatörde çalıştır) ve Seri Monitör'ü aç. 3 saniyelik kurulumdan sonra \"Alarm KURULDU\" yazılır; PIR'da hareket oluşturunca siren 5 saniye çalar ve LED yanıp söner."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Pasif buzzer kendi başına ses üretmez; tone(pin, frekans) ile verilen frekansta çalar. siren() fonksiyonu 800 Hz ile 1200 Hz'i 250 ms aralıkla değiştirir (10 tur = 5 saniye), LED de aynı ritimle yanıp söner. Sonra noTone() ile susar ve alarm yeniden kurulur."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta 3 saniye \"Sistem kuruluyor\" bekledi; hareket varken siren 3,0 saniyeden 8,0 saniyeye kadar 800/1200 Hz'i sırayla çaldı (simülatör \"çalıyor 1200 Hz\" gösterdi), LED aynı anda yanıp söndü, sonra \"Alarm tekrar kuruldu\" yazıldı; hareket kalkınca alarm tekrar çalmadı, 12 saniyede yeni hareketle yeniden çaldı."
+  ],
+  [
+   "PIR ısınma süresi",
+   "Gerçek HC-SR501'in ortama alışması 30–60 saniye sürer ve bu sürede yanlış alarm verebilir; koddaki 3 saniyelik KURULUM_MS simülatörde beklemeyi kısa tutmak içindir, gerçek devrede artır. PIR'ın üzerindeki iki pot algılama mesafesini ve OUT'un HIGH kalma süresini ayarlar."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Pasif buzzer'ı digitalWrite ile sürmeye çalışmak (ses çıkmaz); tone() + delay() + noTone() sırasını bozmak; PIR VCC'sini 3V3'e bağlamak; LED'i dirençsiz takmak."
+  ],
+  [
+   "Dene",
+   "Alarmı bir buton ya da keypad şifresiyle kapat (proje 27'deki şifre kodunu ekle) ya da siren frekanslarını değiştirerek farklı bir ses dene."
+  ]
+ ]
+}

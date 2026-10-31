@@ -1,0 +1,66 @@
+{
+ "sketch": "yagmur",
+ "d": "Yağmur sensörünün analog (AO) ve dijital (DO) çıkışı okunur; hafif yağmurda buzzer yavaş bip, şiddetli yağmurda sürekli öter. Analog eşikler ve DO çıkışı karşılaştırılır.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × yağmur sensörü modülü (AO/DO)",
+  "1 × aktif buzzer",
+  "Jumper kablolar (6 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Yağmur modülü VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Yağmur modülü GND"
+  ],
+  [
+   "A0",
+   "Yağmur modülü AO (analog çıkış)"
+  ],
+  [
+   "D2",
+   "Yağmur modülü DO (dijital çıkış)"
+  ],
+  [
+   "D8",
+   "Aktif buzzer + (uzun bacak)"
+  ],
+  [
+   "GND (GND3)",
+   "Aktif buzzer − (kısa bacak)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Yağmur modülünü a2 (VCC), a3 (GND), a4 (AO), a5 (DO) deliklerine tak.",
+  "Kablolar: 5V → e2, GND2 → e3, A0 → e4 (AO), D2 → e5 (DO).",
+  "Aktif buzzer'ı a10 (+) ve a11 (−) deliklerine tak. D8 → e10, GND3 → e11.",
+  "Kodu yükle (simülatörde çalıştır) ve Seri Monitör'ü aç. Sensörün ıslaklık kaydırıcısını artır: AO değeri düşer, hafif yağmurda yavaş bip, şiddetli yağmurda sürekli ses duyulur."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Plakadaki izler ıslanınca iletim artar ve AO gerilimi düşer: kuru ≈ 1023, ıslak ≈ 205. LM393 karşılaştırıcı AO'yu bir eşikle kıyaslayıp DO'yu üretir (ıslakken LOW). Kod AO'yu iki eşikle yorumlar: 800'ün altı hafif, 450'nin altı şiddetli yağmur."
+  ],
+  [
+   "Ölçülen değerler (simülatör)",
+   "Islaklık 0 / 0,2 / 0,4 / 0,6 / 0,9 iken AO 1023 / 860 / 696 / 532 / 286 okundu. DO, ıslaklık 0,5'i geçince (AO yaklaşık 613'ün altında) LOW oldu; 0,4'te hâlâ HIGH, 0,6'da LOW'du. Bu yüzden 800 eşiği 0,2'de (860) kuru, 0,4'te (696) hafif; 450 eşiği 0,6'da (532) hafif, 0,9'da (286) şiddetli sonucunu verdi."
+  ],
+  [
+   "Gerçek modül uyarısı",
+   "Gerçek modüldeki DO eşiği karttaki ayar potu ile değişir; simülatörde sabittir. Plakadaki izler su ve kirle paslanır, sensörü yalnızca ölçüm sırasında beslemek ömrünü uzatır."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "DO ile AO'yu karıştırmak; DO'nun ıslakken LOW verdiğini unutup mantığı ters kurmak; AO'yu dijital pine bağlamak; eşikleri ölçmeden yazmak."
+  ],
+  [
+   "Dene",
+   "Yağmur başlayınca bir servo ile pencereyi kapat (proje 25'in servo düzenini kullanabilirsin) ya da AO değerini yüzdeye çevirip Seri Monitör'de göster."
+  ]
+ ]
+}

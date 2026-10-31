@@ -1,0 +1,63 @@
+{
+ "sketch": "pir_lamba",
+ "d": "HC-SR501 PIR sensörü hareketi algılayınca LED lamba yanar ve son hareketten 5 saniye sonra söner. millis() ile bekleme süresi tutmayı ve PIR çıkışını okumayı öğrenirsin.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × PIR hareket sensörü (HC-SR501)",
+  "1 × LED (sarı)",
+  "1 × 220 Ω direnç (LED için)",
+  "Jumper kablolar (5 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "PIR VCC"
+  ],
+  [
+   "D2",
+   "PIR OUT"
+  ],
+  [
+   "GND (GND2)",
+   "PIR GND"
+  ],
+  [
+   "D8",
+   "LED anot (uzun bacak)"
+  ],
+  [
+   "GND (GND3)",
+   "220 Ω direncin ucu (LED katodu direnç üzerinden)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "PIR'ı a2 (VCC), a3 (OUT), a4 (GND) deliklerine tak. 5V → e2, D2 → e3, GND2 → e4.",
+  "LED'i c10 (anot) ve c11 (katot) deliklerine tak. 220 Ω direnci d11 ile d15 arasına tak.",
+  "Kablolar: D8 → e10 (LED anot), GND3 → e15 (direncin diğer ucu).",
+  "Kodu yükle (simülatörde çalıştır) ve Seri Monitör'ü aç. PIR'da hareket oluşturunca LED yanar ve \"Hareket var: lamba yandi\" yazılır; hareket bitince 5 saniye sonra söner."
+ ],
+ "notes": [
+  [
+   "PIR nasıl çalışır?",
+   "Sensör vücut sıcaklığındaki nesnelerin yaydığı kızılötesi ışımadaki değişimi algılar; hareketsiz duran birini ya da ısı farkı oluşturmayan hareketi algılamayabilir. Hareket varken OUT HIGH olur."
+  ],
+  [
+   "Lamba mantığı",
+   "Kod hareket gördükçe sonHareket zamanını yeniler; hareket kesildikten sonra YANIK_KALMA_MS (5 saniye) geçince LED'i söndürür. Simülatörde hareket 2. saniyede bitti, LED yaklaşık 6,95. saniyede söndü (≈ 5 saniye sonra); 8. saniyede kısa bir hareketle yeniden yandı ve yaklaşık 13,25. saniyede söndü."
+  ],
+  [
+   "Isınma ve ayar",
+   "Güç verdikten sonra sensörün ortama alışması için yaklaşık 30–60 saniye gerekir; bu sürede yanlış tetikleme olabilir. HC-SR501 üzerindeki iki küçük pot algılama mesafesini ve OUT'un kaç saniye HIGH kalacağını ayarlar. PIR'ın VCC'si doğrudan 5V'a bağlanmalıdır (simülatörde de böyle)."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "VCC, OUT ve GND bacaklarını karıştırmak (isimler kartın üzerinde yazar); LED'i dirençsiz takmak; PIR'ın hemen açılışta tetiklendiğini hata sanmak (ısınma süresi)."
+  ],
+  [
+   "Dene",
+   "Ortam aydınlıksa LED yanmasın: bir LDR ekleyip yalnızca karanlıkta ve hareket varken yak (proje 23'teki ışık ölçümü)."
+  ]
+ ]
+}

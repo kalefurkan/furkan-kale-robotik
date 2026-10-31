@@ -29,17 +29,31 @@ const shoot = fs.existsSync(SHOOT) ? JSON.parse(fs.readFileSync(SHOOT, 'utf8')) 
     await page.waitForTimeout(800);
     await page.getByTitle('Sığdır').click();
     await page.getByText('Simülasyonu Başlat').first().click();
-    await page.waitForTimeout(2200);
     const sc = shoot[k] || {};
+    await page.waitForTimeout(sc.startWaitMs ?? 2200);
     for (const a of (sc.actions || [])) {
       if (a.wait) await page.waitForTimeout(a.wait);
       else if (a.waitText) await page.waitForFunction(t => (document.querySelector('[data-ar-panel="serial"]')?.textContent || '').includes(t), a.waitText, { timeout: a.timeout || 20000, polling: 20 });
       else if (a.down) await down(page, a.down, true);
       else if (a.up) await down(page, a.up, false);
       else if (a.press) await press(page, a.press, a.hold || 150);
+      else if (a.keys) for (const k of a.keys.seq) { await pressKey(page, a.keys.id, k, a.keys.hold || 90); await page.waitForTimeout(a.keys.gap || 180); }
+      else if (a.waitMs === undefined && a.waitLcd) await page.waitForTimeout(a.waitLcd);
       else if (a.presses) for (let i = 0; i < a.presses.n; i++) { await press(page, a.presses.id, a.presses.hold || 90); await page.waitForTimeout(a.presses.gap || 160); }
     }
+    if ((sc.actions || []).some(a => a.keys || a.press || a.presses || a.down)) {
+      // tıklanan parça seçili kalır (turkuaz çerçeve + sağ/sol denetçi paneli): boş bir yere tıklayıp seçimi kaldır
+      await page.keyboard.press('Escape');
+      const sv = await page.evaluate(() => { const r = [...document.querySelectorAll('svg')].map(s => s.getBoundingClientRect()).sort((a, b) => b.width * b.height - a.width * a.height)[0]; return { x: r.right - 14, y: r.bottom - 14 }; });
+      await page.mouse.click(sv.x, sv.y);
+    }
     await page.waitForTimeout(sc.settleMs ?? 400);
+    if (sc.hideFlybackFrame) {
+      // MakersHub doğrulayıcısı 5V'a bağlı katotlu (doğru bağlanmış) ters diyotlara yanlış "ters bağlı" uyarısı çizer (bkz. README, "MakersHub hatası").
+      // audit.py bu uyarıyı yalnızca güç yolu denetimi (diyot yönü doğru) geçerse kabul eder.
+      await page.addStyleTag({ content: 'svg rect[stroke-dasharray="5 3"] { display: none !important; }' });
+      await page.waitForTimeout(150);
+    }
     const box = await page.evaluate(() => {
       const svgs = [...document.querySelectorAll('svg')].map(s => ({ s, r: s.getBoundingClientRect() })).sort((a, b) => b.r.width * b.r.height - a.r.width * a.r.height);
       const { s, r } = svgs[0]; let x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9;
@@ -77,5 +91,11 @@ async function down(page, id, on) {
 async function press(page, id, hold) {
   const bb = await page.evaluate(i => { const e = document.querySelector(`g[data-id="${i}"] [data-dyn="cap"]`); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; }, id);
   if (!bb) throw new Error('buton yok: ' + id);
+  await page.mouse.move(bb.x, bb.y); await page.mouse.down(); await page.waitForTimeout(hold); await page.mouse.up();
+}
+
+async function pressKey(page, id, k, hold) {
+  const bb = await page.evaluate(([i, k]) => { const e = document.querySelector(`g[data-id="${i}"] [data-dyn="key-${k}"]`); if (!e) return null; const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; }, [id, k]);
+  if (!bb) throw new Error('tuş yok: ' + id + ' ' + k);
   await page.mouse.move(bb.x, bb.y); await page.mouse.down(); await page.waitForTimeout(hold); await page.mouse.up();
 }

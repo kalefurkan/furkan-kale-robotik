@@ -1,0 +1,91 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "2 × buton (push button)",
+  "Jumper kablolar (18 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D7",
+   "Başlat/Durdur butonunun bir ucu"
+  ],
+  [
+   "D6",
+   "Sıfırla butonunun bir ucu"
+  ]
+ ],
+ "img": "assets/devre/elektronik-kronometre.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "Başlat/Durdur butonunu c20 ve c22 deliklerine, Sıfırla butonunu c25 ve c27 deliklerine tak.",
+  "Buton kabloları: D7 → e20, e22 → eksi rayı; D6 → e25, e27 → eksi rayı. Butonlar INPUT_PULLUP ile çalışır (basılınca LOW).",
+  "Kodu yükle (simülatörde çalıştır): D7 butonuna bas, kronometre sayar; yeniden bas, durur ve süre kalır; tekrar bas, kaldığı yerden devam eder; D6 butonu sıfırlar."
+ ],
+ "code": "// Elektronik kronometre: millis() ile sure olcer, 2 buton (baslat/durdur ve sifirla), LCD'de dakika:saniye.onda\n#include <LiquidCrystal.h>\n\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\n\nconst int BTN_BASLAT = 7;        // baslat / durdur (INPUT_PULLUP: basilinca LOW)\nconst int BTN_SIFIRLA = 6;       // sifirla\n\nbool calisiyor = false;\nunsigned long baslangic = 0;     // son baslatmanin millis() degeri\nunsigned long biriken = 0;       // durdurulana kadar biriken sure (ms)\nint oncekiBaslat = HIGH;\nint oncekiSifirla = HIGH;\n\nvoid sureyiYaz() {\n  unsigned long ms = biriken;\n  if (calisiyor) {\n    ms = biriken + (millis() - baslangic);\n  }\n  unsigned long toplamSn = ms / 1000;\n  int dakika = toplamSn / 60;\n  int saniye = toplamSn % 60;\n  int onda = (ms % 1000) / 100;\n\n  lcd.setCursor(0, 1);\n  if (dakika < 10) lcd.print(\"0\");\n  lcd.print(dakika);\n  lcd.print(\":\");\n  if (saniye < 10) lcd.print(\"0\");\n  lcd.print(saniye);\n  lcd.print(\".\");\n  lcd.print(onda);\n  lcd.print(\"        \");\n}\n\nvoid durumuYaz() {\n  lcd.setCursor(0, 0);\n  if (calisiyor) {\n    lcd.print(\"Kronometre: ACIK\");\n  } else {\n    lcd.print(\"Kronometre: DUR \");\n  }\n}\n\nvoid setup() {\n  pinMode(BTN_BASLAT, INPUT_PULLUP);\n  pinMode(BTN_SIFIRLA, INPUT_PULLUP);\n  lcd.begin(16, 2);\n  durumuYaz();\n  sureyiYaz();\n}\n\nvoid loop() {\n  int baslat = digitalRead(BTN_BASLAT);\n  int sifirla = digitalRead(BTN_SIFIRLA);\n\n  if (oncekiBaslat == HIGH && baslat == LOW) {      // baslat/durdur butonuna yeni basildi\n    if (calisiyor) {\n      biriken = biriken + (millis() - baslangic);   // durdururken gecen sureyi ekle\n      calisiyor = false;\n    } else {\n      baslangic = millis();\n      calisiyor = true;\n    }\n    durumuYaz();\n    delay(30);                                      // buton titresimini atla\n  }\n  if (oncekiSifirla == HIGH && sifirla == LOW) {    // sifirla\n    biriken = 0;\n    baslangic = millis();\n    calisiyor = false;\n    durumuYaz();\n    delay(30);\n  }\n  oncekiBaslat = baslat;\n  oncekiSifirla = sifirla;\n\n  sureyiYaz();\n  delay(50);                                        // ekrani saniyede ~20 kez guncelle\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Başlatınca millis() değeri baslangic değişkenine yazılır; geçen süre millis() − baslangic ile bulunur. Durdurunca geçen süre biriken'e eklenir, böylece devam edince süre kaldığı yerden sürer. Kod yalnızca HIGH → LOW geçişini (yeni basış) sayar ve delay(30) ile buton titreşimini atlar. Dakika, saniye ve onda bir saniye bölme/mod işlemleriyle çıkarılır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Başlat düğmesine 1. saniyede basıp 4,3. saniyede durdurunca ekran 00:03.2 gösterdi (gerçek süre 3,3 saniyedir; simülatör zamanlaması ±0,1 saniye sapar). Yeniden başlatınca 00:03.2'den saymaya devam etti, durdurunca 00:05.2'de kaldı, sıfırla düğmesi 00:00.0 yaptı."
+  ],
+  [
+   "Doğruluk",
+   "millis() yaklaşık milisaniye çözünürlüğündedir ama Arduino'nun kristal saati birkaç dakikada bir saniye sapabilir; bu proje bilimsel ölçüm için değil, öğrenme içindir. Ekran onda bir saniye gösterir ve 50 ms'de bir güncellenir."
+  ],
+  [
+   "Simülatör notu",
+   "Gerçek derleme servisinin izinli başlıkları arasında DHT.h, LiquidCrystal.h ve Keypad.h yoktur; bu kütüphaneler yalnızca MakersHub simülatöründe çalışır, sitedeki gerçek derleme bu sketch'lerde hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "delay() ile süre saymaya çalışmak (butonlar donar); durdurunca biriken süreyi eklememek; butonun diğer ucunu GND'ye bağlamamak (INPUT_PULLUP ile HIGH kalır); iki butonun pinlerini koddakiyle karıştırmak."
+  ],
+  [
+   "Dene",
+   "Üçüncü bir butonla tur (lap) süresini ikinci satırda kaydet, ya da süreyi Seri Monitör'e de yazdır."
+  ]
+ ],
+ "title": "36. Elektronik Kronometre"
+}

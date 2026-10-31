@@ -1,0 +1,63 @@
+{
+ "sketch": "cop_kutusu",
+ "d": "HC-SR04 elin yaklaştığını algılayınca servo kapağı açar, el çekilince 3 saniye sonra yavaşça kapatır. Art arda ölçüm doğrulaması ve yumuşak servo hareketi öğrenilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HC-SR04 ultrasonik mesafe sensörü",
+  "1 × servo motor (SG90)",
+  "Jumper kablolar (9 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: HC-SR04 VCC ve servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: HC-SR04 GND ve servo GND"
+  ],
+  [
+   "D7",
+   "HC-SR04 TRIG"
+  ],
+  [
+   "D6",
+   "HC-SR04 ECHO"
+  ],
+  [
+   "D9",
+   "Servo sinyal (SIG)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "HC-SR04'ü c2 (VCC), c3 (TRIG), c4 (ECHO), c5 (GND) deliklerine tak. a2 → artı rayı, a5 → eksi rayı, D7 → a3, D6 → a4.",
+  "Servoyu c10 (SIG), c11 (VCC), c12 (GND) deliklerine tak. D9 → a10, a11 → artı rayı, a12 → eksi rayı.",
+  "Servo koluna bir kapak (karton) bağlandığını düşün: 0° kapalı, 110° açık.",
+  "Kodu yükle (simülatörde çalıştır): mesafe 25 cm'nin altına inince kapak 0°'den 110°'ye açılır, el çekilince 3 saniye sonra kapanır."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Elin 25 cm içinde art arda 3 ölçümde görülmesi gerekir (ardArda sayacı); bu, tek bir hatalı ölçümün kapağı açmasını engeller. El çekilince 3 saniye (ACIK_KALMA_MS) beklenir ve kapak 5°'lik adımlarla kapanır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Mesafe 15 cm iken kapak yaklaşık 0,7 saniyede 110°'ye açıldı. Mesafe 150 cm'ye çıkınca yaklaşık 3 saniye sonra \"Kapak kapaniyor\" yazıldı ve kapak adım adım 0°'ye döndü; mesafe yeniden 20 cm olunca kapak tekrar açıldı."
+  ],
+  [
+   "Besleme uyarısı",
+   "Servo hareket ederken akım çeker; küçük SG90 USB'den çalışır, büyük bir kapak ya da başka servo için ayrı 5 V kaynak ve ortak GND kullan."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TRIG/ECHO'yu ters bağlamak; kapak açıkken sensörün kapağı görüp sürekli açık kalması (sensörü kapaktan uzağa bak); servo ucunu çok fazla döndürüp mekanik sınırı zorlamak."
+  ],
+  [
+   "Dene",
+   "Kapak açılırken kısa bir bip için aktif buzzer ekle ya da açık kalma süresini el yaklaştıkça uzat."
+  ]
+ ]
+}

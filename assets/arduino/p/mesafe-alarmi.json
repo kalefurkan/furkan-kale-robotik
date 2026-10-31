@@ -1,19 +1,17 @@
 {
  "parts": [
   "Arduino Uno ve USB kablosu",
-  "HC-SR04 ultrasonik mesafe sensörü",
-  "1 × aktif buzzer",
   "Breadboard",
-  "Jumper kablolar"
+  "1 × HC-SR04 ultrasonik mesafe sensörü",
+  "1 × aktif buzzer",
+  "1 × LED (kırmızı)",
+  "1 × 220 Ω direnç (LED için)",
+  "Jumper kablolar (8 adet)"
  ],
  "wiring": [
   [
    "5V",
    "HC-SR04 VCC"
-  ],
-  [
-   "GND",
-   "HC-SR04 GND"
   ],
   [
    "D7",
@@ -24,44 +22,60 @@
    "HC-SR04 ECHO"
   ],
   [
-   "D8",
-   "Buzzer + (uzun bacak)"
+   "GND (GND2)",
+   "HC-SR04 GND"
   ],
   [
-   "GND",
-   "Buzzer − (kısa bacak)"
+   "D8",
+   "Aktif buzzer + (uzun bacak)"
+  ],
+  [
+   "GND (GND3)",
+   "Aktif buzzer − (kısa bacak)"
+  ],
+  [
+   "D9",
+   "LED anot (uzun bacak)"
+  ],
+  [
+   "GND (GND1)",
+   "220 Ω direncin ucu (LED katodu direnç üzerinden)"
   ]
  ],
  "img": "assets/devre/mesafe-alarmi.png",
  "steps": [
-  "Devreyi enerjisiz kur. HC-SR04'ü breadboard'a tak; iki \"göz\" ileri baksın, dört bacak ayrı sütunlarda olsun.",
-  "VCC bacağını 5V'a, GND bacağını GND'ye bağla.",
-  "TRIG bacağını D7'ye, ECHO bacağını D6'ya bağla.",
-  "Aktif buzzer'ı breadboard'a tak. Uzun (+) bacağın sütunundan D8'e, kısa bacağın sütunundan GND'ye kablo çek.",
-  "Kodu yükle ve Seri Çizici'yi aç. Elini sensörün önünde yaklaştırıp uzaklaştır; cm değerinin değiştiğini gör.",
-  "30 cm içine girince buzzer öter; nesne yaklaştıkça bip aralığı kısalır."
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "HC-SR04'ü c2 (VCC), c3 (TRIG), c4 (ECHO), c5 (GND) deliklerine tak; gövdesi aşağı doğru uzanır, bu yüzden kabloları a satırına bağla.",
+  "Kablolar: 5V → a2, D7 → a3 (TRIG), D6 → a4 (ECHO), GND2 → a5.",
+  "Aktif buzzer'ı a10 (+) ve a11 (−) deliklerine tak. D8 → e10, GND3 → e11.",
+  "LED'i c16 (anot) ve c17 (katot) deliklerine tak. 220 Ω direnci d17 ile d21 arasına tak. D9 → e16, GND1 → e21.",
+  "Kodu yükle (simülatörde çalıştır) ve HC-SR04'ün mesafe kaydırıcısını azalt: 30 cm'den sonra bip ve yanıp sönme başlar, 8 cm'den sonra buzzer ve LED sürekli açık kalır. Seri Monitör'de cm değeri görünür."
  ],
- "code": "// Mesafe alarmı: nesne yaklaştıkça buzzer daha sık öter\nconst int TRIG = 7;\nconst int ECHO = 6;\nconst int BUZZER = 8;   // aktif buzzer\nconst int ALARM_CM = 30;\n\nfloat mesafeOlc() {\n  digitalWrite(TRIG, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(TRIG, LOW);\n\n  long sure = pulseIn(ECHO, HIGH, 30000);   // en fazla 30 ms bekle\n  if (sure == 0) return -1;                  // yankı gelmedi\n  return sure * 0.0343 / 2.0;                // ses hızı: 0,0343 cm/µs, gidiş-dönüş /2\n}\n\nvoid setup() {\n  pinMode(TRIG, OUTPUT);\n  pinMode(ECHO, INPUT);\n  pinMode(BUZZER, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  float cm = mesafeOlc();\n  Serial.println(cm);\n\n  if (cm > 0 && cm < ALARM_CM) {\n    digitalWrite(BUZZER, HIGH);\n    delay(40);\n    digitalWrite(BUZZER, LOW);\n    // yakınsa kısa, uzaksa uzun ara\n    delay(map((long)cm, 2, ALARM_CM, 40, 500));\n  } else {\n    digitalWrite(BUZZER, LOW);\n    delay(100);\n  }\n}\n",
+ "code": "// Park sensoru: nesne yaklastikca buzzer daha sik oter ve LED daha hizli yanip soner; cok yakinda surekli yanar\nconst int TRIG = 7;\nconst int ECHO = 6;\nconst int BUZZER = 8;           // aktif buzzer\nconst int LED = 9;\nconst int UYARI_CM = 30;        // bu mesafeden yakinda uyari baslar\nconst int COK_YAKIN_CM = 8;     // bu mesafeden yakinda surekli uyari\n\nfloat mesafeOlc() {\n  digitalWrite(TRIG, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG, HIGH);     // 10 mikrosaniyelik tetik darbesi\n  delayMicroseconds(10);\n  digitalWrite(TRIG, LOW);\n\n  long sure = pulseIn(ECHO, HIGH, 30000);   // en fazla 30 ms bekle\n  if (sure == 0) return -1;                  // yanki gelmedi\n  return sure * 0.0343 / 2.0;                // ses hizi 0,0343 cm/mikrosaniye; gidis-donus oldugu icin /2\n}\n\nvoid uyariVer(bool acik) {\n  digitalWrite(BUZZER, acik);\n  digitalWrite(LED, acik);\n}\n\nvoid setup() {\n  pinMode(TRIG, OUTPUT);\n  pinMode(ECHO, INPUT);\n  pinMode(BUZZER, OUTPUT);\n  pinMode(LED, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  float cm = mesafeOlc();\n  Serial.println(cm);\n\n  if (cm > 0 && cm < COK_YAKIN_CM) {\n    uyariVer(true);                          // cok yakin: surekli ot ve yan\n    delay(100);\n  } else if (cm > 0 && cm < UYARI_CM) {\n    uyariVer(true);                          // kisa bip + LED yanmasi\n    delay(40);\n    uyariVer(false);\n    // yaklastikca bekleme kisalir: 8 cm -> 40 ms, 30 cm -> 400 ms\n    delay(map((long)cm, COK_YAKIN_CM, UYARI_CM, 40, 400));\n  } else {\n    uyariVer(false);                         // nesne yok ya da uzakta\n    delay(100);\n  }\n}\n",
  "notes": [
   [
    "Sensör nasıl ölçer?",
-   "TRIG'e verilen 10 µs'lik darbe, sensörden ultrason çıkarır. ECHO pini ses geri dönene kadar HIGH kalır; bu süreyi pulseIn ile ölçeriz."
+   "TRIG'e verilen 10 µs'lik darbe sensörden ultrason çıkarır; ECHO pini sesin geri dönmesine kadar HIGH kalır ve bu süre pulseIn ile ölçülür. Mesafe = süre × 0,0343 / 2 (ses 0,0343 cm/µs hızla gider, gidiş-dönüş olduğu için ikiye bölünür)."
   ],
   [
-   "Mesafe formülü",
-   "mesafe = süre × 0,0343 / 2. Ses yaklaşık 343 m/s hızla gider (0,0343 cm/µs); gidiş-dönüş olduğu için ikiye böleriz."
+   "Bip ve LED hızı",
+   "30 cm ile 8 cm arasında bip, LED ile birlikte 40 ms açık kalır; kapalı kalma süresi map() ile 400 ms (30 cm) ile 40 ms (8 cm) arasında değişir. Simülatörde 25 cm'de bip yaklaşık 0,34 saniyede bir, 8 cm'nin altında (6 cm) buzzer ve LED sürekli açık gözlendi. Seri Monitör'de ölçülen değerler 24,95 / 14,97 / 7,99 / 5,99 cm okundu (simülatör ses hızını ayarlanan değerden ufak sapmayla hesaplar)."
   ],
   [
-   "Zaman aşımı",
-   "pulseIn 30 ms bekler (yaklaşık 5 m). Yankı gelmezse 0 döner; kod bunu \"nesne yok\" sayar (−1)."
-  ],
-  [
-   "Aktif buzzer",
-   "İçinde osilatör vardır; HIGH verince öter. Pasif buzzer olsaydı tone() ile frekans üretmek gerekirdi."
+   "Aktif buzzer ve LED",
+   "Aktif buzzer'ın içinde osilatör vardır: HIGH verince öter. LED'in akımını 220 Ω direnç sınırlar (yaklaşık 14 mA). Buzzer ve LED aynı anda uyarı verir; fonksiyon uyariVer() ikisini birlikte açıp kapatır."
   ],
   [
    "Doğruluk",
    "HC-SR04 yaklaşık 2–400 cm aralığında çalışır. Kumaş gibi yumuşak ya da sensöre açılı duran yüzeyler yankıyı zayıflatır."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TRIG ve ECHO'yu ters bağlamak (mesafe hep −1 görünür); LED'i direnç olmadan bağlamak; buzzer'ın + ve − bacaklarını ters takmak; GND bağlantılarından birini unutmak."
+  ],
+  [
+   "Dene",
+   "Mesafeyi 4 kademeye böl (30, 20, 10, 5 cm) ve her kademede farklı bip hızı kullan ya da ikinci bir LED ekleyip yakınlığı iki LED ile göster."
   ]
  ],
  "title": "24. Park Sensörü"

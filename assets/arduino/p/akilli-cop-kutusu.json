@@ -1,0 +1,64 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HC-SR04 ultrasonik mesafe sensörü",
+  "1 × servo motor (SG90)",
+  "Jumper kablolar (9 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: HC-SR04 VCC ve servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: HC-SR04 GND ve servo GND"
+  ],
+  [
+   "D7",
+   "HC-SR04 TRIG"
+  ],
+  [
+   "D6",
+   "HC-SR04 ECHO"
+  ],
+  [
+   "D9",
+   "Servo sinyal (SIG)"
+  ]
+ ],
+ "img": "assets/devre/akilli-cop-kutusu.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "HC-SR04'ü c2 (VCC), c3 (TRIG), c4 (ECHO), c5 (GND) deliklerine tak. a2 → artı rayı, a5 → eksi rayı, D7 → a3, D6 → a4.",
+  "Servoyu c10 (SIG), c11 (VCC), c12 (GND) deliklerine tak. D9 → a10, a11 → artı rayı, a12 → eksi rayı.",
+  "Servo koluna bir kapak (karton) bağlandığını düşün: 0° kapalı, 110° açık.",
+  "Kodu yükle (simülatörde çalıştır): mesafe 25 cm'nin altına inince kapak 0°'den 110°'ye açılır, el çekilince 3 saniye sonra kapanır."
+ ],
+ "code": "// Akilli cop kutusu: el yaklasinca kapak (servo) acilir, el cekilince birkac saniye sonra yavasca kapanir\n#include <Servo.h>\n\nconst int TRIG = 7;\nconst int ECHO = 6;\nconst int SERVO_PIN = 9;\nconst int ALGILA_CM = 25;                 // bu mesafeden yakin = el var\nconst int GEREKLI_OLCUM = 3;              // yanlis alarmlari azaltmak icin art arda 3 olcum gerekir\nconst unsigned long ACIK_KALMA_MS = 3000; // el cekildikten sonra kapak 3 sn acik kalir\nconst int KAPALI_ACI = 0;\nconst int ACIK_ACI = 110;\n\nServo kapak;\nint aci = KAPALI_ACI;\nint ardArda = 0;                          // art arda kac olcumde el goruldu\nbool acik = false;\nunsigned long sonGorulme = 0;\n\nfloat mesafeOlc() {\n  digitalWrite(TRIG, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(TRIG, LOW);\n  long sure = pulseIn(ECHO, HIGH, 30000);\n  if (sure == 0) return -1;\n  return sure * 0.0343 / 2.0;\n}\n\nvoid setup() {\n  pinMode(TRIG, OUTPUT);\n  pinMode(ECHO, INPUT);\n  kapak.attach(SERVO_PIN);\n  kapak.write(aci);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  float cm = mesafeOlc();\n\n  if (cm > 0 && cm < ALGILA_CM) {\n    ardArda++;\n    sonGorulme = millis();\n  } else {\n    ardArda = 0;\n  }\n\n  if (ardArda >= GEREKLI_OLCUM && !acik) {\n    acik = true;\n    Serial.println(\"El algilandi: kapak aciliyor\");\n  }\n  if (acik && ardArda == 0 && millis() - sonGorulme > ACIK_KALMA_MS) {\n    acik = false;\n    Serial.println(\"Kapak kapaniyor\");\n  }\n\n  // kapagi 5'er derece ilerleterek hareket ettir\n  int hedef = KAPALI_ACI;\n  if (acik) {\n    hedef = ACIK_ACI;\n  }\n  if (aci < hedef) {\n    aci += 5;\n    if (aci > hedef) aci = hedef;\n    kapak.write(aci);\n  } else if (aci > hedef) {\n    aci -= 5;\n    if (aci < hedef) aci = hedef;\n    kapak.write(aci);\n  }\n  delay(30);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Elin 25 cm içinde art arda 3 ölçümde görülmesi gerekir (ardArda sayacı); bu, tek bir hatalı ölçümün kapağı açmasını engeller. El çekilince 3 saniye (ACIK_KALMA_MS) beklenir ve kapak 5°'lik adımlarla kapanır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Mesafe 15 cm iken kapak yaklaşık 0,7 saniyede 110°'ye açıldı. Mesafe 150 cm'ye çıkınca yaklaşık 3 saniye sonra \"Kapak kapaniyor\" yazıldı ve kapak adım adım 0°'ye döndü; mesafe yeniden 20 cm olunca kapak tekrar açıldı."
+  ],
+  [
+   "Besleme uyarısı",
+   "Servo hareket ederken akım çeker; küçük SG90 USB'den çalışır, büyük bir kapak ya da başka servo için ayrı 5 V kaynak ve ortak GND kullan."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TRIG/ECHO'yu ters bağlamak; kapak açıkken sensörün kapağı görüp sürekli açık kalması (sensörü kapaktan uzağa bak); servo ucunu çok fazla döndürüp mekanik sınırı zorlamak."
+  ],
+  [
+   "Dene",
+   "Kapak açılırken kısa bir bip için aktif buzzer ekle ya da açık kalma süresini el yaklaştıkça uzat."
+  ]
+ ],
+ "title": "32. Akıllı Çöp Kutusu"
+}

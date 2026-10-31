@@ -1,11 +1,11 @@
 {
  "parts": [
   "Arduino Uno ve USB kablosu",
-  "HC-SR501 PIR hareket sensörü",
   "Breadboard",
-  "1 × LED",
-  "1 × 220 Ω direnç",
-  "Jumper kablolar"
+  "1 × PIR hareket sensörü (HC-SR501)",
+  "1 × LED (sarı)",
+  "1 × 220 Ω direnç (LED için)",
+  "Jumper kablolar (5 adet)"
  ],
  "wiring": [
   [
@@ -13,47 +13,51 @@
    "PIR VCC"
   ],
   [
-   "GND",
-   "PIR GND"
-  ],
-  [
    "D2",
    "PIR OUT"
+  ],
+  [
+   "GND (GND2)",
+   "PIR GND"
   ],
   [
    "D8",
    "LED anot (uzun bacak)"
   ],
   [
-   "LED katot (kısa bacak)",
-   "220 Ω direnç, direncin diğer ucu GND"
+   "GND (GND3)",
+   "220 Ω direncin ucu (LED katodu direnç üzerinden)"
   ]
  ],
  "img": "assets/devre/pir-hareket.png",
  "steps": [
-  "Devreyi enerjisiz kur. PIR sensörünü breadboard'a tak; VCC, OUT ve GND bacakları ayrı sütunlarda olsun (isimleri kartın üzerinde yazar).",
-  "VCC sütunundan 5V'a, GND sütunundan GND'ye, OUT sütunundan D2'ye kablo çek.",
-  "LED devresini kur: D8 → LED anot, LED katot → 220 Ω → GND.",
-  "Kodu yükle ve Seri Çizici'yi aç.",
-  "Sensörün önünde elini hareket ettir: LED yanar ve \"Hareket var\" yazılır. Hareket durunca bir süre sonra LED söner."
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "PIR'ı a2 (VCC), a3 (OUT), a4 (GND) deliklerine tak. 5V → e2, D2 → e3, GND2 → e4.",
+  "LED'i c10 (anot) ve c11 (katot) deliklerine tak. 220 Ω direnci d11 ile d15 arasına tak.",
+  "Kablolar: D8 → e10 (LED anot), GND3 → e15 (direncin diğer ucu).",
+  "Kodu yükle (simülatörde çalıştır) ve Seri Monitör'ü aç. PIR'da hareket oluşturunca LED yanar ve \"Hareket var: lamba yandi\" yazılır; hareket bitince 5 saniye sonra söner."
  ],
- "code": "// PIR hareket sensörü: hareket algılanınca LED yanar\nconst int PIR = 2;\nconst int LED = 8;\n\nvoid setup() {\n  pinMode(PIR, INPUT);\n  pinMode(LED, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  if (digitalRead(PIR) == HIGH) {\n    digitalWrite(LED, HIGH);\n    Serial.println(\"Hareket var\");\n  } else {\n    digitalWrite(LED, LOW);\n  }\n  delay(100);\n}\n",
+ "code": "// Hareket algilayan gece lambasi: PIR hareket gorunce LED yanar, hareket bitince 5 saniye sonra soner\nconst int PIR_PIN = 2;\nconst int LED_PIN = 8;\nconst unsigned long YANIK_KALMA_MS = 5000;   // son hareketten sonra lamba bu kadar yanik kalir\n\nunsigned long sonHareket = 0;\nbool lambaAcik = false;\n\nvoid setup() {\n  pinMode(PIR_PIN, INPUT);\n  pinMode(LED_PIN, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  if (digitalRead(PIR_PIN) == HIGH) {\n    sonHareket = millis();                   // her harekette sure yeniden baslar\n    if (!lambaAcik) {\n      lambaAcik = true;\n      digitalWrite(LED_PIN, HIGH);\n      Serial.println(\"Hareket var: lamba yandi\");\n    }\n  } else if (lambaAcik && millis() - sonHareket > YANIK_KALMA_MS) {\n    lambaAcik = false;\n    digitalWrite(LED_PIN, LOW);\n    Serial.println(\"Hareket yok: lamba sondu\");\n  }\n  delay(50);\n}\n",
  "notes": [
   [
    "PIR nasıl çalışır?",
-   "Sensör, vücut sıcaklığındaki nesnelerin yaydığı kızılötesi ışımadaki değişimi algılar. Hareketsiz duran birini ya da ısı farkı oluşturmayan hareketi algılamayabilir."
+   "Sensör vücut sıcaklığındaki nesnelerin yaydığı kızılötesi ışımadaki değişimi algılar; hareketsiz duran birini ya da ısı farkı oluşturmayan hareketi algılamayabilir. Hareket varken OUT HIGH olur."
   ],
   [
-   "Isınma süresi",
-   "Güç verdikten sonra sensörün ortama alışması için yaklaşık 30–60 saniye gerekir; bu sürede yanlış alarm verebilir."
+   "Lamba mantığı",
+   "Kod hareket gördükçe sonHareket zamanını yeniler; hareket kesildikten sonra YANIK_KALMA_MS (5 saniye) geçince LED'i söndürür. Simülatörde hareket 2. saniyede bitti, LED yaklaşık 6,95. saniyede söndü (≈ 5 saniye sonra); 8. saniyede kısa bir hareketle yeniden yandı ve yaklaşık 13,25. saniyede söndü."
   ],
   [
-   "Ayar potları",
-   "HC-SR501 üzerinde iki küçük pot vardır: biri algılama mesafesini, diğeri OUT'un kaç saniye HIGH kalacağını ayarlar."
+   "Isınma ve ayar",
+   "Güç verdikten sonra sensörün ortama alışması için yaklaşık 30–60 saniye gerekir; bu sürede yanlış tetikleme olabilir. HC-SR501 üzerindeki iki küçük pot algılama mesafesini ve OUT'un kaç saniye HIGH kalacağını ayarlar. PIR'ın VCC'si doğrudan 5V'a bağlanmalıdır (simülatörde de böyle)."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "VCC, OUT ve GND bacaklarını karıştırmak (isimler kartın üzerinde yazar); LED'i dirençsiz takmak; PIR'ın hemen açılışta tetiklendiğini hata sanmak (ısınma süresi)."
   ],
   [
    "Dene",
-   "LED yerine aktif buzzer bağla ve basit bir hırsız alarmı yap."
+   "Ortam aydınlıksa LED yanmasın: bir LDR ekleyip yalnızca karanlıkta ve hareket varken yak (proje 23'teki ışık ölçümü)."
   ]
  ],
  "title": "35. Hareket Algılayan Gece Lambası"

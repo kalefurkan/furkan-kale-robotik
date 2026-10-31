@@ -1,0 +1,117 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × 4x4 tuş takımı (keypad)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "1 × servo motor (SG90)",
+  "Jumper kablolar (25 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D10",
+   "Keypad R1"
+  ],
+  [
+   "D9",
+   "Keypad R2"
+  ],
+  [
+   "D8",
+   "Keypad R3"
+  ],
+  [
+   "D7",
+   "Keypad R4"
+  ],
+  [
+   "A0",
+   "Keypad C1 (analog pin dijital kullanılır)"
+  ],
+  [
+   "A1",
+   "Keypad C2"
+  ],
+  [
+   "A2",
+   "Keypad C3"
+  ],
+  [
+   "A3",
+   "Keypad C4"
+  ],
+  [
+   "D6",
+   "Servo sinyal (SIG)"
+  ]
+ ],
+ "img": "assets/devre/sifreli-kapi-kilidi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "Keypad'i a19–a26 deliklerine tak; pinler soldan sağa R1, R2, R3, R4, C1, C2, C3, C4 sırasındadır.",
+  "Keypad kabloları: D10 → e19 (R1), D9 → e20 (R2), D8 → e21 (R3), D7 → e22 (R4), A0 → e23 (C1), A1 → e24 (C2), A2 → e25 (C3), A3 → e26 (C4).",
+  "Servoyu d28 (SIG), d29 (VCC), d30 (GND) deliklerine tak. D6 → b28, b29 → artı rayı (B+25), b30 → eksi rayı (B-25).",
+  "Kodu yükle (simülatörde çalıştır) ve tuvaldeki tuşlara tıklayarak 1 2 3 4 # gir: ekranda \"Sifre dogru!\" / \"Kapi acik\" yazar ve servo 90°'ye döner; 3 saniye sonra kilit kapanır."
+ ],
+ "code": "// Sifreli kapi kilidi: 4x4 tus takimi + LCD + servo. Dogru sifre (1234#) servoyu acar.\n#include <Keypad.h>\n#include <LiquidCrystal.h>\n#include <Servo.h>\n\n// --- tus takimi ---\nconst byte SATIR = 4;\nconst byte SUTUN = 4;\nchar tuslar[SATIR][SUTUN] = {\n  {'1', '2', '3', 'A'},\n  {'4', '5', '6', 'B'},\n  {'7', '8', '9', 'C'},\n  {'*', '0', '#', 'D'}\n};\nbyte satirPinleri[SATIR] = {10, 9, 8, 7};      // R1..R4\nbyte sutunPinleri[SUTUN] = {A0, A1, A2, A3};   // C1..C4 (analog pinler dijital olarak kullanilir)\nKeypad tusTakimi = Keypad(makeKeymap(tuslar), satirPinleri, sutunPinleri, SATIR, SUTUN);\n\n// --- LCD ve servo ---\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\nServo kilit;\nconst int SERVO_PIN = 6;\nconst int KILITLI_ACI = 0;\nconst int ACIK_ACI = 90;\n\n// --- sifre ---\nconst int SIFRE_UZUNLUK = 4;\nconst char DOGRU_SIFRE[4] = {'1', '2', '3', '4'};\nchar girilen[4];\nint girilenSayi = 0;\n\nvoid girisEkrani() {\n  lcd.setCursor(0, 0);\n  lcd.print(\"Sifre giriniz:  \");\n  lcd.setCursor(0, 1);\n  lcd.print(\"                \");\n  lcd.setCursor(0, 1);\n  for (int i = 0; i < girilenSayi; i++) {\n    lcd.print(\"*\");                      // sifreyi ekranda gizle\n  }\n}\n\nbool sifreDogruMu() {\n  if (girilenSayi != SIFRE_UZUNLUK) {\n    return false;                       // eksik ya da fazla tus\n  }\n  for (int i = 0; i < SIFRE_UZUNLUK; i++) {\n    if (girilen[i] != DOGRU_SIFRE[i]) {\n      return false;\n    }\n  }\n  return true;\n}\n\nvoid setup() {\n  kilit.attach(SERVO_PIN);\n  kilit.write(KILITLI_ACI);\n  lcd.begin(16, 2);\n  girisEkrani();\n}\n\nvoid loop() {\n  char tus = tusTakimi.getKey();        // basilan tus; basis yoksa NO_KEY\n  if (tus == NO_KEY) {\n    return;\n  }\n\n  if (tus == '#') {                     // # = onayla\n    if (sifreDogruMu()) {\n      lcd.setCursor(0, 0);\n      lcd.print(\"Sifre dogru!    \");\n      lcd.setCursor(0, 1);\n      lcd.print(\"Kapi acik       \");\n      kilit.write(ACIK_ACI);\n      delay(3000);                      // kapi 3 saniye acik kalir\n      kilit.write(KILITLI_ACI);\n    } else {\n      lcd.setCursor(0, 0);\n      lcd.print(\"Yanlis sifre!   \");\n      lcd.setCursor(0, 1);\n      lcd.print(\"Tekrar deneyin  \");\n      delay(1500);\n    }\n    girilenSayi = 0;\n    girisEkrani();\n  } else if (tus == '*') {              // * = girileni sil\n    girilenSayi = 0;\n    girisEkrani();\n  } else if (girilenSayi < SIFRE_UZUNLUK) {\n    girilen[girilenSayi] = tus;         // yeni tusu kaydet\n    girilenSayi++;\n    girisEkrani();\n  }\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Keypad(makeKeymap(tuslar), satirPinleri, sutunPinleri, SATIR, SUTUN) tuş matrisini tanımlar; satirPinleri dizisi keypad'in R1–R4, sutunPinleri dizisi C1–C4 uçlarına bağlı pinleri listeler (bu sırayı bozarsan tuşlar karışır). getKey() basılan tuşu bir kez döndürür, basış yoksa NO_KEY verir. Girilen rakamlar girilen[] dizisine yazılır, # ile DOGRU_SIFRE[] ile karşılaştırılır; * girileni siler. Şifre ekranda * ile gizlenir."
+  ],
+  [
+   "Pin bütçesi",
+   "LCD 6, keypad 8, servo 1 pin ister: 15 pin. D2–D13 yalnızca 12 pindir, bu yüzden keypad sütunları A0–A3'e bağlandı. Analog pinler dijital pin gibi de kullanılabilir (A0 = 14 numaralı pin). Simülatörde A0–A3 üzerindeki keypad sütunlarının çalıştığı görüldü."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "\"12#\" girince 1,5 saniye \"Yanlis sifre!\" / \"Tekrar deneyin\" yazdı ve servo 0°'de kaldı; \"1234#\" girince \"Sifre dogru!\" / \"Kapi acik\" yazdı, servo 90°'ye çıktı, 3 saniye sonra 0°'ye döndü; \"99*1234#\" girince * ile silinen rakamlardan sonra şifre kabul edildi. Gerçek derleme servisinin izinli başlıkları arasında DHT.h, LiquidCrystal.h ve Keypad.h yoktur; bu kütüphaneler yalnızca MakersHub simülatöründe çalışır, sitedeki gerçek derleme bu sketch'lerde hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Keypad pinlerini satirPinleri/sutunPinleri sırasıyla eşleştirmemek (basılan tuş başka çıkar); D0/D1'i kullanmak (Seri haberleşme ile çakışır); şifreyi 4 hane sınırı olmadan almak; servoyu LCD'nin kullandığı rayla karıştırmak."
+  ],
+  [
+   "Dene",
+   "3 yanlış denemeden sonra 10 saniye kilitle, ya da şifreyi * 4 5 6 # gibi tuşla değiştirmeyi ekle."
+  ]
+ ],
+ "title": "26. Şifreli Kapı Kilidi"
+}

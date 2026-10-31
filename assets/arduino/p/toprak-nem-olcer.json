@@ -1,0 +1,82 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × toprak nem sensörü (analog çıkışlı)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "Jumper kablolar (17 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "A0",
+   "Toprak nem sensörü OUT"
+  ]
+ ],
+ "img": "assets/devre/toprak-nem-olcer.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "Toprak nem sensörünü a20 (VCC), a21 (OUT), a22 (GND) deliklerine tak. e20 → artı rayı, A0 → e21, e22 → eksi rayı.",
+  "Kodu yükle (simülatörde çalıştır): sensörün nem kaydırıcısını değiştir; LCD'de yüzde ve durum yazısı güncellenir."
+ ],
+ "code": "// Toprak nem olcer: sensor degerini yuzdeye cevirip LCD'de gosterir\n#include <LiquidCrystal.h>\n\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\nconst int SENSOR = A0;\n\n// Kalibrasyon (sensoru havada/kuru ve suda olcerek bul). Bu sensorde nem artinca okunan deger DUSER.\nconst int KURU = 921;\nconst int ISLAK = 256;\n\nvoid setup() {\n  lcd.begin(16, 2);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int ham = analogRead(SENSOR);\n  int yuzde = map(ham, KURU, ISLAK, 0, 100); // KURU -> %0, ISLAK -> %100\n  yuzde = constrain(yuzde, 0, 100);\n\n  lcd.setCursor(0, 0);\n  lcd.print(\"Toprak Nem: %\");\n  lcd.print(yuzde);\n  lcd.print(\"  \");\n\n  lcd.setCursor(0, 1);\n  if (yuzde < 30) {\n    lcd.print(\"Kuru - sula!    \");\n  } else if (yuzde < 60) {\n    lcd.print(\"Nemli           \");\n  } else {\n    lcd.print(\"Islak           \");\n  }\n\n  Serial.print(\"Ham: \");\n  Serial.print(ham);\n  Serial.print(\"  Nem: %\");\n  Serial.println(yuzde);\n  delay(300);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Bu sensör nem arttıkça OUT gerilimini DÜŞÜRÜR (kuru toprakta yüksek değer). map(ham, KURU, ISLAK, 0, 100) satırında KURU büyük, ISLAK küçük sayı olduğu için değer ters çevrilip yüzdeye dönüşür. %30'un altı \"Kuru - sula!\", %60'ın altı \"Nemli\", üstü \"Islak\" yazar."
+  ],
+  [
+   "Kalibrasyon (simülatörden ölçüldü)",
+   "Nem kaydırıcısı 0 / 0,2 / 0,4 / 0,6 / 0,8 / 1 iken analogRead 921 / 788 / 655 / 522 / 389 / 256 okundu; LCD %0 / %20 / %40 / %60 / %80 / %100 gösterdi. Bu yüzden KURU = 921, ISLAK = 256. Gerçek sensörde sayılar farklıdır: sensörü kuru havada ve bir bardak suda okuyup iki sayıyı değiştir."
+  ],
+  [
+   "Gerçek sensör uyarısı",
+   "Ucuz dirençli toprak nem sensörleri toprakta kısa sürede paslanır; ölçümü yalnızca gerektiğinde güç vererek yapmak ya da kapasitif sensör kullanmak ömrü uzatır. Yüzde değeri yaklaşıktır, topraktan toprağa değişir. Gerçek derleme servisinin izinli başlıkları arasında DHT.h, LiquidCrystal.h ve Keypad.h yoktur; bu kütüphaneler yalnızca MakersHub simülatöründe çalışır, sitedeki gerçek derleme bu sketch'lerde hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "KURU ve ISLAK sayılarını ters yazmak (yüzde ters çıkar); VCC'yi 5V yerine bir dijital pine bağlamak; sinyal telini dijital pine takmak; LCD'ye eski rakamı silmek için boşluk yazmamak."
+  ],
+  [
+   "Dene",
+   "Yüzde %30'un altına inince LCD'de yazı yanıp sönsün ya da bir LED yansın. Sonraki proje (Otomatik Bitki Sulama) bu ölçümü pompayla birleştirir."
+  ]
+ ],
+ "title": "30. Toprak Nem Ölçer"
+}

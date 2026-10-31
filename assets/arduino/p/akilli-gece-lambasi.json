@@ -1,0 +1,79 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × LDR (ışığa duyarlı direnç)",
+  "1 × 10 kΩ direnç (gerilim bölücü)",
+  "1 × RGB LED (ortak katot)",
+  "3 × 220 Ω direnç (kanal dirençleri)",
+  "Jumper kablolar (7 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "LDR'nin bir ucu"
+  ],
+  [
+   "A0",
+   "LDR ile 10 kΩ direncin ortak noktası"
+  ],
+  [
+   "GND (GND3)",
+   "10 kΩ direncin diğer ucu"
+  ],
+  [
+   "GND (GND2)",
+   "RGB LED ortak katot (K)"
+  ],
+  [
+   "D9",
+   "Kırmızı kanalın 220 Ω direnci"
+  ],
+  [
+   "D10",
+   "Yeşil kanalın 220 Ω direnci"
+  ],
+  [
+   "D11",
+   "Mavi kanalın 220 Ω direnci"
+  ]
+ ],
+ "img": "assets/devre/akilli-gece-lambasi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "RGB LED'i a2 (R), a3 (K, ortak katot), a4 (G), a5 (B) deliklerine tak.",
+  "Üç adet 220 Ω direnci tak: kırmızı için e2 ile h2 arasına, yeşil için e4 ile h4 arasına (ikisi dikey, orta oluğu aşar), mavi için e5 ile e9 arasına (yatay).",
+  "Kablolar: D9 → j2 (kırmızı), D10 → j4 (yeşil), D11 → a9 (mavi), GND2 → e3 (ortak katot).",
+  "LDR'yi a14 ve a15 deliklerine tak. 10 kΩ direnci d15 ile d19 arasına tak.",
+  "Kablolar: 5V → e14 (LDR'nin 5V ucu), A0 → b15 (LDR ile direncin ortak noktası), GND3 → e19 (10 kΩ direncin GND ucu).",
+  "Kodu yükle (simülatörde çalıştır) ve LDR'nin ışık kaydırıcısını değiştir: ışık azalınca LED parlar, aydınlıkta söner. Seri Monitör'de ham ışık değeri ve parlaklık görünür."
+ ],
+ "code": "// Akilli gece lambasi: ortam karardikca RGB LED'in parlakligi artar\nconst int LDR_PIN = A0;         // LDR + 10k direnc gerilim bolucusunun orta noktasi\nconst int KIRMIZI = 9;          // PWM pinleri (analogWrite)\nconst int YESIL = 10;\nconst int MAVI = 11;\n\nconst int KARANLIK = 100;       // bu degerin altinda tam karanlik (olculen degerle degistir)\nconst int AYDINLIK = 800;       // bu degerin ustunde lamba tamamen soner\n\nvoid setup() {\n  pinMode(KIRMIZI, OUTPUT);\n  pinMode(YESIL, OUTPUT);\n  pinMode(MAVI, OUTPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int isik = analogRead(LDR_PIN);                   // 0-1023: yuksek = aydinlik (LDR 5V tarafinda)\n  isik = constrain(isik, KARANLIK, AYDINLIK);\n  int parlaklik = map(isik, KARANLIK, AYDINLIK, 255, 0);   // karardikca parlaklik artar\n\n  // sicak beyaz isik: kirmizi tam, yesil biraz, mavi az\n  analogWrite(KIRMIZI, parlaklik);\n  analogWrite(YESIL, parlaklik / 2);\n  analogWrite(MAVI, parlaklik / 5);\n\n  Serial.print(\"Isik: \");\n  Serial.print(analogRead(LDR_PIN));\n  Serial.print(\"  Parlaklik: \");\n  Serial.println(parlaklik);\n  delay(200);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "5V → LDR → A0 → 10 kΩ → GND bir gerilim bölücüdür. Işık azalınca LDR'nin direnci artar ve A0'a gelen gerilim düşer: karanlık = küçük analogRead değeri. Kod değeri map() ile ters çevirir (karanlık → 255, aydınlık → 0) ve analogWrite ile üç kanalı farklı oranlarda sürer (kırmızı tam, yeşil yarısı, mavi beşte biri); böylece sıcak beyaz bir ışık elde edilir."
+  ],
+  [
+   "Ölçülen değerler",
+   "Simülatörde LDR ışık kaydırıcısı 0,1 / 0,3 / 0,5 / 0,7 / 0,9 iken analogRead sırasıyla 20 / 75 / 246 / 570 / 853 okundu (0,2'de 39). Koddaki KARANLIK = 100 ve AYDINLIK = 800 sınırları bu ölçümlerden seçildi: 246 okununca parlaklık 202, 570'te 84, 853'te 0. Gerçek LDR ve ortam için bu iki sayıyı kendi ölçümünle değiştir."
+  ],
+  [
+   "RGB LED ve dirençler",
+   "Ortak katotlu RGB LED'in üç renk çipinin her birine ayrı 220 Ω direnç gerekir; tek direnç kullanırsan renkler birbirinin parlaklığını değiştirir."
+  ],
+  [
+   "Simülatör notu",
+   "Simülatör analogWrite'ı ortalama akım olarak çözer ve LED'in parlaklığını buna göre çizer. Gerçek LDR'nin ışık-direnç eğrisi doğrusal değildir, simülatör modeli basittir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "LDR'yi GND tarafına, direnci 5V tarafına takıp mantığı ters kurmak (o zaman karardıkça değer artar); ortak katodu 5V'a bağlamak; kanal dirençlerini unutmak; pinleri PWM olmayan pinlere (örn. D8) bağlamak."
+  ],
+  [
+   "Dene",
+   "Aydınlıkta LED sönsün ama çok karanlıkta renk maviye kaysın: mavi kanalı parlaklıkla birlikte artır, kırmızıyı azalt."
+  ]
+ ],
+ "title": "23. Akıllı Gece Lambası"
+}

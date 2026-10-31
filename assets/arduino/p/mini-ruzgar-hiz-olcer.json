@@ -1,0 +1,54 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × Hall efekt sensörü modülü (A3144 tipi; kanada yapıştırılacak küçük bir mıknatısla)",
+  "Jumper kablolar (3 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Hall sensörü VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Hall sensörü GND"
+  ],
+  [
+   "D2",
+   "Hall sensörü DO"
+  ]
+ ],
+ "img": "assets/devre/mini-ruzgar-hiz-olcer.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Hall sensörünü a2 (VCC), a3 (GND), a4 (DO) deliklerine tak.",
+  "Kablolar: 5V → e2, GND2 → e3, D2 → e4.",
+  "Gerçek devrede mıknatısı rüzgâr çarkının bir kanadına yapıştırırsın; kanat dönerken mıknatıs sensörün önünden her turda bir kez geçer. Simülatörde bunu Hall sensörünün \"devir/dk\" (rpm) kaydırıcısı verir.",
+  "Kodu yükle (simülatörde çalıştır) ve Seri Monitör'ü aç. 2 saniyede bir devir ve hız yazılır; rpm kaydırıcısını değiştirince değerler değişir."
+ ],
+ "code": "// Mini ruzgar hiz olcer: Hall sensoru donen kanattaki miknatisi her turda bir kez gorur.\n// Belirli bir surede darbe sayilir -> devir/dakika (rpm) -> cevre hizi hesaplanir.\nconst int HALL_PIN = 2;                       // Hall sensoru DO cikisi (miknatis yakinken LOW)\nconst float YARICAP_M = 0.05;                 // VARSAYIM: kanat ucunun donme yaricapi 5 cm (kendi kanadinla olc)\nconst unsigned long PENCERE_MS = 2000;        // darbeler 2 saniye boyunca sayilir\n\nint darbe = 0;\nint onceki = HIGH;\nunsigned long pencereBaslangic = 0;\n\nvoid setup() {\n  pinMode(HALL_PIN, INPUT);\n  Serial.begin(9600);\n  pencereBaslangic = millis();\n}\n\nvoid loop() {\n  int durum = digitalRead(HALL_PIN);\n  if (onceki == HIGH && durum == LOW) {       // HIGH -> LOW: miknatis sensorun onunden gecmeye basladi\n    darbe++;\n  }\n  onceki = durum;\n\n  if (millis() - pencereBaslangic >= PENCERE_MS) {\n    float rpm = darbe * 60000.0 / PENCERE_MS;                 // darbe sayisi = tur sayisi\n    float hiz = 2.0 * 3.14159 * YARICAP_M * rpm / 60.0;       // cevre hizi (m/s) = 2 * pi * r * tur/saniye\n    Serial.print(\"Devir: \");\n    Serial.print(rpm, 0);\n    Serial.print(\" d/dk   Kanat ucu hizi: \");\n    Serial.print(hiz, 2);\n    Serial.print(\" m/s (\");\n    Serial.print(hiz * 3.6, 1);\n    Serial.println(\" km/sa)\");\n    darbe = 0;\n    pencereBaslangic = millis();\n  }\n  delay(1);                                   // sensoru saniyede ~1000 kez oku\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Hall sensörü mıknatıs yakınken DO'yu LOW yapar. Dönen mıknatıs her turda bir LOW darbesi verir (simülatörde turun %10'u kadar sürer). Kod digitalRead ile hızlı okur ve yalnızca HIGH → LOW kenarını sayar; 2 saniyelik pencerede sayılan darbe = tur sayısı. rpm = darbe × 60000 / 2000. Simülatörde attachInterrupt desteklenmediği için okuma döngüde yapılır (delay(1) ile saniyede ~1000 okuma)."
+  ],
+  [
+   "Hız hesabı ve varsayım",
+   "Kanat ucunun çevre hızı v = 2 × π × r × (rpm / 60) formülüyle bulunur. Koddaki r = 0,05 m (5 cm) bir VARSAYIMDIR; kendi çarkının yarıçapını ölç ve YARICAP_M'yi değiştir. Bu değer kanat ucunun hızıdır, rüzgârın gerçek hızı değildir: gerçek bir anemometrenin rüzgâr hızıyla ilişkisi kanat şekline bağlı bir kalibrasyon katsayısıyla bulunur ve burada hesaplanmaz."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "600 d/dk ayarında okuma 600 d/dk (3,14 m/s), 300 d/dk ayarında 300 (1,57 m/s), 60 d/dk ayarında 60 (0,31 m/s) çıktı. 120 d/dk ayarındaki ilk 2 saniyelik pencerede 150 okundu, sonraki pencerede 120: pencere kenarına denk gelen tek bir fazla darbe 2 saniyelik pencerede ±30 d/dk hata yapar. Pencereyi uzatmak hatayı azaltır ama tepkiyi yavaşlatır."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Hall sensörünün VCC/GND'sini ters bağlamak; darbeyi LOW yerine HIGH ile saymak; döngüde uzun delay() kullanıp darbeleri kaçırmak; mıknatısın kutbunu ters yapıştırmak (bazı Hall sensörleri yalnızca tek kutba tepki verir)."
+  ],
+  [
+   "Dene",
+   "Sonucu 16x2 LCD'de göster (proje 20'deki LCD bloğunu ekle) ya da hıza göre bir LED çubuğu yak."
+  ]
+ ],
+ "title": "39. Mini Rüzgâr Hız Ölçer"
+}

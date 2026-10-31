@@ -1,0 +1,86 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × DHT11 sıcaklık ve nem sensörü (3 pinli modül)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "Jumper kablolar (17 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD, arka ışık direnci ve DHT11 VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW, K ve DHT11 GND"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D8",
+   "DHT11 DATA"
+  ]
+ ],
+ "img": "assets/devre/dijital-termometre.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "DHT11'i c20 (VCC), c21 (DATA), c22 (GND) deliklerine tak. e20 → artı rayı, e22 → eksi rayı, D8 pinini e21'e kablola.",
+  "Kodu yükle (simülatörde çalıştır): ekranın ilk satırında \"Sicaklik: 27.0 C\", ikinci satırında \"Nem: %55\" görünür. Sensör kaydırıcısını değiştirince ekran iki saniye içinde güncellenir."
+ ],
+ "code": "// Dijital termometre: DHT11 sicaklik ve nemi 16x2 LCD'de gosterir\n#include <DHT.h>\n#include <LiquidCrystal.h>\n\nconst int DHT_PIN = 8;          // DHT11 DATA bacagi D8'e bagli\nDHT dht(DHT_PIN, DHT11);        // sensor nesnesi: pin ve sensor turu\n\n// LCD pinleri: RS, E, D4, D5, D6, D7 (4 bit baglanti)\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\n\nvoid setup() {\n  dht.begin();\n  lcd.begin(16, 2);             // 16 sutun, 2 satir\n  lcd.setCursor(0, 0);\n  lcd.print(\"Dijital Termo\");\n}\n\nvoid loop() {\n  float sicaklik = dht.readTemperature();   // santigrat derece\n  float nem = dht.readHumidity();           // bagil nem (%)\n\n  if (isnan(sicaklik) || isnan(nem)) {\n    // sensor okunamadi (kablo gevsek ya da guc yok)\n    lcd.setCursor(0, 0);\n    lcd.print(\"Sensor hatasi!  \");\n    lcd.setCursor(0, 1);\n    lcd.print(\"Kablo kontrol    \");\n  } else {\n    lcd.setCursor(0, 0);\n    lcd.print(\"Sicaklik: \");\n    lcd.print(sicaklik, 1);                 // 1 basamak ondalik\n    lcd.print(\" C  \");                      // ASCII: derece simgesi yok\n    lcd.setCursor(0, 1);\n    lcd.print(\"Nem: %\");\n    lcd.print(nem, 0);                      // ondaliksiz\n    lcd.print(\"        \");                  // eski rakamlari silmek icin bosluk\n  }\n  delay(2000);                              // DHT11 en sik 1-2 saniyede bir okunur\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "DHT11 tek veri hattıyla sıcaklık ve nemi sayısal gönderir; zamanlamayı DHT.h kütüphanesi halleder. dht.readTemperature() °C, dht.readHumidity() % bağıl nem verir. Sonuçlar lcd.print(sayı, basamak) ile yazılır: sıcaklık 1, nem 0 ondalık basamakla. LCD'de derece simgesi (°) yoktur; bu yüzden \"C\" ve \"%\" harfleri ASCII olarak yazıldı."
+  ],
+  [
+   "Ekranı silmeden güncelleme",
+   "lcd.clear() ekranı titretir. Bunun yerine her seferinde aynı konuma yazılır ve satırın sonuna boşluk eklenir; böylece \"%100\" den \"%9\" a inince eski rakam ekranda kalmaz."
+  ],
+  [
+   "Sensör sınırları",
+   "DHT11 yalnızca 0–50 °C ve %20–90 nem aralığında ölçer, hata payı yaklaşık ±2 °C ve ±%5'tir, en sık 1–2 saniyede bir okunur (kodda delay(2000))."
+  ],
+  [
+   "Simülatör notu",
+   "Simülatörde sensör kaydırıcıdan ayarlanır ve tam sayı döner: 27 °C ve %55 iken ekranda \"Sicaklik: 27.0 C\" / \"Nem: %55\", 31 °C ve %70'e getirince \"31.0 C\" / \"%70\", 18 °C ve %35'e getirince \"18.0 C\" / \"%35\" göründü. Gerçek derleme servisinin izinli başlıkları arasında DHT.h, LiquidCrystal.h ve Keypad.h yoktur; bu kütüphaneler yalnızca MakersHub simülatöründe çalışır, sitedeki gerçek derleme bu sketch'lerde hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "DHT kütüphanesini kurmamak; DATA pinini koddaki DHT_PIN ile aynı yapmamak (ekranda \"Sensor hatasi!\" görünür); LCD'nin RW ve V0 bacaklarını GND'ye bağlamamak (ekran boş kalır); lcd.print(\"°C\") yazmaya çalışmak (simgeler ekranda ? olur)."
+  ],
+  [
+   "Dene",
+   "Sıcaklık 30 °C'yi geçince ekrana \"SICAK!\" yazdır ya da en yüksek ve en düşük sıcaklığı değişkenlerde tutup ikinci satırda göster."
+  ]
+ ],
+ "title": "21. Dijital Termometre"
+}

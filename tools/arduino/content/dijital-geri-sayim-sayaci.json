@@ -1,0 +1,120 @@
+{
+ "sketch": "geri_sayim",
+ "d": "Keypad ile saniye girilir, # ile geri sayım başlar, LCD'de dakika:saniye azalır ve süre bitince buzzer 3 kez öter. * girileni siler ve geri sayımı iptal eder.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × 4x4 tuş takımı (keypad)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "1 × aktif buzzer",
+  "Jumper kablolar (24 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D10",
+   "Keypad R1"
+  ],
+  [
+   "D9",
+   "Keypad R2"
+  ],
+  [
+   "D8",
+   "Keypad R3"
+  ],
+  [
+   "D7",
+   "Keypad R4"
+  ],
+  [
+   "A0",
+   "Keypad C1 (analog pin dijital kullanılır)"
+  ],
+  [
+   "A1",
+   "Keypad C2"
+  ],
+  [
+   "A2",
+   "Keypad C3"
+  ],
+  [
+   "A3",
+   "Keypad C4"
+  ],
+  [
+   "D6",
+   "Aktif buzzer + (uzun bacak)"
+  ],
+  [
+   "GND (GND3)",
+   "Aktif buzzer − (kısa bacak)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "Keypad'i a19–a26 deliklerine tak; pinler soldan sağa R1, R2, R3, R4, C1, C2, C3, C4 sırasındadır.",
+  "Keypad kabloları: D10 → e19, D9 → e20, D8 → e21, D7 → e22 (satırlar); A0 → e23, A1 → e24, A2 → e25, A3 → e26 (sütunlar).",
+  "Aktif buzzer'ı a29 (+) ve a30 (−) deliklerine tak. D6 → e29, GND3 → e30.",
+  "Kodu yükle (simülatörde çalıştır) ve tuvaldeki tuşlarla örneğin 1 5 # gir: ekranda \"Kalan sure:\" ve 00:15'ten geriye doğru sayan süre görünür; sıfıra inince \"SURE DOLDU!\" yazar ve buzzer 3 kez öter."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Rakam tuşları girilen sayının sağına eklenir (girilen = girilen × 10 + rakam, en fazla 4 hane), ekranda saniye mm:ss biçiminde gösterilir. # ile sayimiYap() başlar: kalan = toplam − (millis() − başlangıç) / 1000; ekran yalnızca saniye değişince güncellenir ve sayım sırasında * tuşu iptal eder."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "\"12\" girilince 00:12, * ile 00:00'a döndü; \"8\" girilip # basılınca ekran \"Kalan sure:\" / 00:08, 00:07 … 00:01 şeklinde saniyede bir azaldı, sıfırda \"SURE DOLDU!\" yazıldı ve buzzer 300 ms'lik 3 bip verdi, ardından giriş ekranı geri geldi. Gerçek derleme servisinin izinli başlıkları arasında DHT.h, LiquidCrystal.h ve Keypad.h yoktur; bu kütüphaneler yalnızca MakersHub simülatöründe çalışır, sitedeki gerçek derleme bu sketch'lerde hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Pin bütçesi",
+   "LCD 6, keypad 8, buzzer 1 pin ister: 15 pin. D2–D13 yalnızca 12 pindir, bu yüzden keypad sütunları A0–A3'e bağlandı; analog pinler dijital olarak kullanılabilir. Simülatörde bu atamanın çalıştığı görüldü."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Keypad R/C pinlerini sketch'teki satirPinleri/sutunPinleri ile uyumsuz bağlamak; sayım sırasında delay() kullanıp tuşları kaçırmak; ekranı her turda yeniden yazıp titretmek; 4 haneden uzun sayı girip int taşırmak (kod 4 hane ile sınırlıdır)."
+  ],
+  [
+   "Dene",
+   "Sayım bitince LED yakıp söndür ya da sayım sırasında bir tuşla duraklatmayı ekle."
+  ]
+ ]
+}

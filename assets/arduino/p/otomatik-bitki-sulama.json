@@ -1,0 +1,77 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × toprak nem sensörü (analog çıkışlı)",
+  "1 × röle (SPDT, 5 V bobin)",
+  "1 × NPN transistör (BC547 tipi)",
+  "1 × 1 kΩ direnç (transistör taban direnci)",
+  "2 × diyot (1N4007; biri bobinde, biri motor devresinde)",
+  "1 × mini su pompası (DC motor)",
+  "1 × 6 V harici güç kaynağı (örn. 4 × AA pil yuvası; simülatörde ayarlanabilir güç kaynağı)",
+  "1 × LED (yeşil, kapalı durum göstergesi)",
+  "1 × 470 Ω direnç (LED için)",
+  "Jumper kablolar (17 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: röle bobini C1, bobin diyodu katodu, toprak nem sensörü VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: transistör emitörü ve toprak nem sensörü GND"
+  ],
+  [
+   "A0",
+   "Toprak nem sensörü OUT"
+  ],
+  [
+   "D7",
+   "1 kΩ direncin ucu (transistör tabanı)"
+  ]
+ ],
+ "img": "assets/devre/otomatik-bitki-sulama.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın. Harici güç kaynağı ve pompa breadboard'a takılı değildir, breadboard dışında durur ve yalnızca kablolarla bağlanır.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Röleyi a2–a6 deliklerine tak (C1, C2, COM, NO, NC). e2 → artı rayı (bobin C1 = 5V). Bobin diyodunu c3 (anot) ile c7 (katot) arasına tak ve e7 → artı rayı.",
+  "NPN transistörü a12 (C), a13 (B), a14 (E) deliklerine tak. e12 → e3 (kolektör, bobinin C2 ucuna), e14 → eksi rayı (emitör). 1 kΩ direnci d13 ile d17 arasına tak ve D7 pinini e17'ye kablola.",
+  "Toprak nem sensörünü a20 (VCC), a21 (OUT), a22 (GND) deliklerine tak. e20 → artı rayı, A0 → e21, e22 → eksi rayı.",
+  "Pompa devresi (ayrı güç): 6 V güç kaynağının + ucunu e4'e (COM), röle NO ucunu e5 → g19 kablosuyla alt şeride, h19 → pompanın bir ucuna kablola. Güç kaynağının − ucunu e19'a, pompanın diğer ucunu b19'a bağla. Pompa diyodunu dikey tak: anot c19, katot f19 (katot NO tarafına, + tarafa bakar).",
+  "NC ucundan yeşil LED'e: e6 → e24. LED'i c24 (anot), c25 (katot) deliklerine tak; 470 Ω direnci d25 ile d29 arasına tak ve e29 → a19 (güç kaynağı − şeridi). Bu LED pompa kapalıyken yanar.",
+  "Kodu yükle (simülatörde çalıştır): toprak kuruysa D7 HIGH olur, röle çeker, pompa döner; nem %50'ye çıkınca ya da 5 saniye dolunca pompa durur."
+ ],
+ "code": "// Otomatik bitki sulama: toprak kuruysa role pompayi calistirir\nconst int NEM_PIN = A0;          // toprak nem sensoru (OUT)\nconst int ROLE_PIN = 7;          // D7 -> 1k direnc -> NPN taban: transistor role bobinini surer\n\n// Kalibrasyon (sensoru kuru havada ve suda olcerek bul). Bu sensorde nem artinca okunan deger DUSER.\nconst int KURU = 921;\nconst int ISLAK = 256;\n\nconst int SULA_ALT = 30;         // nem % bu degerin altina inerse sulama baslar\nconst int DUR_UST = 50;          // nem % bu degere cikinca sulama durur (histerezis)\nconst unsigned long POMPA_MAKS_MS = 5000;  // guvenlik: pompa en fazla 5 sn art arda calisir\nconst unsigned long BEKLEME_MS = 8000;     // sulamadan sonra suyun topraga yayilmasi icin bekleme\n\nbool pompaAcik = false;\nunsigned long pompaBaslangic = 0;\n\nvoid pompa(bool ac) {\n  digitalWrite(ROLE_PIN, ac);    // HIGH: role cekilir, pompa ayri guc kaynagindan beslenir\n  pompaAcik = ac;\n}\n\nvoid setup() {\n  pinMode(ROLE_PIN, OUTPUT);\n  pompa(false);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int ham = analogRead(NEM_PIN);\n  int nem = map(ham, KURU, ISLAK, 0, 100);\n  nem = constrain(nem, 0, 100);\n\n  if (!pompaAcik && nem < SULA_ALT) {\n    pompa(true);\n    pompaBaslangic = millis();\n    Serial.println(\"Toprak kuru: pompa ACIK\");\n  } else if (pompaAcik && (nem >= DUR_UST || millis() - pompaBaslangic > POMPA_MAKS_MS)) {\n    pompa(false);\n    Serial.println(\"Pompa KAPALI\");\n    delay(BEKLEME_MS);           // su topraga yayilsin; bu sirada sensor degeri yeniden okunmaz\n  }\n\n  Serial.print(\"Ham: \");\n  Serial.print(ham);\n  Serial.print(\"  Nem: %\");\n  Serial.println(nem);\n  delay(500);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Arduino pini röle bobinini (≈70 mA) doğrudan süremez, bu yüzden D7 → 1 kΩ → NPN transistör bobini 5V rayından sürer. Röle çekince COM–NO kontağı kapanır ve ayrı 6 V kaynaktan pompa beslenir; kontak Arduino devresinden elektriksel olarak ayrıdır. Pompa kapalıyken COM–NC kontağı yeşil LED'i yakar."
+  ],
+  [
+   "Ters diyotlar neden gerekli?",
+   "Röle bobini ve pompa motoru bobin gibi davranır; akım kesilince ters gerilim oluşur ve transistöre/kontağa zarar verebilir. Her birine paralel, ters yönde bağlı diyot bu gerilimi yok eder (katot + tarafa bakar). Pompa diyodunun katodu rölenin NO ucuna bağlıdır. MakersHub'ın doğrulayıcısı katodu 5V'a bağlı bu diyot için 'ters bağlı' uyarısı verebilir ve diyodun çevresini kesikli turuncu çizebilir; bu yanlış uyarıdır: bu diyot bilerek ters (flyback) bağlanır ve görevi motor kapanınca oluşan ters gerilimi kısa devre etmektir. Sayfadaki görüntüde bu çerçeve gizlenmiştir."
+  ],
+  [
+   "Güvenli sulama mantığı",
+   "Nem %30'un altına inince pompa açılır, %50'ye çıkınca kapanır (histerezis); pompa her koşulda en fazla 5 saniye çalışır ve ardından 8 saniye beklenir (su toprağa yayılsın, taşırma olmasın). Simülatörde nem kaydırıcısı 0,1 iken (analogRead 855, %9) pompa 5 saniye çalıştı (6 V'ta yaklaşık 199 mA), sonra röle bıraktı ve yeşil LED yandı; kaydırıcı 0,8 iken (analogRead 389, %80) pompa çalışmadı."
+  ],
+  [
+   "Güç ve akım uyarısı",
+   "Mini pompa yaklaşık 200 mA çeker ve ayrı kaynaktan beslenir; Arduino'nun 5V pininden beslemeyi deneme. Gerçek pompanın gerilimini (çoğu 3–6 V) kontrol et. Su ve elektriği ayrı tut: sensör ve pompa bağlantılarını suya temas etmeyecek şekilde yalıt. Röle kontağının akım/gerilim değerini aşma."
+  ],
+  [
+   "Kalibrasyon",
+   "Toprak nem sensörü bu simülatörde nem arttıkça düşen değer verir: kuru 921, ıslak 256 (proje 30'da ölçüldü). Gerçek sensör için KURU ve ISLAK sayılarını kendin ölç. "
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Pompayı doğrudan Arduino pinine ya da 5V rayına bağlamak; röle bobinine transistör ve diyot koymamak; ayrı güç kaynağının eksisini rölenin yanlış ucuna bağlamak (kısa devre); diyotu ters takmak; NC/NO uçlarını karıştırmak (pompa sürekli çalışır)."
+  ],
+  [
+   "Dene",
+   "Pompa süresini ve bekleme süresini bitkine göre ayarla; ya da nem %20 altına inince bir buzzer ekleyip \"su deposu boş\" uyarısı ver."
+  ]
+ ],
+ "title": "31. Otomatik Bitki Sulama"
+}

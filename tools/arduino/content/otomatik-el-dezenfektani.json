@@ -1,0 +1,64 @@
+{
+ "sketch": "dezenfektan",
+ "d": "IR engel sensörü eli algılayınca NPN transistör üzerinden mini pompa 1,5 saniye çalışır ve el çekilene kadar tekrar çalışmaz. Transistörle pompa sürme, ters diyot ve tek seferlik tetikleme öğrenilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × IR engel algılama sensörü",
+  "1 × mini pompa (DC motor)",
+  "1 × NPN transistör (BC547 tipi)",
+  "1 × 1 kΩ direnç (transistör taban direnci)",
+  "1 × diyot (1N4007, ters diyot)",
+  "Jumper kablolar (10 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: IR sensör VCC, pompanın + ucu ve diyot katodu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: IR sensör GND ve transistör emitörü"
+  ],
+  [
+   "D2",
+   "IR sensör OUT"
+  ],
+  [
+   "D9",
+   "1 kΩ direncin ucu (transistör tabanı)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "IR sensörü a2 (VCC), a3 (GND), a4 (OUT) deliklerine tak. e2 → artı rayı, e3 → eksi rayı, D2 pinini e4'e kablola.",
+  "Pompayı (DC motor) a11 ve a12 deliklerine tak. e11 → artı rayı.",
+  "NPN transistörü a16 (C), a17 (B), a18 (E) deliklerine tak. b12 ile d16 arasına kablo çek (pompanın diğer ucu transistörün kolektörüne). e18 → eksi rayı.",
+  "1 kΩ direnci d17 ile d21 arasına tak ve D9 pinini e21'e kablola.",
+  "Diyodu dikey tak: anot c12, katot f12; h12 → artı rayı (katot + tarafa bakar).",
+  "Kodu yükle (simülatörde çalıştır): IR sensörde \"engel var\" düğmesini aç; pompa 1,5 saniye çalışır. Düğmeyi kapatana kadar tekrar çalışmaz."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "IR sensör engel (el) varken OUT'u LOW yapar. Kod LOW görünce pompayı POMPA_MS (1500 ms) süreyle açar; elVardi değişkeni el sensörün önündeyken yeniden pompalamayı engeller. OUT yeniden HIGH olunca (el çekildi) sistem yeni doz için hazırdır. Pompa D9 → 1 kΩ → NPN ile sürülür; pompanın akımı 5V rayından akar."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Pompa her algılamada 1,5 saniye döndü (5V'ta yaklaşık 150 mA). El 3 saniye sensörün önünde tutulunca yalnızca bir doz verildi; 0,3 saniyelik kısa bir el hareketi de tam bir doz (1,5 saniye) verdi."
+  ],
+  [
+   "Ters diyot ve güç uyarısı",
+   "Pompa motoru ters gerilim üretir; diyot bunu bastırır. MakersHub'ın doğrulayıcısı katodu 5V'a bağlı bu diyot için 'ters bağlı' uyarısı verebilir ve diyodun çevresini kesikli turuncu çizebilir; bu yanlış uyarıdır: bu diyot bilerek ters (flyback) bağlanır ve görevi motor kapanınca oluşan ters gerilimi kısa devre etmektir. Sayfadaki görüntüde bu çerçeve gizlenmiştir. Pompa akımı Arduino pininden değil 5V rayından çekilir; gerçek pompa daha fazla akım çekiyorsa ayrı bir güç kaynağı kullan ve GND'leri birleştir. Elektronik parçaları dezenfektan sıvısından uzak tut."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Pompayı doğrudan D9'a bağlamak; diyotu ters takmak; IR sensörün mantığını ters sanmak (engelde LOW); pompa süresini çok uzun tutup dezenfektanı israf etmek."
+  ],
+  [
+   "Dene",
+   "POMPA_MS değerini değiştirip doz miktarını ayarla; ya da doz sayısını sayıp LCD'de göstermek için proje 20'deki LCD düzenini ekle."
+  ]
+ ]
+}

@@ -28,11 +28,15 @@ def classify(t):
     if 'pasif buzzer' in l: return 'passivebuzzer'
     if 'aktif buzzer' in l: return 'buzzer'
     if re.search(r'Ω\s*direnç', t): return 'resistor'
-    for k, typ in [('potansiyometre', 'pot'), ('ldr', 'ldr'), ('lm35', 'lm35'), ('dht11', 'dht11'), ('hc-sr04', 'hcsr04'), ('ttp223', 'ttp223'),
-                   ('eğim', 'tilt'), ('tilt', 'tilt'), ('lcd', 'lcd16x2'), ('servo', 'servo'), ('pir', 'pir'), ('buton', 'button')]:
-        if k in l: return typ
+    for k, typ in [('potansiyometre', 'pot'), ('rgb', 'rgbled'), (r'\bldr\b', 'ldr'), ('lm35', 'lm35'), ('dht11', 'dht11'), ('hc-sr04', 'hcsr04'), ('ttp223', 'ttp223'),
+                   ('eğim', 'tilt'), ('tilt', 'tilt'), ('lcd', 'lcd16x2'), ('servo', 'servo'), (r'\bpir\b', 'pir'),
+                   ('keypad', 'keypad4x4'), ('tuş takımı', 'keypad4x4'), ('su seviye', 'waterlevel'), ('yağmur', 'rainsensor'),
+                   ('toprak nem', 'soil'), (r'\bir\b.*(sensör|engel)', 'irsensor'), ('hall', 'hallsensor'), ('hmc5883l', 'hmc5883l'),
+                   ('röle', 'relay'), (r'\bnpn\b', 'npn'), ('diyot', 'diode'), ('güç kaynağı', 'psu'), (r'\bpil\b', 'battery9v'),
+                   ('dc motor', 'dcmotor'), ('pompa', 'dcmotor'), (r'\bfan\b', 'dcmotor'), ('buton', 'button')]:
+        if re.search(k, l): return typ
     if re.search(r'direnç', l): return 'resistor'
-    if re.search(r'\bled\b', l) and 'rgb' not in l: return 'led'
+    if re.search(r'\bled\b', l): return 'led'
     return None
 
 def pin_tokens(s):
@@ -76,13 +80,27 @@ for i in ids:
     if f['holeClash']: errs.append(f"(3) delik çakışması: {f['holeClash']}")
     # (4) breadboard
     if not has_bb: errs.append('(4) malzemede Breadboard yok (devrede var)')
-    elif f['unplugged']: errs.append(f"(4) breadboard'a takılı olmayan uçlar: {f['unplugged']}")
+    else:
+        cpath = f'{HERE}/content/{i}.json'
+        free = json.load(open(cpath, encoding='utf-8')).get('free', []) if os.path.exists(cpath) else []
+        bad = [u for u in f['unplugged'] if u.split('.')[0] not in free]
+        if bad: errs.append(f"(4) breadboard'a takılı olmayan uçlar: {bad}")
+        if free:
+            txt0 = json.dumps(s, ensure_ascii=False)
+            if not re.search(r"takılı değil|breadboard dışında", txt0): errs.append("(4) serbest parçalar (breadboard dışı) metinde açıklanmamış ('takılı değil' / 'breadboard dışında')")
     # (5) simülatör
-    if f['validator']['errors'] or f['validator']['warnings']: errs.append(f"(5) doğrulayıcı: {f['validator']}")
+    FLY = "Diyot ters bağlı: anot GND'ye (veya katot 5V'a) gidiyor, akım geçirmez."
+    vw = [w for w in f['validator']['warnings'] if w != FLY]
+    nfly = len(f['validator']['warnings']) - len(vw)
+    if nfly:  # MakersHub yanlış alarmı: yalnızca güç yolu denetimi diyot yönünü doğruladıysa ve diyot sayısı kadar kabul edilir
+        if f.get('powerIssues') or nfly > f['counts'].get('diode', 0): errs.append("(5) 'Diyot ters bağlı' uyarısı yanlış alarm olarak kabul edilemedi (güç yolu hatası ya da diyot sayısından fazla)")
+        else: warns.append(f"MakersHub yanlış alarmı kabul edildi ({nfly}): doğru bağlı ters (flyback) diyot 'ters bağlı' uyarısı alıyor; ekran görüntüsünde çerçeve gizlenir, notlarda belirtilmeli")
+    if f['validator']['errors'] or vw: errs.append(f"(5) doğrulayıcı: {f['validator']}")
     r = f['runtime']
     if r['error']: errs.append(f"(5) çalışma hatası: {r['error']}")
     if r['warnings'] or r['shorted'] or r['overcurrent'] or r['lcdProblem'] or r['diagnostics']: errs.append(f'(5) simülatör uyarısı: {r}')
     if not (f['serial'] or f['toneLog'] or f['buzLog'] or f['ledLog'] or any(f['lcd'].values())): errs.append('(5) gözlenen davranış yok (seri/ton/buzzer/LED/LCD boş)')
+    if f.get('powerIssues'): errs.append(f"güç yolu: {f['powerIssues']}")
     # bağlantı tablosu == Uno pinleri
     wt = set()
     for pin, _ in s['wiring']: wt |= pin_tokens(pin)
@@ -102,6 +120,7 @@ for i in ids:
     img = f"{SITE}/{s['img']}"
     if not os.path.exists(img) or os.path.getsize(img) < 20000: errs.append('görüntü yok ya da çok küçük')
     alltxt = json.dumps(s, ensure_ascii=False)
+    if f['validator']['warnings'] and not re.search(r'yanlış (uyarı|alarm)', alltxt): errs.append("MakersHub'ın yanlış 'ters bağlı' uyarısı notlarda açıklanmamış ('yanlış uyarı' ifadesi yok)")
     if re.search(r'gerçek kartta (denendi|test edildi|çalıştırıldı)', alltxt): errs.append('doğrulanamaz ifade: gerçek kartta denendi')
     if 'denendi' in alltxt and 'gerçek kartta denenmedi' not in alltxt: warns.append("'denendi' geçiyor: simülatörde denendiği açık yazılmış mı kontrol et")
     # adımlarda pin anılıyor mu (uyarı)

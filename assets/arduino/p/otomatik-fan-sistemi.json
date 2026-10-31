@@ -1,0 +1,69 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × DHT11 sıcaklık ve nem sensörü (3 pinli modül)",
+  "1 × DC motor (fan)",
+  "1 × NPN transistör (BC547 tipi)",
+  "1 × 1 kΩ direnç (transistör taban direnci)",
+  "1 × diyot (1N4007, ters diyot)",
+  "Jumper kablolar (10 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: DHT11 VCC, fanın + ucu ve diyot katodu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: DHT11 GND ve transistör emitörü"
+  ],
+  [
+   "D8",
+   "DHT11 DATA"
+  ],
+  [
+   "D9",
+   "1 kΩ direncin ucu (transistör tabanı)"
+  ]
+ ],
+ "img": "assets/devre/otomatik-fan-sistemi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "DHT11'i a2 (VCC), a3 (DATA), a4 (GND) deliklerine tak. e2 → artı rayı, e4 → eksi rayı, D8 pinini e3'e kablola.",
+  "Fanı (DC motor) a11 ve a12 deliklerine tak. e11 → artı rayı: fanın bir ucu doğrudan 5V rayından beslenir.",
+  "NPN transistörü a16 (C), a17 (B), a18 (E) deliklerine tak. b12 ile d16 arasına kablo çek: fanın diğer ucu transistörün kolektörüne gitsin. e18 → eksi rayı (emitör GND).",
+  "1 kΩ direnci d17 ile d21 arasına tak (taban direnci) ve D9 pinini e21'e kablola. D9 yalnızca transistörün tabanını sürer, fanın akımı Arduino pininden geçmez.",
+  "Diyodu dikey tak: anot ucu c12'de (fanın transistör tarafı), katot ucu f12'de olsun; h12 → artı rayı. Katot (çizgili uç) artı tarafa bakmalı.",
+  "Kodu yükle (simülatörde çalıştır): sıcaklık 28 °C ve üstüne çıkınca fan döner, 27 °C ve altına inince durur."
+ ],
+ "code": "// Otomatik fan: sicaklik esigi asilinca fan doner, sicaklik dusunce durur\n#include <DHT.h>\n\nconst int DHT_PIN = 8;          // DHT11 DATA pini\nconst int FAN_PIN = 9;          // transistorun taban direncine giden pin (fan dogrudan bu pine baglanmaz!)\nconst float ESIK = 28.0;        // fan bu sicaklikta (C) acilir\nconst float HISTEREZIS = 1.0;   // fan ESIK - 1 C'ye inince kapanir (surekli ac-kapa yapmasin)\n\nDHT dht(DHT_PIN, DHT11);\nbool fanAcik = false;\n\nvoid setup() {\n  pinMode(FAN_PIN, OUTPUT);\n  digitalWrite(FAN_PIN, LOW);\n  Serial.begin(9600);\n  dht.begin();\n}\n\nvoid loop() {\n  float sicaklik = dht.readTemperature();\n\n  if (isnan(sicaklik)) {\n    fanAcik = false;                         // sensor okunamazsa guvenli tarafta kal: fan kapali\n    Serial.println(\"Sensor okunamadi\");\n  } else {\n    if (!fanAcik && sicaklik >= ESIK) {\n      fanAcik = true;                        // esigi astik: fani ac\n    } else if (fanAcik && sicaklik <= ESIK - HISTEREZIS) {\n      fanAcik = false;                       // yeterince sogudu: fani kapat\n    }\n    Serial.print(\"Sicaklik: \");\n    Serial.print(sicaklik, 1);\n    Serial.print(\" C   Fan: \");\n    if (fanAcik) {\n      Serial.println(\"ACIK\");\n    } else {\n      Serial.println(\"KAPALI\");\n    }\n  }\n\n  if (fanAcik) {\n    digitalWrite(FAN_PIN, HIGH);             // transistoru iletime sok: fan 5V rayindan beslenir\n  } else {\n    digitalWrite(FAN_PIN, LOW);\n  }\n  delay(1000);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "D9 HIGH olunca taban direncinden küçük bir akım akar ve NPN transistör iletime geçer; fan, 5V rayından transistör üzerinden GND'ye devresini tamamlar. Arduino pini yalnızca (5 V − 0,7 V) / 1 kΩ ≈ 4 mA verir; asıl akımı güç rayı taşır. Bir Arduino pini en fazla 40 mA (önerilen 20 mA) verebilir, fan ise onlarca-yüzlerce mA çeker; bu yüzden motor asla doğrudan pine bağlanmaz."
+  ],
+  [
+   "Ters diyot neden gerekli?",
+   "Motor bir bobindir: akımı kesilince uçlarında ters yönde yüksek gerilim doğurur ve transistörü bozabilir. Motora paralel, ters yönde bağlı diyot bu akımı motorun içinde dolaştırır. MakersHub'ın doğrulayıcısı katodu 5V'a bağlı bu diyot için 'ters bağlı' uyarısı verebilir ve diyodun çevresini kesikli turuncu çizebilir; bu yanlış uyarıdır: bu diyot bilerek ters (flyback) bağlanır ve görevi motor kapanınca oluşan ters gerilimi kısa devre etmektir. Sayfadaki görüntüde bu çerçeve gizlenmiştir."
+  ],
+  [
+   "Histerezis",
+   "Kod fanı 28 °C'de açar ama 27 °C'ye inene kadar kapatmaz. Böylece sıcaklık eşik civarında dalgalanırsa fan sürekli aç-kapa yapmaz. Simülatörde 31 °C → ACIK, 24 °C → KAPALI, 28 °C → ACIK, 26 °C → KAPALI, 31 °C → ACIK gözlendi."
+  ],
+  [
+   "Güç uyarısı",
+   "Simülatördeki fan 5V rayında yaklaşık 150 mA çekti (hızı %75, çünkü motor modeli ±6 V'ta tam hızdır ve transistörde yaklaşık 0,2 V düşer). Küçük bir fan USB'den beslenebilir; büyük motorlar için ayrı güç kaynağı kullan ve GND'lerini Arduino GND'sine bağla."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Fanı doğrudan D9'a bağlamak; diyodu ters takmak (devre kısa devre gibi davranır); taban direncini unutmak (transistör ve pin zarar görür); emitörü GND'ye bağlamamak (fan dönmez)."
+  ],
+  [
+   "Dene",
+   "analogWrite(9, hız) ile fan hızını sıcaklığa göre değiştir: 25 °C'de yavaş, 35 °C'de tam hız (transistör PWM ile de çalışır)."
+  ]
+ ],
+ "title": "22. Otomatik Fan Sistemi"
+}

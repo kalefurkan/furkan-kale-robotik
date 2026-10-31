@@ -1,0 +1,96 @@
+{
+ "sketch": "kasa",
+ "d": "Keypad'e doğru şifre (1234#) girilince servo kilidi açılır ve iki kısa bip duyulur; yanlış şifrede buzzer uzun öter, üç yanlış denemede 2 saniyelik alarm çalar.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × 4x4 tuş takımı (keypad)",
+  "1 × servo motor (SG90)",
+  "1 × aktif buzzer",
+  "Jumper kablolar (13 adet)"
+ ],
+ "wiring": [
+  [
+   "D9",
+   "Keypad R1"
+  ],
+  [
+   "D8",
+   "Keypad R2"
+  ],
+  [
+   "D7",
+   "Keypad R3"
+  ],
+  [
+   "D6",
+   "Keypad R4"
+  ],
+  [
+   "D5",
+   "Keypad C1"
+  ],
+  [
+   "D4",
+   "Keypad C2"
+  ],
+  [
+   "D3",
+   "Keypad C3"
+  ],
+  [
+   "D2",
+   "Keypad C4"
+  ],
+  [
+   "D10",
+   "Servo sinyal (SIG)"
+  ],
+  [
+   "5V",
+   "Servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Servo GND"
+  ],
+  [
+   "D11",
+   "Aktif buzzer + (uzun bacak)"
+  ],
+  [
+   "GND (GND3)",
+   "Aktif buzzer − (kısa bacak)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Keypad'i a2–a9 deliklerine tak; pinler soldan sağa R1, R2, R3, R4, C1, C2, C3, C4 sırasındadır.",
+  "Keypad kabloları: D9 → e2 (R1), D8 → e3 (R2), D7 → e4 (R3), D6 → e5 (R4), D5 → e6 (C1), D4 → e7 (C2), D3 → e8 (C3), D2 → e9 (C4).",
+  "Servoyu c13 (SIG), c14 (VCC), c15 (GND) deliklerine tak. D10 → a13, 5V → a14, GND2 → a15.",
+  "Aktif buzzer'ı a20 (+) ve a21 (−) deliklerine tak. D11 → e20, GND3 → e21.",
+  "Kodu yükle (simülatörde çalıştır) ve Seri Monitör'ü aç. Tuvaldeki tuşlarla 1 2 3 4 # gir: iki kısa bip, servo 90°'ye döner ve 4 saniye sonra kapanır."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Her tuşa basışta kısa bir tuş sesi (30 ms) çalar ve rakam girilen[] dizisine eklenir. # ile şifre kontrol edilir: doğruysa iki kısa bip, servo açılır, 4 saniye sonra kilitlenir; yanlışsa 500 ms'lik bip ve yanlisSayisi artar; 3 yanlışta 2 saniyelik alarm çalar ve sayaç sıfırlanır. * girileni siler."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "\"123#\" yanlış (Seri: Deneme: 1, uzun bip), \"1234#\" doğru (iki kısa bip, servo 0° → 90°, 4 saniye sonra 0°), \"1*1234#\" ile * silip doğru şifre kabul edildi, art arda üç yanlış denemede Seri Monitör'de \"3 yanlis deneme: ALARM\" yazıldı. Gerçek derleme servisinin izinli başlıkları arasında DHT.h, LiquidCrystal.h ve Keypad.h yoktur; bu kütüphaneler yalnızca MakersHub simülatöründe çalışır, sitedeki gerçek derleme bu sketch'lerde hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Güvenlik notu",
+   "Bu bir öğretici projedir: şifre kodun içinde açık yazılıdır ve servo kolu gerçek bir kilidi tek başına güvenli tutmaz. Gerçek bir kasada şifreyi EEPROM'a kaydet ve mekanik kilidi servoya güvenerek değil, ayrıca tasarla."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Keypad R/C pinlerini sketch'teki satirPinleri/sutunPinleri ile aynı sırada bağlamamak; servo besleme ucunu veri pinine bağlamak; buzzer'ın − ucunu GND'ye bağlamamak (hiç ses çıkmaz)."
+  ],
+  [
+   "Dene",
+   "Şifreyi 6 haneye çıkar ya da kilit açıkken bir LED yak. Kasa kapağına bir buton takıp açık kalma süresini bitirmeyi dene."
+  ]
+ ]
+}

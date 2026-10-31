@@ -1,0 +1,62 @@
+{
+ "sketch": "otomatik_kapi",
+ "d": "HC-SR04 biri 20 cm içine girince servo ile kapıyı açar, kişi uzaklaşıp 2 saniye geçince kapatır. Servo hareketini yumuşatmayı ve millis() ile bekleme süresi tutmayı öğrenirsin.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HC-SR04 ultrasonik mesafe sensörü",
+  "1 × servo motor (SG90)",
+  "Jumper kablolar (9 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: HC-SR04 VCC ve servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: HC-SR04 GND ve servo GND"
+  ],
+  [
+   "D9",
+   "HC-SR04 TRIG"
+  ],
+  [
+   "D10",
+   "HC-SR04 ECHO"
+  ],
+  [
+   "D6",
+   "Servo sinyal (SIG)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "HC-SR04'ü c2 (VCC), c3 (TRIG), c4 (ECHO), c5 (GND) deliklerine tak. a2 → artı rayı, a5 → eksi rayı, D9 → a3, D10 → a4.",
+  "Servoyu c10 (SIG), c11 (VCC), c12 (GND) deliklerine tak. D6 → a10, a11 → artı rayı, a12 → eksi rayı.",
+  "Kodu yükle (simülatörde çalıştır): mesafe kaydırıcısı 20 cm'nin altındayken servo kolu 0°'den 90°'ye döner (kapı açılır); kişi uzaklaşınca 2 saniye sonra geri döner."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Kod her turda mesafeyi ölçer. 20 cm'den yakınsa kisiVar = true olur ve sonGorulme zamanı güncellenir; kişi gidince 2 saniye (BEKLEME_MS) geçmeden kapı kapanmaz. Servo, ani hareket yerine her turda 3°'lik adımlarla hedef açıya ilerletilir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Mesafe 15 cm iken servo 0°'den 90°'ye yaklaşık 0,6 saniyede çıktı. Mesafe 120 cm'ye çıkınca servo yaklaşık 2 saniye sonra kapanmaya başladı ve yaklaşık 0,8 saniyede 0°'ye döndü; 30 cm'de (eşiğin dışında) kapı kapalı kaldı, 10 cm'de yeniden açıldı."
+  ],
+  [
+   "Besleme uyarısı",
+   "Servo hareket ederken yüzlerce mA çekebilir ve çalışırken Arduino'yu resetleyebilir. SG90 gibi küçük servolar USB'den çalışır; birden çok servo ya da büyük servo için ayrı 5 V kaynak kullan ve GND'lerini birleştir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Servo kablolarını ters takmak (kahverengi/siyah = GND, kırmızı = VCC, turuncu = sinyal); servo VCC'sini bir veri pinine bağlamak; HC-SR04'ün TRIG/ECHO pinlerini koddakiyle uyumsuz bağlamak; Servo.h kütüphanesini eklememek."
+  ],
+  [
+   "Dene",
+   "Açık kalma süresini 5 saniyeye çıkar, ya da kapı açılırken bir buzzer ile kısa bip ver."
+  ]
+ ]
+}

@@ -1,0 +1,63 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HC-SR04 ultrasonik mesafe sensörü",
+  "1 × servo motor (SG90)",
+  "Jumper kablolar (9 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: HC-SR04 VCC ve servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: HC-SR04 GND ve servo GND"
+  ],
+  [
+   "D9",
+   "HC-SR04 TRIG"
+  ],
+  [
+   "D10",
+   "HC-SR04 ECHO"
+  ],
+  [
+   "D6",
+   "Servo sinyal (SIG)"
+  ]
+ ],
+ "img": "assets/devre/otomatik-kapi-sistemi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "HC-SR04'ü c2 (VCC), c3 (TRIG), c4 (ECHO), c5 (GND) deliklerine tak. a2 → artı rayı, a5 → eksi rayı, D9 → a3, D10 → a4.",
+  "Servoyu c10 (SIG), c11 (VCC), c12 (GND) deliklerine tak. D6 → a10, a11 → artı rayı, a12 → eksi rayı.",
+  "Kodu yükle (simülatörde çalıştır): mesafe kaydırıcısı 20 cm'nin altındayken servo kolu 0°'den 90°'ye döner (kapı açılır); kişi uzaklaşınca 2 saniye sonra geri döner."
+ ],
+ "code": "// Otomatik kapi: HC-SR04 biri yaklasinca servoyu (kapi) acar, uzaklasinca kapatir\n#include <Servo.h>\n\nconst int TRIG = 9;\nconst int ECHO = 10;\nconst int SERVO_PIN = 6;\nconst int ACMA_CM = 20;                // bu mesafeden yakinda kapi acilir\nconst unsigned long BEKLEME_MS = 2000; // kisi uzaklasinca kapi 2 sn daha acik kalir\nconst int KAPALI_ACI = 0;\nconst int ACIK_ACI = 90;\n\nServo kapi;\nint aci = KAPALI_ACI;                  // servonun su anki acisi\nunsigned long sonGorulme = 0;          // kisiyi en son gordugumuz an (ms)\nbool kisiVar = false;\n\nfloat mesafeOlc() {\n  digitalWrite(TRIG, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(TRIG, LOW);\n  long sure = pulseIn(ECHO, HIGH, 30000);\n  if (sure == 0) return -1;\n  return sure * 0.0343 / 2.0;\n}\n\nvoid setup() {\n  pinMode(TRIG, OUTPUT);\n  pinMode(ECHO, INPUT);\n  kapi.attach(SERVO_PIN);\n  kapi.write(aci);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  float cm = mesafeOlc();\n\n  if (cm > 0 && cm < ACMA_CM) {\n    kisiVar = true;\n    sonGorulme = millis();             // her gorulusunde bekleme suresi yeniden baslar\n  } else if (kisiVar && millis() - sonGorulme > BEKLEME_MS) {\n    kisiVar = false;                   // kisi gitti ve bekleme bitti\n  }\n\n  // kapiyi hedefe dogru 3'er derece ilerlet (ani hareket yerine yumusak acilis)\n  int hedef = KAPALI_ACI;\n  if (kisiVar) {\n    hedef = ACIK_ACI;\n  }\n  if (aci < hedef) {\n    aci += 3;\n    if (aci > hedef) aci = hedef;\n    kapi.write(aci);\n  } else if (aci > hedef) {\n    aci -= 3;\n    if (aci < hedef) aci = hedef;\n    kapi.write(aci);\n  }\n\n  Serial.print(\"Mesafe: \");\n  Serial.print(cm, 0);\n  Serial.print(\" cm  Kapi acisi: \");\n  Serial.println(aci);\n  delay(20);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Kod her turda mesafeyi ölçer. 20 cm'den yakınsa kisiVar = true olur ve sonGorulme zamanı güncellenir; kişi gidince 2 saniye (BEKLEME_MS) geçmeden kapı kapanmaz. Servo, ani hareket yerine her turda 3°'lik adımlarla hedef açıya ilerletilir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Mesafe 15 cm iken servo 0°'den 90°'ye yaklaşık 0,6 saniyede çıktı. Mesafe 120 cm'ye çıkınca servo yaklaşık 2 saniye sonra kapanmaya başladı ve yaklaşık 0,8 saniyede 0°'ye döndü; 30 cm'de (eşiğin dışında) kapı kapalı kaldı, 10 cm'de yeniden açıldı."
+  ],
+  [
+   "Besleme uyarısı",
+   "Servo hareket ederken yüzlerce mA çekebilir ve çalışırken Arduino'yu resetleyebilir. SG90 gibi küçük servolar USB'den çalışır; birden çok servo ya da büyük servo için ayrı 5 V kaynak kullan ve GND'lerini birleştir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Servo kablolarını ters takmak (kahverengi/siyah = GND, kırmızı = VCC, turuncu = sinyal); servo VCC'sini bir veri pinine bağlamak; HC-SR04'ün TRIG/ECHO pinlerini koddakiyle uyumsuz bağlamak; Servo.h kütüphanesini eklememek."
+  ],
+  [
+   "Dene",
+   "Açık kalma süresini 5 saniyeye çıkar, ya da kapı açılırken bir buzzer ile kısa bip ver."
+  ]
+ ],
+ "title": "25. Otomatik Kapı Sistemi"
+}
