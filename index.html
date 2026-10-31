@@ -261,7 +261,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     </a>
     <nav class="nav" aria-label="Ana menü">
       <a href="#icerikler">İçerikler</a>
-      <a href="#araclar">Uygulamalarım</a>
+      <a href="#uygulamalar">Uygulamalar</a>
+      <a href="#araclar">Platformlarım</a>
       <a href="#yol">Öğrenme yolu</a>
       <a href="#notlar">Atölye notları</a>
       <a href="#hakkimda">Hakkımda</a>
@@ -279,7 +280,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <p class="lede">Arduino'dan ROS 2'ye adım adım yazılar, çalışan proje dosyaları ve kendi geliştirdiğim uygulamalar. Her içerik bir masada denenmiş, kablosu takılmış hâliyle burada.</p>
       <div class="ctas">
         <a class="btn btn-primary" href="#icerikler">İçeriklere göz at →</a>
-        <a class="btn btn-ghost" href="#araclar">Uygulamalarım</a>
+        <a class="btn btn-ghost" href="#uygulamalar">Uygulamalarım</a>
       </div>
       <ul class="topics" aria-label="Konular">
         <li>Scratch Jr.</li><li>Scratch</li><li>Kodu Game Lab</li><li>Minecraft</li><li>Tinkercad</li><li>SPIKE</li><li>Arduino</li><li>Python</li>
@@ -319,11 +320,86 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   </div>
 </section>
 
-<section id="araclar">
+<section id="uygulamalar">
   <div class="wrap">
     <div class="sec-head">
       <div>
         <div class="eyebrow">U2 · Uygulamalarım</div>
+        <h2>Atölyede ihtiyaç duyup yazdığım araçlar</h2>
+        <p>Her biri bir projede karşılaştığım sorunu çözmek için başladı. Ücretsiz deneyebilirsin.</p>
+      </div>
+    </div>
+    <div class="apps">
+      <article class="app">
+        <div class="app-screen">
+          <div class="m-servo" aria-hidden="true">
+            <div class="m-row"><span>J1</span><div class="m-track"><b style="width:52%"></b></div><span>94°</span></div>
+            <div class="m-row"><span>J2</span><div class="m-track"><b style="width:30%"></b></div><span>54°</span></div>
+            <div class="m-row"><span>J3</span><div class="m-track"><b style="width:74%"></b></div><span>133°</span></div>
+            <div class="m-row"><span>GR</span><div class="m-track"><b style="width:12%"></b></div><span>22°</span></div>
+          </div>
+        </div>
+        <div class="app-body">
+          <div class="app-title"><h3>ServoLab</h3><span class="status live">Yayında</span></div>
+          <p>Bluetooth ile robot kolunu telefondan sür, her servonun sınırlarını kalibre et ve hareketleri kaydedip tekrar oynat.</p>
+          <ul class="feat">
+            <li>HC-05 ve ESP32 BLE desteği</li>
+            <li>Kaydedilen hareketi Arduino koduna dönüştürme</li>
+            <li>Servo başına min/max darbe ayarı</li>
+          </ul>
+          <div class="app-foot"><span class="platforms">Android · iOS</span><a href="https://play.google.com" target="_blank" rel="noopener">İndir →</a></div>
+        </div>
+      </article>
+      <article class="app">
+        <div class="app-screen">
+          <div aria-hidden="true">
+            <div class="m-pins">
+              <span></span><span class="p"></span><span></span><span class="p"></span><span class="a"></span><span class="a"></span><span></span><span class="i"></span><span class="i"></span><span></span>
+              <span></span><span></span><span class="p"></span><span></span><span class="a"></span><span></span><span class="p"></span><span></span><span></span><span class="a"></span>
+            </div>
+            <div class="m-legend"><span><i style="background:var(--gold)"></i>PWM</span><span><i style="background:var(--mask)"></i>ADC</span><span><i style="background:var(--info)"></i>I²C</span></div>
+          </div>
+        </div>
+        <div class="app-body">
+          <div class="app-title"><h3>PinHarita</h3><span class="status beta">Beta</span></div>
+          <p>Kartını seç, hangi pinin PWM, ADC, I²C ya da SPI desteklediğini tek ekranda gör. Önyükleme sırasında sorun çıkaran pinler ayrıca işaretli.</p>
+          <ul class="feat">
+            <li>Uno R4, ESP32-S3, Pico 2, Raspberry Pi 5</li>
+            <li>Çakışma uyarısı: aynı pine iki görev atanınca</li>
+            <li>Çevrimdışı çalışır</li>
+          </ul>
+          <div class="app-foot"><span class="platforms">Web</span><a href="https://github.com" target="_blank" rel="noopener">Dene →</a></div>
+        </div>
+      </article>
+      <article class="app">
+        <div class="app-screen">
+          <div class="m-blocks" aria-hidden="true">
+            <div class="b1">tekrarla 4 kez</div>
+            <div class="b2">ileri git 20 cm</div>
+            <div class="b3">sağa dön 90°</div>
+            <div class="b1">bitti</div>
+          </div>
+        </div>
+        <div class="app-body">
+          <div class="app-title"><h3>RoboBlok</h3><span class="status dev">Geliştiriliyor</span></div>
+          <p>Çocuklar ve yeni başlayanlar için blok tabanlı kodlama. Bloklar arka planda gerçek Arduino koduna çevrilir, kod yan panelde görünür.</p>
+          <ul class="feat">
+            <li>Bloktan C++ koduna anlık çeviri</li>
+            <li>Sınıflar için hazır görev kartları</li>
+            <li>Türkçe arayüz</li>
+          </ul>
+          <div class="app-foot"><span class="platforms">Web · Tablet</span><a href="#iletisim">Bekleme listesi →</a></div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="araclar">
+  <div class="wrap">
+    <div class="sec-head">
+      <div>
+        <div class="eyebrow">U3 · Platformlarım</div>
         <h2>Kendi geliştirdiğim eğitim uygulamaları</h2>
         <p>Öğrencilerin tarayıcıda deneyerek öğrendiği iki platform.</p>
       </div>
@@ -349,7 +425,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <div class="eyebrow">U3 · Öğrenme yolu</div>
+        <div class="eyebrow">U4 · Öğrenme yolu</div>
         <h2>Sıfırdan otonom robota</h2>
         <p>Nereden başlayacağını bilmiyorsan bu sırayı izle. Her adım bir öncekinin üzerine kurulu.</p>
       </div>
@@ -367,7 +443,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 <section id="notlar">
   <div class="wrap notes-grid">
     <div>
-      <div class="eyebrow">U4 · Atölye notları</div>
+      <div class="eyebrow">U5 · Atölye notları</div>
       <h2 style="font-size:clamp(28px,4vw,40px);margin-top:12px">Kısa paylaşımlar</h2>
       <p style="color:var(--muted);margin-top:10px;max-width:44ch">Uzun bir yazıya dönüşmeyen ama işe yarayan bulgular: bir hata, bir ipucu, masadan bir fotoğraf.</p>
       <form class="compose" id="compose" style="margin-top:24px">
@@ -383,7 +459,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 <section id="hakkimda">
   <div class="wrap about">
     <div class="about-text">
-      <div class="eyebrow">U5 · Hakkımda</div>
+      <div class="eyebrow">U6 · Hakkımda</div>
       <h2>Merhaba, ben Furkan.</h2>
       <p>Robotik ve gömülü sistemler üzerine çalışıyor, öğrendiklerimi Türkçe kaynak olarak paylaşıyorum. Amacım, bir robotu ilk kez hareket ettirmek isteyen herkesin takıldığı yerde elinde çalışan bir örnek olması.</p>
       <p>Yazılarda kullandığım her devreyi önce kendi masamda kuruyorum. Kodlar GitHub'da açık; hata bulursan ya da bir konu önermek istersen yazman yeterli.</p>
