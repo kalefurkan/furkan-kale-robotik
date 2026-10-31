@@ -220,19 +220,10 @@ section{padding-block:72px;border-bottom:1px solid var(--line)}
 .compose .row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;font:500 12px var(--f-mono);color:var(--muted)}
 
 /* Hakkımda */
-.about{display:grid;grid-template-columns:1fr 1.1fr;gap:48px;align-items:start}
-@media (max-width:900px){.about{grid-template-columns:1fr;gap:32px}}
+.about{display:grid;grid-template-columns:1fr;align-items:start}
 .about-text{display:grid;gap:16px;max-width:60ch}
 .about-text h2{font-size:clamp(28px,4vw,40px);margin-top:12px}
 .about-text p{color:var(--muted)}
-.bom-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
-.bom{width:100%;border-collapse:collapse;font-size:14px;min-width:440px}
-.bom caption{text-align:left;padding:14px 16px;font:600 13px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--line)}
-.bom th,.bom td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
-.bom tr:last-child td{border-bottom:0}
-.bom th{font:500 11px var(--f-mono);color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-.bom td:first-child{font:500 13px var(--f-mono);color:var(--gold-ink);white-space:nowrap}
-.bom td:last-child{color:var(--muted)}
 
 /* İletişim */
 .contact{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:start}
@@ -463,20 +454,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <a class="btn btn-primary" href="#iletisim">Benimle iletişime geç</a>
         <a class="btn btn-ghost" href="https://github.com" target="_blank" rel="noopener">GitHub</a>
       </div>
-    </div>
-    <div class="bom-wrap">
-      <table class="bom">
-        <caption>Masamdaki malzeme listesi (BOM)</caption>
-        <thead><tr><th>Ref</th><th>Parça</th><th>Ne için</th></tr></thead>
-        <tbody>
-          <tr><td>U1</td><td>Arduino Uno R4 WiFi</td><td>Başlangıç projeleri ve dersler</td></tr>
-          <tr><td>U2</td><td>ESP32-S3 DevKitC</td><td>Kablosuz kontrol, BLE uygulamaları</td></tr>
-          <tr><td>U3</td><td>Raspberry Pi 5</td><td>ROS 2 Jazzy ve kamera işleri</td></tr>
-          <tr><td>M1–M4</td><td>MG996R servo</td><td>4 eksenli masaüstü kol</td></tr>
-          <tr><td>S1</td><td>MPU6050 IMU</td><td>Denge robotu, PID denemeleri</td></tr>
-          <tr><td>SW</td><td>KiCad · VS Code · PlatformIO</td><td>Kart tasarımı ve kodlama</td></tr>
-        </tbody>
-      </table>
     </div>
   </div>
 </section>
