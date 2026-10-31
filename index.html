@@ -213,7 +213,7 @@ dialog#detail::backdrop{background:rgba(5,20,13,.6)}
 .m-blocks .b3{background:var(--info);color:var(--bg);margin-left:16px}
 
 /* Araçlar */
-.tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
 @media (max-width:900px){.tools{grid-template-columns:1fr}}
 .tool{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;display:grid;gap:18px;min-width:0}
 .tool h3{font-size:22px}
@@ -452,7 +452,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <div>
         <div class="eyebrow">U3 · Platformlarım</div>
         <h2>Kendi geliştirdiğim eğitim uygulamaları</h2>
-        <p>Öğrencilerin tarayıcıda deneyerek öğrendiği iki platform.</p>
+        <p>Öğrencilerin tarayıcıda deneyerek öğrendiği üç platform.</p>
       </div>
     </div>
     <div class="tools">
@@ -465,8 +465,14 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <div class="tool">
         <div class="app-title"><h3>MakersHub Studio</h3><span class="status live">Yayında</span></div>
         <p>Arduino ve 3D tasarımı tarayıcıda öğreten eğitim platformu: 3D editör, devre simülasyonu ve öğretmen için sınıf ve ödev yönetimi.</p>
-        <ul class="feat"><li>3D editör: 18 şekil, Boolean işlemleri, STL / OBJ / GLB dışa aktarma</li><li>Arduino atölyesi: devre editörü, 35 bileşen, kod simülasyonu</li><li>Öğretmen paneli: sınıf, ödev ve teslim değerlendirme</li></ul>
+        <ul class="feat"><li>3D editör: 18 şekil, Boolean işlemleri, STL / OBJ / GLB dışa aktarma</li><li>Arduino atölyesi: devre editörü, 81 bileşen, kod simülasyonu</li><li>Öğretmen paneli: sınıf, ödev ve teslim değerlendirme</li></ul>
         <div class="app-foot"><span class="platforms">Web</span><a href="https://makerlab.furkankale-sosyal.workers.dev" target="_blank" rel="noopener">Aç →</a></div>
+      </div>
+      <div class="tool">
+        <div class="app-title"><h3>Kod Noktası</h3><span class="status live">Yayında</span></div>
+        <p>Kod okuma oyunu: kodu oku, zihninde çalıştır ve hamleleri yap. Tarayıcıda oynanır, iOS sürümü Capacitor ile hazırlanıyor.</p>
+        <ul class="feat"><li>Kodu çalıştırmadan, okuyarak izlemeyi öğreten oyun</li><li>13 dil desteği: Türkçe, İngilizce ve 11 dil daha</li><li>Web ve iOS için tek kod tabanı</li></ul>
+        <div class="app-foot"><span class="platforms">Web · iOS yolda</span><a href="https://kalefurkan.github.io/kod-noktasi-oyun/" target="_blank" rel="noopener">Oyna →</a></div>
       </div>
     </div>
   </div>
