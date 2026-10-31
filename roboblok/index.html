@@ -80,9 +80,12 @@ th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line)}
 th{font:500 11px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 td code{font:500 12px var(--f-mono)}
 ul.parts{margin:6px 0 10px;padding-left:20px;font-size:13.5px}
-.rel{display:flex;gap:8px;flex-wrap:wrap}
-.rel a{font-size:13px;color:var(--mask);font-weight:600;text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:4px 10px}
+.rel{display:grid;gap:8px}
+.rel a{display:grid;gap:2px;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px}
 .rel a:hover{background:var(--sunken)}
+.rel b{font:600 14px var(--f-display);color:var(--mask)}
+.rel small{color:var(--muted);font-size:12.5px}
+.rel .m{font:500 11px var(--f-mono);color:var(--muted)}
 </style>
 </head>
 <body>
@@ -153,13 +156,7 @@ ul.parts{margin:6px 0 10px;padding-left:20px;font-size:13.5px}
           </tbody>
         </table>
         <p class="hint">Çizgi sensörü modülünün çıkışı modele göre ters çalışabilir; kodda <code>HIGH</code> yerine <code>LOW</code> yaz. Sol/sağ motor yönü ters çıkarsa motor kablolarını L298N çıkışında değiştir.</p>
-        <div class="grp">Sitedeki ilgili projeler</div>
-        <div class="rel">
-          <a href="../index.html#arduino/engelden-kacan-robot">Engelden Kaçan Robot</a>
-          <a href="../index.html#arduino/cizgi-izleyen-robot">Çizgi İzleyen Robot</a>
-          <a href="../index.html#arduino/bluetooth-kontrollu-robot-araba">Bluetooth Robot Araba</a>
-          <a href="../index.html#arduino/mini-sumo-robot">Mini Sumo Robot</a>
-        </div>
+        <div id="relbox" hidden><div class="grp">Bu robotun gerçek projeleri</div><p class="hint" style="margin:0 0 8px">Sitedeki Arduino yolundan: devre şeması, kod ve adım adım anlatımıyla.</p><div class="rel" id="rel"></div></div>
       </details>
     </section>
   </div>
@@ -502,6 +499,17 @@ runBtn.addEventListener('click', async () => {
 stopBtn.addEventListener('click', () => { stopRun(); msg('Durduruldu.', ''); });
 $('reset').addEventListener('click', () => { stopRun(); resetWorld(); msg('', ''); });
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change', draw);
+
+/* Sitedeki gerçek projeler (assets/arduino/index.json'dan) */
+fetch('../assets/arduino/index.json').then(r => r.json()).then(d => {
+  const ids = ['cizgi-izleyen-robot', 'engelden-kacan-robot', 'mini-sumo-robot', 'bluetooth-kontrollu-robot-araba'];
+  const lv = Object.fromEntries(d.levels.map(l => [l.id, l.name]));
+  const ps = ids.map(id => d.projects.find(p => p.id === id && p.ready)).filter(Boolean);
+  if (!ps.length) return;
+  const e = t => t.replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+  $('rel').innerHTML = ps.map(p => `<a href="../index.html#arduino/${p.id}"><span class="m">${String(p.n).padStart(2, '0')} · Seviye ${p.lv} ${e(lv[p.lv] || '')}</span><b>${e(p.t)}</b><small>${e((p.d || '').split('. ')[0].replace(/\.$/, ''))}.</small><span class="m">${e(p.comps || '')}</span></a>`).join('');
+  $('relbox').hidden = false;
+}).catch(() => {});
 
 /* test için */
 window.__rb = {get prog() { return prog; }, set prog(v) { prog = v; rerender(); }, setMis(id) { mis = MIS.find(m => m.id === id); drawMis(); resetWorld(); }, get pose() { return pose; }, get trail() { return trail; }, get code() { return lastCode; }, get done() { return [...doneSet]; }};
