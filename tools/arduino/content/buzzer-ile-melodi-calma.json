@@ -1,0 +1,50 @@
+{
+ "sketch": "melodi",
+ "d": "Pasif buzzer ile tone() komutunu kullanarak bir ezgi çalar. Nota ve süre dizileri, for döngüsü ve noTone ile notalar arasındaki kısa sessizlik öğrenilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × pasif buzzer",
+  "Jumper kablolar (2 adet)"
+ ],
+ "wiring": [
+  [
+   "D8",
+   "Pasif buzzer + (artı) bacağı"
+  ],
+  [
+   "GND",
+   "Pasif buzzer − (eksi) bacağı"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Pasif buzzer'ı breadboard'a tak: + işaretli bacağı sol sütunda (c10), diğer bacağı yanındaki sütunda (c11) olsun.",
+  "D8 pinini bir kabloyla + bacağının sütunundaki e10 deliğine bağla.",
+  "Buzzer'ın − bacağının sütunundaki e11 deliğini bir kabloyla Arduino GND pinine bağla.",
+  "Kodu yükle ve Seri Monitör'ü aç (9600 baud). Buzzer \"Twinkle Twinkle Little Star\" ezgisini çalar; çalan notanın frekansı Seri Monitör'e yazılır.",
+  "Melodi biter, iki saniye sonra baştan başlar."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Pasif buzzer'ın içinde kendi osilatörü yoktur: Arduino'nun tone(pin, frekans) komutu pine o frekansta bir kare dalga üretir, buzzer de o sesi çıkarır. Nota frekansları: Do 262, Re 294, Mi 330, Fa 349, Sol 392, La 440 Hz. NOTALAR dizisi hangi notaların, SURELER dizisi bu notaların ne kadar süreceğini tutar (1000/4 = 250 ms çeyrek nota, 1000/2 = 500 ms yarım nota)."
+  ],
+  [
+   "tone ve noTone",
+   "tone(pin, frekans) sesi başlatır, delay() ses sürerken bekletir, noTone(pin) sesi keser. Notalar arasında kısa bir noTone + delay bırakmazsan aynı notalar peş peşe tek uzun ses gibi duyulur."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Aktif buzzer kullanmak: aktif buzzer her frekansta aynı sesi çıkarır, melodi çalamaz. digitalWrite(HIGH) ile pasif buzzer'ı öttürmeye çalışmak: pasif buzzer yalnızca tone() ile çalışır. + ve − bacaklarını ters bağlamak ya da buzzer'ı GND'ye bağlamayı unutmak."
+  ],
+  [
+   "Simülatör notu",
+   "MakersHub Studio'da ses çıkmaz; pasif buzzer'ın üstünde \"çalıyor 392 Hz\" gibi bir etiket görünür. Ses gerçek kartta duyulur (bu proje simülatörde denendi, gerçek kartta denenmedi)."
+  ],
+  [
+   "Dene",
+   "Kendi melodini yazmak için NOTALAR ve SURELER dizilerini, NOTA_SAYISI değerini değiştir. delay(sure / 4) arasını büyütüp küçülterek notaların bağlı ya da kesik çalmasını dene."
+  ]
+ ]
+}

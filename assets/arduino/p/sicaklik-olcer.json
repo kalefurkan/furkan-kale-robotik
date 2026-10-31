@@ -1,0 +1,50 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × LM35 sıcaklık sensörü",
+  "Jumper kablolar (3 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "LM35 +Vs (sol bacak, yassı yüze bakınca)"
+  ],
+  [
+   "A0",
+   "LM35 OUT (orta bacak)"
+  ],
+  [
+   "GND",
+   "LM35 GND (sağ bacak)"
+  ]
+ ],
+ "img": "assets/devre/sicaklik-olcer.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LM35'i yassı yüzü size dönük tutarak breadboard'a tak: +Vs bacağı c10, OUT bacağı c11, GND bacağı c12 deliğinde olsun.",
+  "5V pinini e10'a, A0 pinini e11'e, e12'yi GND pinine kablola.",
+  "Kodu yükle ve Seri Monitör'ü aç (9600 baud).",
+  "Her saniye ADC değeri ve sıcaklık yazılır. Sensörü parmaklarınla tutarak ısıt: değer yavaşça yükselir."
+ ],
+ "code": "// LM35 ile sıcaklık ölçer: çıkış gerilimi 10 mV / °C\nconst int LM35 = A0;\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int deger = analogRead(LM35);                      // 0 ... 1023 (0 V ... 5 V)\n  float gerilim = deger * 5.0 / 1023.0;              // ADC değerini volta çevir (5V referans)\n  float sicaklik = gerilim * 100.0;                  // 10 mV/°C = 0.01 V/°C  ->  °C = volt x 100\n\n  Serial.print(\"ADC: \");\n  Serial.print(deger);\n  Serial.print(\"  Sıcaklık: \");\n  Serial.print(sicaklik);\n  Serial.println(\" C\");\n  delay(1000);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "LM35 her °C için çıkışında 10 mV üretir: 25 °C → 250 mV. analogRead 0–5 V aralığını 0–1023'e çevirir; gerilim = deger × 5 / 1023, sıcaklık = gerilim × 100. Sensör doğrudan 5V ve GND'ye bağlı olmalı, yoksa çıkış anlamsız olur."
+  ],
+  [
+   "Kalibrasyon (simülatörden okunan)",
+   "Simülatörde sıcaklık kaydırıcısı 0 °C'de ADC 0, 10 °C'de 20 (9,78 °C), 25 °C'de 51 (24,93 °C), 27 °C'de 55 (26,88 °C), 37 °C'de 75 (36,66 °C), 50 °C'de 102 (49,85 °C) ve 100 °C'de 204 (99,71 °C) okundu. ADC bir adımı 5000/1023 ≈ 4,9 mV, yani yaklaşık 0,49 °C'dir; bu yüzden sonuç 0,5 °C basamaklarla değişir. Gerçek sensör ±0,5 °C kadar hata yapabilir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Bacakları ters takmak (+Vs ile GND yer değiştirirse sensör ısınabilir, hemen sök); 5V yerine 3,3 V kullanıp 5.0 ile hesaplamak; deger × 5 / 1023 yerine tam sayı bölmesi yapmak (5.0 ondalıklı yazılmalı, yoksa sonuç yuvarlanır)."
+  ],
+  [
+   "Dene",
+   "Daha kararlı değer için 10 ölçümün ortalamasını al: bir for döngüsüyle analogRead toplamını 10'a böl. Sıcaklık 30 °C'yi geçince bir LED yaksın."
+  ]
+ ],
+ "title": "13. Sıcaklık Ölçer"
+}

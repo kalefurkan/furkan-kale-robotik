@@ -1,0 +1,69 @@
+{
+ "sketch": "led_bar",
+ "d": "Potansiyometreyi çevirdikçe 10 LED'lik çubuk soldan sağa dolar: yanan LED sayısı 0–10 arasında değişir. map(), constrain() ve LED dizisi bir arada kullanılır.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "10 × LED (4 yeşil, 3 sarı, 3 kırmızı)",
+  "10 × 220 Ω direnç",
+  "1 × 10 kΩ potansiyometre",
+  "Jumper kablolar (24 adet)"
+ ],
+ "wiring": [
+  [
+   "D2, D3, D4, D5, D6, D7, D8, D9, D10, D11",
+   "Soldan sağa 1.–10. LED'in anodu"
+  ],
+  [
+   "Her LED'in katodu (kısa bacak)",
+   "Kendi 220 Ω direnci; direncin alt ucu kabloyla alttaki eksi (−) rayına"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı"
+  ],
+  [
+   "5V",
+   "Potansiyometrenin bir dış bacağı"
+  ],
+  [
+   "A0",
+   "Potansiyometrenin orta bacağı"
+  ],
+  [
+   "GND (GND3)",
+   "Potansiyometrenin öbür dış bacağı"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "On LED'i breadboard'un üst yarısında d satırına, ikişer sütun arayla tak (sütun 2–3, 4–5, ... 20–21). Uzun bacaklar (anot) soldaki sütunda olsun. Renk sırası: 4 yeşil, 3 sarı, 3 kırmızı.",
+  "Her LED'in kısa bacağıyla aynı sütundaki e deliğine bir 220 Ω direncin bir ucunu tak; direncin öbür ucu breadboard'un ortasındaki oluğu aşıp h deliğine gelsin.",
+  "Her direncin alt ucunun sütunundaki j deliğinden alttaki mavi (−) rayına birer kablo çek (10 kablo); rayı bir kabloyla Arduino GND pinine (GND2) bağla.",
+  "D2'den D11'e kadar pinleri sırayla soldan sağa LED'lerin anot sütunlarına (a satırı) kablola.",
+  "Potansiyometreyi c24, c25, c26 deliklerine tak. 5V pinini e24'e, A0 pinini e25'e (orta bacak), e26'yı GND3 pinine kablola.",
+  "Kodu yükle ve Seri Monitör'ü aç (9600 baud). Potansiyometreyi çevir: çubuğun uzunluğu değişir."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "analogRead 0–1023 arası değer verir. map(deger, 0, 1023, 0, 11) bu aralığı 11 eşit dilime böler (0, 1, ... 10 LED). Değer tam 1023 olursa sonuç 11 çıkar; constrain(yanacak, 0, 10) bunu 10'a sabitler. for döngüsü ilk \"yanacak\" kadar LED'i yakar, kalanları söndürür."
+  ],
+  [
+   "Neden 11 ile map?",
+   "map(deger, 0, 1023, 0, 10) yazarsan 10. LED yalnızca değer tam 1023 olduğunda yanar, yani pot sonuna gelmeden hiç yanmaz. 11 dilimli aralık her LED'e yaklaşık eşit pot dönüşü payı verir."
+  ],
+  [
+   "Pot yönü (simülatörden okunan)",
+   "Bu bağlantıda 5V potansiyometrenin A (sol) bacağına bağlı olduğu için pot sola çevrilince değer artar. Simülatörde pot konumu sol uçtayken 1022 okundu (10 LED), %30'da 716 (7 LED), %60'ta 409 (4 LED), %90'da 102 (1 LED), sağ uçta 1 (0 LED). Yönü tersine çevirmek istersen 5V ve GND kablolarının yerini değiştir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Her LED'e direnç koymamak ya da dirençlerin alt ucunu GND rayına bağlamayı unutmak; LED'leri ters takmak; potansiyometrenin orta bacağını A0 yerine bir dış bacağa bağlamak (değer hiç değişmez)."
+  ],
+  [
+   "Dene",
+   "Barı ortadan iki yöne büyüt ya da en yüksek LED'in yandığı anda bir buzzer öttür (8. projedeki buzzer ile birleştir)."
+  ]
+ ]
+}

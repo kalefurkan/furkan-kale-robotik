@@ -1,0 +1,59 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × DHT11 sıcaklık ve nem sensörü (3 pinli modül)",
+  "Jumper kablolar (3 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "DHT11 VCC"
+  ],
+  [
+   "D2",
+   "DHT11 DATA"
+  ],
+  [
+   "GND",
+   "DHT11 GND"
+  ]
+ ],
+ "img": "assets/devre/ortam-sicaklik-ve-nem-olcer.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino IDE'de Kütüphane Yöneticisi'ni (Araçlar → Kütüphaneleri Yönet) aç ve \"DHT sensor library\" (Adafruit) kütüphanesini kur; istenirse \"Adafruit Unified Sensor\" kütüphanesini de kur.",
+  "DHT11'i breadboard'a tak: VCC bacağı c10, DATA bacağı c11, GND bacağı c12 deliğinde olsun (bacak sırası modüle göre değişebilir, kartın üzerindeki yazıya bak).",
+  "5V pinini e10'a, D2 pinini e11'e, e12'yi GND pinine kablola.",
+  "Kodu yükle ve Seri Monitör'ü aç (9600 baud).",
+  "İki saniyede bir sıcaklık ve nem yazılır. Sensöre nefesini üfle: nem hızla yükselir."
+ ],
+ "code": "// DHT11 ile ortamın sıcaklığını ve nemini ölçer\n#include <DHT.h>                    // Adafruit \"DHT sensor library\" (Arduino IDE'de Kütüphane Yöneticisi'nden kur)\n\nconst int DHT_PIN = 2;              // DHT11 DATA bacağı D2'ye bağlı\nDHT dht(DHT_PIN, DHT11);            // sensör tipi: DHT11\n\nvoid setup() {\n  Serial.begin(9600);\n  dht.begin();                      // sensörü başlat\n}\n\nvoid loop() {\n  float sicaklik = dht.readTemperature();   // °C\n  float nem = dht.readHumidity();           // % bağıl nem\n\n  if (isnan(sicaklik) || isnan(nem)) {      // okuma başarısızsa NaN (sayı değil) döner\n    Serial.println(\"Sensör okunamadı! Bağlantıları kontrol et.\");\n  } else {\n    Serial.print(\"Sıcaklık: \");\n    Serial.print(sicaklik);\n    Serial.print(\" C   Nem: %\");\n    Serial.println(nem);\n  }\n  delay(2000);                              // DHT11 en fazla 1-2 saniyede bir okunabilir\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "DHT11 tek bir veri hattı (DATA) üzerinden sıcaklık ve nemi sayısal olarak gönderir; zamanlamayı DHT.h kütüphanesi halleder. DHT dht(2, DHT11) sensörün hangi pine bağlı olduğunu ve türünü söyler, dht.begin() sensörü başlatır, readTemperature() °C, readHumidity() % bağıl nem verir."
+  ],
+  [
+   "isnan() kontrolü",
+   "Sensör okunamazsa (kablo gevşek, güç yok) kütüphane NaN (sayı değil) döndürür. isnan(sicaklik) bunu yakalar; kontrol etmezsen ekrana \"nan\" yazılır."
+  ],
+  [
+   "Sensör sınırları",
+   "DHT11 yalnızca 0–50 °C ve %20–90 nem aralığını ölçer, hata payı yaklaşık ±2 °C ve ±%5'tir ve en sık 1–2 saniyede bir okunabilir. Çıplak 4 bacaklı DHT11 kullanırsan DATA ile VCC arasına 10 kΩ çekme direnci gerekir; 3 pinli modüllerde bu direnç genellikle kart üzerindedir."
+  ],
+  [
+   "Simülatör notu",
+   "Simülatörde sensör kaydırıcıdan ayarlanır ve tam sayı döner (24 °C ve %45 iken \"Sıcaklık: 24.00 C   Nem: %45.00\" yazıldı; 31 °C ve %70'e getirilince değerler 31.00 ve 70.00 oldu). Gerçek sensörün zamanlaması ve hata payı simüle edilmez."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Kütüphaneyi kurmamak (derleme hatası: DHT.h bulunamadı); DATA pinini koddaki DHT_PIN ile aynı yapmamak; delay(2000) yerine çok hızlı okumak (hatalı değerler)."
+  ],
+  [
+   "Dene",
+   "Sıcaklık 30 °C'yi ya da nem %70'i geçince bir LED yak veya sıcaklığı Fahrenheit olarak yaz: dht.readTemperature(true)."
+  ]
+ ],
+ "title": "14. Ortam Sıcaklık ve Nem Ölçer"
+}

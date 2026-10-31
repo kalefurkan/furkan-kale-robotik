@@ -78,7 +78,8 @@
    "t": "LED ile Işık Şiddeti Göstergesi",
    "comps": "LDR, LED'ler",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "LDR ile ortamın ışığını ölçüp beş LED'i bir ışık göstergesine çevirir: ortam aydınlandıkça yanan LED sayısı 0'dan 5'e çıkar. analogRead, map ve constrain birlikte kullanılır."
   },
   {
    "n": 7,
@@ -95,7 +96,8 @@
    "t": "Buzzer ile Melodi Çalma",
    "comps": "Pasif buzzer",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "Pasif buzzer ile tone() komutunu kullanarak bir ezgi çalar. Nota ve süre dizileri, for döngüsü ve noTone ile notalar arasındaki kısa sessizlik öğrenilir."
   },
   {
    "n": 9,
@@ -103,7 +105,8 @@
    "t": "Butonlu Elektronik Piyano",
    "comps": "Butonlar, pasif buzzer",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "Dört butonlu mini piyano: her butona basınca pasif buzzer farklı bir nota (Do, Re, Mi, Fa) çalar. INPUT_PULLUP, dizi ve tone/noTone birlikte kullanılır."
   },
   {
    "n": 10,
@@ -111,7 +114,8 @@
    "t": "Dijital Zar",
    "comps": "7 LED, buton",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "Butona basınca yedi LED'den oluşan zar 1–6 arası rastgele bir sayı gösterir. random(), randomSeed(), dizi ve bit işlemleri öğrenilir."
   },
   {
    "n": 11,
@@ -119,7 +123,8 @@
    "t": "LED Bar Grafik",
    "comps": "10 LED, dirençler",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "Potansiyometreyi çevirdikçe 10 LED'lik çubuk soldan sağa dolar: yanan LED sayısı 0–10 arasında değişir. map(), constrain() ve LED dizisi bir arada kullanılır."
   },
   {
    "n": 12,
@@ -127,7 +132,8 @@
    "t": "Reaksiyon Hız Testi",
    "comps": "LED, buton, buzzer",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "LED yandığı anda butona ne kadar çabuk bastığını milisaniye olarak ölçer. Rastgele bekleme, millis() ile süre ölçümü ve erken basma kontrolü öğrenilir; buzzer kısa bir bip verir."
   },
   {
    "n": 13,
@@ -135,7 +141,8 @@
    "t": "Sıcaklık Ölçer",
    "comps": "LM35 sensörü",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "LM35 sensörünün 10 mV/°C çıkışını analogRead ile okuyup sıcaklığı derece olarak hesaplar ve Seri Monitör'e yazar. ADC değeri, gerilim ve sıcaklık dönüşümü öğrenilir."
   },
   {
    "n": 14,
@@ -143,7 +150,8 @@
    "t": "Ortam Sıcaklık ve Nem Ölçer",
    "comps": "DHT11",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "DHT11 sensöründen DHT.h kütüphanesi ile ortamın sıcaklığını ve nemini okuyup Seri Monitör'e yazar. Kütüphane kullanımı, nesne tanımlama ve isnan() ile hata kontrolü öğrenilir."
   },
   {
    "n": 15,
@@ -151,7 +159,8 @@
    "t": "Ultrasonik Mesafe Ölçer",
    "comps": "HC-SR04",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "HC-SR04 ultrasonik sensörüyle önündeki nesneye olan mesafeyi santimetre olarak ölçer ve Seri Monitör'e yazar. pulseIn() ile süre ölçümü ve süreyi mesafeye çevirme öğrenilir."
   },
   {
    "n": 16,
@@ -159,7 +168,8 @@
    "t": "Dokunmatik LED Kontrolü",
    "comps": "TTP223, LED",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "TTP223 kapasitif dokunmatik sensörüne dokununca LED yanar, parmağı çekince söner. Dijital girişin sensör çıkışından okunması ve sensörlerin güç bağlantısı öğrenilir."
   },
   {
    "n": 17,
@@ -176,7 +186,8 @@
    "t": "Işıkla Kontrol Edilen Buzzer",
    "comps": "LDR, buzzer",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "LDR ile ışığı ölçüp pasif buzzerın frekansını ışığa göre değiştirir; elini sensörün üstünde oynatarak theremin gibi çalabilirsin. map() ile bir değer aralığını frekans aralığına çevirme öğrenilir."
   },
   {
    "n": 19,
@@ -184,7 +195,8 @@
    "t": "Eğilme Algılayıcı Alarm",
    "comps": "Tilt sensörü, buzzer",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "Eğim sensörü eğildiğinde aktif buzzer alarm verir. İki uçlu bir anahtar gibi çalışan sensörün INPUT_PULLUP ile okunması ve durum değişimini hatırlama öğrenilir."
   },
   {
    "n": 20,
@@ -192,7 +204,8 @@
    "t": "Mini Elektronik Sayaç",
    "comps": "Buton, 16x2 LCD",
    "lv": 1,
-   "ready": false
+   "ready": true,
+   "d": "Butona her basışta sayı artar ve 16x2 LCD ekranda görünür. LiquidCrystal kütüphanesi, 4 bit LCD bağlantısı, basılı tutmayı saymama ve buton titreşimini (debounce) atlama öğrenilir."
   },
   {
    "n": 21,

@@ -1,0 +1,61 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × TTP223 dokunmatik sensör modülü",
+  "1 × LED (yeşil)",
+  "1 × 220 Ω direnç",
+  "Jumper kablolar (5 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "TTP223 VCC"
+  ],
+  [
+   "D2",
+   "TTP223 OUT"
+  ],
+  [
+   "GND (GND3)",
+   "TTP223 GND"
+  ],
+  [
+   "D8",
+   "LED anot (uzun bacak)"
+  ],
+  [
+   "LED katot (kısa bacak)",
+   "220 Ω direnç, direncin diğer ucu GND (GND2)"
+  ]
+ ],
+ "img": "assets/devre/dokunmatik-led-kontrolu.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "TTP223 modülünü breadboard'a tak: VCC bacağı c10, OUT bacağı c11, GND bacağı c12 deliğinde olsun.",
+  "5V pinini e10'a, D2 pinini e11'e, e12'yi GND3 pinine kablola.",
+  "LED'i c18 (uzun bacak) ve c19 (kısa bacak) deliklerine, 220 Ω direnci d19 ile d23 arasına tak.",
+  "D8 pinini e18'e, e23'ü GND2 pinine kablola.",
+  "Kodu yükle. Modülün dokunmatik yüzeyine parmağını koy: LED yanar; parmağını çekince söner."
+ ],
+ "code": "// Dokunmatik LED kontrolü: TTP223 modülüne dokunulunca LED yanar, parmak çekilince söner\nconst int DOKUNMATIK = 2;   // TTP223 OUT bacağı D2'ye bağlı\nconst int LED = 8;          // D8 -> LED (+) -> 220 ohm direnç -> GND\n\nvoid setup() {\n  pinMode(DOKUNMATIK, INPUT);   // modül kendi çıkışını sürer: dokunulunca HIGH, değilken LOW\n  pinMode(LED, OUTPUT);\n}\n\nvoid loop() {\n  if (digitalRead(DOKUNMATIK) == HIGH) {   // dokunuluyor mu?\n    digitalWrite(LED, HIGH);\n  } else {\n    digitalWrite(LED, LOW);\n  }\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "TTP223 parmağın yarattığı kapasite değişimini algılar. Varsayılan modda dokunulurken OUT pini HIGH, dokunulmuyorken LOW olur; Arduino pini INPUT yapıp digitalRead ile bunu okur. Modül çıkışını kendisi sürdüğü için INPUT_PULLUP gerekmez."
+  ],
+  [
+   "Simülatör notu",
+   "Simülatörde dokunma, sensörün üzerindeki bir düğmeyle taklit edilir (kapasitif algılama modellenmez). Denemede dokunma anında LED yandı ve bırakınca söndü."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "VCC ve GND bacaklarını karıştırmak (sensör çalışmaz, ısınabilir); LED'in direncini unutmak; OUT pinini bir önceki projedeki gibi INPUT_PULLUP yapmak (gerek yok, ama zararsız)."
+  ],
+  [
+   "Dene: aç/kapa",
+   "Dokunuşta LED'i açıp kapatan sürüm için LED durumunu bir değişkende tut ve yalnızca dokunuşun başladığı anda değiştir: bool ledAcik = false; bool onceki = LOW; loop içinde durum = digitalRead(DOKUNMATIK); if (onceki == LOW && durum == HIGH) { ledAcik = !ledAcik; digitalWrite(LED, ledAcik); } onceki = durum; delay(30);"
+  ]
+ ],
+ "title": "16. Dokunmatik LED Kontrolü"
+}

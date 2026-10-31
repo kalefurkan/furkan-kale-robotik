@@ -1,0 +1,67 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "5 × LED (2 yeşil, 2 sarı, 1 kırmızı)",
+  "5 × 220 Ω direnç",
+  "1 × 10 kΩ direnç",
+  "1 × LDR (ışığa duyarlı direnç)",
+  "Jumper kablolar (14 adet)"
+ ],
+ "wiring": [
+  [
+   "D2, D3, D4, D5, D6",
+   "Soldan sağa 1.–5. LED'in anodu (uzun bacağın sütunu)"
+  ],
+  [
+   "Her LED'in katodu (kısa bacak)",
+   "Kendi 220 Ω direnci; direncin alt ucu kabloyla alttaki eksi (−) rayına"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı"
+  ],
+  [
+   "5V",
+   "LDR'nin bir ucu"
+  ],
+  [
+   "A0",
+   "LDR'nin öbür ucu ile 10 kΩ direncin birleştiği nokta"
+  ],
+  [
+   "GND (GND3)",
+   "10 kΩ direncin öbür ucu"
+  ]
+ ],
+ "img": "assets/devre/led-ile-isik-siddeti-gostergesi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Beş LED'i breadboard'un üst yarısında c satırına, aralarında boş sütun bırakarak tak (sütun 2–3, 5–6, 8–9, 11–12, 14–15). Her LED'in uzun bacağı (anot) soldaki, kısa bacağı (katot) sağdaki sütunda olsun.",
+  "Her LED'in kısa bacağıyla aynı sütundaki e deliğine bir 220 Ω direncin bir ucunu tak; direncin öbür ucu breadboard'un ortasındaki oluğu aşıp h deliğine gelsin. Böylece her LED'in kendi direnci olur (aynı anda birçok LED yanacağı için tek ortak direnç kullanılmaz).",
+  "Her direncin alt ucunun sütunundaki j deliğinden alttaki mavi (−) rayına birer kısa kablo çek. Bu rayı bir kabloyla Arduino'nun GND pinine (GND2) bağla.",
+  "D2, D3, D4, D5 ve D6 pinlerini, soldan sağa sırayla, LED'lerin anot sütunlarındaki a deliklerine kablola.",
+  "LDR'yi c20 ve c21 deliklerine, 10 kΩ direnci d21 ile d25 arasına tak. 5V pinini e20'ye (LDR'nin bir ucu), A0 pinini e21'e (LDR ile direncin birleştiği sütun), e25'i GND3 pinine kablola.",
+  "Kodu yükle ve Seri Monitör'ü aç (9600 baud). LDR'nin üstünü elinle kapatıp aç: ışık arttıkça yanan LED sayısı artar."
+ ],
+ "code": "// LED ile ışık şiddeti göstergesi: ortam aydınlandıkça yanan LED sayısı artar\nconst int LDR = A0;                          // 5V - LDR - A0 - 10k - GND (gerilim bölücü)\nconst int LEDLER[] = {2, 3, 4, 5, 6};        // 1. LED en sol, 5. LED en sağ\nconst int LED_SAYISI = 5;\n\n// Kendi ortamına göre ayarla: Seri Monitör'de karanlıkta ve en aydınlıkta okuduğun değerler\nconst int KARANLIK = 50;    // bu değer ve altında hiç LED yanmaz\nconst int AYDINLIK = 900;   // bu değer ve üstünde 5 LED de yanar\n\nvoid setup() {\n  for (int i = 0; i < LED_SAYISI; i++) {\n    pinMode(LEDLER[i], OUTPUT);\n  }\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int isik = analogRead(LDR);                                   // 0 ... 1023, aydınlandıkça artar\n  int yanacak = map(isik, KARANLIK, AYDINLIK, 0, LED_SAYISI);   // ışığı 0 ... 5 aralığına çevir\n  yanacak = constrain(yanacak, 0, LED_SAYISI);                  // aralığın dışına taşmayı engelle\n\n  for (int i = 0; i < LED_SAYISI; i++) {\n    if (i < yanacak) {\n      digitalWrite(LEDLER[i], HIGH);   // ilk \"yanacak\" kadar LED yanar\n    } else {\n      digitalWrite(LEDLER[i], LOW);\n    }\n  }\n\n  Serial.print(\"Isik: \");\n  Serial.print(isik);\n  Serial.print(\"  Yanan LED: \");\n  Serial.println(yanacak);\n  delay(200);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "5V – LDR – A0 – 10 kΩ – GND bir gerilim bölücüdür. LDR aydınlıkta küçük, karanlıkta büyük direnç gösterir; bu yüzden aydınlandıkça A0 gerilimi ve analogRead değeri artar. map(isik, KARANLIK, AYDINLIK, 0, 5) bu değeri 0–5 arası bir LED sayısına çevirir, constrain taşmaları keser. for döngüsü ilk \"yanacak\" kadar LED'i yakar."
+  ],
+  [
+   "Kalibrasyon (simülatörden okunan)",
+   "Simülatördeki LDR ışık kaydırıcısı %0'da 10, %30'da 75, %50'da 246, %70'da 570 ve %100'de 930 okundu; yanan LED sayısı sırasıyla 0, 0, 1, 3 ve 5 oldu (KARANLIK = 50, AYDINLIK = 900 ile). Gerçek LDR'ler farklı davranır: Seri Monitör'de kendi karanlık ve aydınlık değerlerini oku, KARANLIK ile AYDINLIK sabitlerini ona göre değiştir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "LED'leri ters takmak (kısa bacak soldaki sütundaysa LED yanmaz); LED'lere direnç koymayı unutmak; direncin alt ucunu GND rayına bağlamayı unutmak (LED hiç yanmaz); LDR ile 10 kΩ direnci aynı sütunda birleştirmeyip A0'ı yanlış deliğe bağlamak (değer hep 0 ya da 1023 gelir)."
+  ],
+  [
+   "Dene",
+   "LED sayısını azaltıp artırmak için LED_SAYISI ve LEDLER dizisini değiştir. Ya da göstergeyi ters çevir: map(isik, KARANLIK, AYDINLIK, LED_SAYISI, 0) ile ortam karardıkça daha çok LED yansın."
+  ]
+ ],
+ "title": "6. LED ile Işık Şiddeti Göstergesi"
+}

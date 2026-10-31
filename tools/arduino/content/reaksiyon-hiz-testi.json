@@ -1,0 +1,70 @@
+{
+ "sketch": "reaksiyon",
+ "d": "LED yandığı anda butona ne kadar çabuk bastığını milisaniye olarak ölçer. Rastgele bekleme, millis() ile süre ölçümü ve erken basma kontrolü öğrenilir; buzzer kısa bir bip verir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × LED (kırmızı)",
+  "1 × 220 Ω direnç",
+  "1 × buton (push button)",
+  "1 × aktif buzzer",
+  "Jumper kablolar (6 adet)"
+ ],
+ "wiring": [
+  [
+   "D8",
+   "LED anot (uzun bacak)"
+  ],
+  [
+   "LED katot (kısa bacak)",
+   "220 Ω direnç, direncin diğer ucu GND (GND2)"
+  ],
+  [
+   "D2",
+   "Butonun sol bacağı"
+  ],
+  [
+   "GND (GND3)",
+   "Butonun sağ bacağı"
+  ],
+  [
+   "D9",
+   "Aktif buzzer + bacağı"
+  ],
+  [
+   "GND (GND1)",
+   "Aktif buzzer − bacağı"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LED'i c4 (uzun bacak) ve c5 (kısa bacak) deliklerine, 220 Ω direnci d5 ile d9 arasına tak. D8 pinini e4'e, e9'u GND2 pinine kablola.",
+  "Butonu c14 ve c16 deliklerine tak. D2 pinini e14'e, e16'yı GND3 pinine kablola.",
+  "Aktif buzzer'ı c22 (+) ve c23 (−) deliklerine tak. D9 pinini e22'ye, e23'ü GND1 pinine (kartın üst sırasındaki GND) kablola.",
+  "Kodu yükle ve Seri Monitör'ü aç (9600 baud). \"Hazır ol!\" yazar.",
+  "İki ile beş saniye arasında rastgele bir süre sonra LED yanar ve \"ŞİMDİ BAS!\" yazılır. Hemen butona bas: tepki süren ms olarak yazılır ve buzzer kısa öter.",
+  "LED yanmadan butona basarsan \"Çok erken bastın!\" yazılır ve tur yenilenir."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "random(2000, 5001) 2000–5000 arasında rastgele bir bekleme süresi üretir. Bu süre dolana kadar while döngüsü butonu izler; basılırsa erken basılmış sayılır. LED yandığında millis() ile o anın zamanı saklanır; butona basılınca millis() - yanmaZamani basma süresini milisaniye olarak verir. Buton INPUT_PULLUP olduğu için basılınca LOW okunur."
+  ],
+  [
+   "Aktif buzzer",
+   "Aktif buzzer'ın içinde osilatör vardır: HIGH verince öter, LOW verince susar. Bu yüzden tone() gerekmez. Pasif buzzer olsaydı tone() ile sürmek gerekirdi."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Butonu GND'ye bağlamamak (buton hiç LOW okunmaz, program LED yandıktan sonra sonsuza kadar bekler); int yerine unsigned long kullanmamak (uzun sürelerde millis() değeri int'e sığmaz); erken basma kontrolünü unutup butonu basılı tutarak hile yapmak."
+  ],
+  [
+   "Simülatör notu",
+   "Simülatörde buton fare ile basılır; sonuçlar gerçek bir insan tepkisiyle (yaklaşık 200–300 ms) karşılaştırılamaz. Denemede, LED yandıktan sonra bilerek geç basarak 1609 ms ve 1182 ms gibi değerler okundu ve erken basma uyarısı gözlendi."
+  ],
+  [
+   "Dene",
+   "En iyi süreyi hatırlayan bir sürüm yap: enKisaSure adlı bir değişkende en düşük tepki süresini sakla ve her turda Seri Monitör'e yaz."
+  ]
+ ]
+}

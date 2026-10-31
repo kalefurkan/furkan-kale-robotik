@@ -1,0 +1,59 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HC-SR04 ultrasonik mesafe sensörü",
+  "Jumper kablolar (4 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "HC-SR04 VCC"
+  ],
+  [
+   "D9",
+   "HC-SR04 TRIG"
+  ],
+  [
+   "D10",
+   "HC-SR04 ECHO"
+  ],
+  [
+   "GND",
+   "HC-SR04 GND"
+  ]
+ ],
+ "img": "assets/devre/ultrasonik-mesafe-olcer.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "HC-SR04'ü breadboard'a tak: dört bacağı (VCC, TRIG, ECHO, GND) c10, c11, c12 ve c13 deliklerine gelsin. Sensörün gövdesi alt satırları kapatır, bu yüzden kabloları a satırına bağlayacağız.",
+  "5V pinini a10'a, D9 pinini a11'e (TRIG), D10 pinini a12'ye (ECHO) kablola.",
+  "a13'ü Arduino GND pinine kablola.",
+  "Kodu yükle ve Seri Monitör'ü aç (9600 baud).",
+  "Sensörün önüne elini ya da bir kitabı tutup yaklaştır/uzaklaştır: yarım saniyede bir mesafe yazılır."
+ ],
+ "code": "// HC-SR04 ultrasonik sensör ile mesafe ölçer\nconst int TRIG = 9;        // tetik (trigger) pini: ses darbesini başlatır\nconst int ECHO = 10;       // yankı (echo) pini: darbenin geri dönüş süresini verir\n\nvoid setup() {\n  pinMode(TRIG, OUTPUT);\n  pinMode(ECHO, INPUT);\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  // 1) 10 mikrosaniyelik tetik darbesi gönder\n  digitalWrite(TRIG, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(TRIG, LOW);\n\n  // 2) ECHO pininin HIGH kaldığı süreyi (mikrosaniye) ölç\n  long sure = pulseIn(ECHO, HIGH);\n\n  // 3) Ses yaklaşık 0.0343 cm/µs hızla gider; gidiş-dönüş olduğu için ikiye böleriz\n  float mesafe = sure * 0.0343 / 2;\n\n  if (sure == 0) {\n    Serial.println(\"Nesne algılanamadı (menzil dışı)\");\n  } else {\n    Serial.print(\"Mesafe: \");\n    Serial.print(mesafe);\n    Serial.println(\" cm\");\n  }\n  delay(500);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "TRIG pinine 10 mikrosaniyelik bir HIGH darbesi verilince sensör 40 kHz'lik ses dalgası yollar. Ses bir nesneye çarpıp dönene kadar ECHO pini HIGH kalır; pulseIn(ECHO, HIGH) bu süreyi mikrosaniye cinsinden verir. Ses saniyede yaklaşık 343 m yani 0,0343 cm/µs gider; gidiş-dönüş olduğu için sonuç ikiye bölünür: mesafe = süre × 0,0343 / 2."
+  ],
+  [
+   "Kalibrasyon (simülatörden okunan)",
+   "Simülatörde engel mesafesi kaydırıcısı 10 cm iken 9.98 cm, 25 cm iken 24.95 cm, 50 cm iken 49.91 cm, 100 cm iken 99.81 cm ve 400 cm iken 399.25 cm okundu. Gerçek sensör 2–400 cm arasında çalışır, ±3 mm hata verebilir; yumuşak (kumaş, sünger) ya da yana eğik yüzeylerde yankı zayıf döner."
+  ],
+  [
+   "Menzil dışı",
+   "Nesne yoksa ya da çok uzaktaysa ECHO hiç HIGH olmaz, pulseIn() 0 döner; kod bu durumda \"Nesne algılanamadı\" yazar."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TRIG ve ECHO kablolarının yerini değiştirmek (hep 0 gelir); sensörü 5V yerine 3,3 V ile beslemek; pulseIn sonucunu int yerine long saklamamak (uzun sürelerde taşar); delay koymadan çok hızlı ölçüm yapmak (önceki yankıyla karışır)."
+  ],
+  [
+   "Dene",
+   "Mesafe 20 cm'nin altına inince bir LED yak ya da buzzer öttür (Park Sensörü projesine bir adım kalır)."
+  ]
+ ],
+ "title": "15. Ultrasonik Mesafe Ölçer"
+}

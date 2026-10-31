@@ -1,0 +1,64 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × LDR (ışığa duyarlı direnç)",
+  "1 × 10 kΩ direnç",
+  "1 × pasif buzzer",
+  "Jumper kablolar (5 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "LDR'nin bir ucu"
+  ],
+  [
+   "A0",
+   "LDR'nin öbür ucu ile 10 kΩ direncin birleştiği nokta"
+  ],
+  [
+   "GND (GND3)",
+   "10 kΩ direncin öbür ucu"
+  ],
+  [
+   "D8",
+   "Pasif buzzer + bacağı"
+  ],
+  [
+   "GND (GND2)",
+   "Pasif buzzer − bacağı"
+  ]
+ ],
+ "img": "assets/devre/isikla-kontrol-edilen-buzzer.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LDR'yi c10 ve c11 deliklerine, 10 kΩ direnci d11 ile d15 arasına tak. LDR'nin bir ucu (sütun 10) için 5V pinini e10'a, LDR ile direncin birleştiği sütun (11) için A0 pinini e11'e, e15'i GND3 pinine kablola.",
+  "Pasif buzzer'ı c20 (+) ve c21 (−) deliklerine tak. D8 pinini e20'ye, e21'i GND2 pinine kablola.",
+  "Kodu yükle ve Seri Monitör'ü aç (9600 baud).",
+  "Elini LDR'nin üstünde yaklaştırıp uzaklaştır: ışık değiştikçe buzzerın perdesi değişir. Seri Monitör'de ışık değeri ve frekans yazılır."
+ ],
+ "code": "// Işıkla kontrol edilen buzzer (theremin): ortam ışığına göre buzzerın sesi (frekansı) değişir\nconst int LDR = A0;          // 5V - LDR - A0 - 10k - GND (gerilim bölücü)\nconst int BUZZER = 8;        // D8 -> pasif buzzer (+), buzzer (-) -> GND\n\n// Kendi ortamına göre ayarla: Seri Monitör'de karanlıkta ve en aydınlıkta okuduğun değerler\nconst int KARANLIK = 50;\nconst int AYDINLIK = 900;\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  int isik = analogRead(LDR);                                  // 0 ... 1023, aydınlandıkça artar\n  int frekans = map(isik, KARANLIK, AYDINLIK, 200, 2000);      // ışığı 200-2000 Hz aralığına çevir\n  frekans = constrain(frekans, 200, 2000);                     // aralığın dışına taşmayı engelle\n\n  tone(BUZZER, frekans);                                       // buzzer bu frekansta öter\n\n  Serial.print(\"Işık: \");\n  Serial.print(isik);\n  Serial.print(\"  Frekans: \");\n  Serial.print(frekans);\n  Serial.println(\" Hz\");\n  delay(100);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "5V – LDR – A0 – 10 kΩ – GND gerilim bölücüdür; aydınlandıkça analogRead değeri artar. map(isik, KARANLIK, AYDINLIK, 200, 2000) bu değeri 200–2000 Hz arasına çevirir, constrain taşmaları keser, tone(BUZZER, frekans) buzzerı o frekansta öttürür. Frekans arttıkça ses incelir."
+  ],
+  [
+   "Kalibrasyon (simülatörden okunan)",
+   "Simülatördeki LDR ışık kaydırıcısı %0'da ADC 10 (200 Hz), %30'da 75 (252 Hz), %50'de 246 (615 Hz), %70'te 570 (1301 Hz) ve %100'de 930 (2000 Hz) verdi (KARANLIK = 50, AYDINLIK = 900 ile). Gerçek LDR'ler farklıdır: kendi ortamındaki en düşük ve en yüksek okumaları Seri Monitör'den oku ve iki sabiti değiştir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Aktif buzzer kullanmak (her frekansta aynı sesi çıkarır); constrain unutmak (ADC değeri KARANLIK'ın altına inerse frekans negatif ya da çok düşük çıkar); LDR'yi 10 kΩ direnç olmadan doğrudan A0'a bağlamak (gerilim bölücü olmaz, değer anlamlı değişmez)."
+  ],
+  [
+   "Simülatör notu",
+   "Ses çıkmaz; çalan frekans pasif buzzerın üstünde \"çalıyor 1301 Hz\" gibi görünür."
+  ],
+  [
+   "Dene",
+   "Gerçek bir theremin gibi hissetmek için frekans aralığını 100–1000 Hz yap ya da gelen ışığa göre ses yerine yalnızca \"bip\" aralığı değiştir (frekans yerine delay süresini map et)."
+  ]
+ ],
+ "title": "18. Işıkla Kontrol Edilen Buzzer"
+}

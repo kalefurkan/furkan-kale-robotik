@@ -1,0 +1,89 @@
+{
+ "sketch": "sayac",
+ "d": "Butona her basışta sayı artar ve 16x2 LCD ekranda görünür. LiquidCrystal kütüphanesi, 4 bit LCD bağlantısı, basılı tutmayı saymama ve buton titreşimini (debounce) atlama öğrenilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (arka ışık)",
+  "1 × buton (push button)",
+  "Jumper kablolar (16 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu (A bacağı üzerinden)"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW, K ve butonun bir ucu"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "D7",
+   "Butonun sol bacağı"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda kullanılmaz ve boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0, kontrast için GND), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "Veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "Butonu c20 ve c22 deliklerine tak. D7 pinini e20'ye, e22'yi eksi rayına kablola.",
+  "Kodu yükle: ekranda \"Mini Sayac\" ve altında \"Sayi: 0\" görünür. Butona her basışta sayı bir artar."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "LiquidCrystal lcd(12, 11, 5, 4, 3, 2) satırı ekranın RS, E, D4, D5, D6 ve D7 pinlerinin Arduino'da hangi pinlere bağlı olduğunu söyler; lcd.begin(16, 2) ekranı 16 sütun 2 satır olarak başlatır. lcd.setCursor(sütun, satır) yazmanın başlayacağı yeri, lcd.print() yazıyı ya da sayıyı yazar. Kodda ekrana yazma işi ekranaYaz() fonksiyonuna taşındı."
+  ],
+  [
+   "Debounce ve tek sayma",
+   "Butona basılınca kontaklar bir an titreşir ve birkaç kez basılmış gibi görünebilir. Kod yalnızca HIGH → LOW geçişini (yeni basış) sayar, ardından delay(50) ile titreşimi atlar. Butonu basılı tutarsan sayı tekrar artmaz."
+  ],
+  [
+   "Ekrandaki eski rakamlar",
+   "lcd.print(\"Sayi: \"); lcd.print(sayac); ardından boşluklar yazılır; böylece sayı 10'dan 9'a düşse bile eski rakam ekranda kalmaz. Ekranı komple silen lcd.clear() ise ekranı titretir, bu yüzden kullanılmadı."
+  ],
+  [
+   "Kontrast ve arka ışık",
+   "V0 bacağını GND'ye bağlamak çoğu ekranda en yüksek kontrastı verir; bazı ekranlarda yazılar silik ya da kutu kutu görünebilir, o zaman V0'ı 10 kΩ potansiyometrenin orta bacağına bağla ve çevirerek ayarla. A (arka ışık +) bacağını 220 Ω üzerinden 5V'a, K (−) bacağını GND'ye bağladık."
+  ],
+  [
+   "Simülatör notu",
+   "Simülatörde ekrana yalnızca ASCII metin yazılır; Türkçe harfler (ş, ğ, ı gibi) ekran ROM'unda olmadığı için \"?\" olarak görünür, bu yüzden metinler \"Sayac\" ve \"Sayi\" olarak yazıldı. Denemede butona 7 kez basınca ekranda \"Sayi: 7\" göründü."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "RW bacağını GND'ye bağlamamak (ekran yazmaz); RS, E ve D4–D7 sırasını koddaki pinlerle karıştırmak (ekran boş ya da bozuk karakter gösterir); VDD ve VSS'yi ters bağlamak (ekran ısınabilir); lcd.begin() satırını unutmak."
+  ],
+  [
+   "Dene",
+   "Sayıyı 0'a döndüren ikinci bir buton ekle (sıfırla), ya da sayıyı bir EEPROM'a yazıp güç kesilse de hatırlat."
+  ]
+ ]
+}

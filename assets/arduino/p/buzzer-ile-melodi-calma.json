@@ -1,0 +1,51 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × pasif buzzer",
+  "Jumper kablolar (2 adet)"
+ ],
+ "wiring": [
+  [
+   "D8",
+   "Pasif buzzer + (artı) bacağı"
+  ],
+  [
+   "GND",
+   "Pasif buzzer − (eksi) bacağı"
+  ]
+ ],
+ "img": "assets/devre/buzzer-ile-melodi-calma.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Pasif buzzer'ı breadboard'a tak: + işaretli bacağı sol sütunda (c10), diğer bacağı yanındaki sütunda (c11) olsun.",
+  "D8 pinini bir kabloyla + bacağının sütunundaki e10 deliğine bağla.",
+  "Buzzer'ın − bacağının sütunundaki e11 deliğini bir kabloyla Arduino GND pinine bağla.",
+  "Kodu yükle ve Seri Monitör'ü aç (9600 baud). Buzzer \"Twinkle Twinkle Little Star\" ezgisini çalar; çalan notanın frekansı Seri Monitör'e yazılır.",
+  "Melodi biter, iki saniye sonra baştan başlar."
+ ],
+ "code": "// Pasif buzzer ile melodi: \"Twinkle Twinkle Little Star\" ezgisi\nconst int BUZZER = 8;   // D8 -> pasif buzzer (+), buzzer (-) -> GND\n\n// Nota frekansları (Hz)\nconst int DO_ = 262;    // C4\nconst int RE_ = 294;    // D4\nconst int MI_ = 330;    // E4\nconst int FA_ = 349;    // F4\nconst int SOL_ = 392;   // G4\nconst int LA_ = 440;    // A4\n\nconst int NOTA_SAYISI = 14;\n// Nota dizisi ve her notanın süresi (1000 / değer ms): 4 = çeyrek nota, 2 = yarım nota\nconst int NOTALAR[] = {DO_, DO_, SOL_, SOL_, LA_, LA_, SOL_, FA_, FA_, MI_, MI_, RE_, RE_, DO_};\nconst int SURELER[] = {4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 2};\n\nvoid setup() {\n  Serial.begin(9600);\n}\n\nvoid loop() {\n  for (int i = 0; i < NOTA_SAYISI; i++) {\n    int sure = 1000 / SURELER[i];      // nota süresi (ms)\n    Serial.print(\"Çalan nota: \");\n    Serial.print(NOTALAR[i]);\n    Serial.println(\" Hz\");\n    tone(BUZZER, NOTALAR[i]);          // notayı çalmaya başla\n    delay(sure);                       // nota süresi kadar çal\n    noTone(BUZZER);                    // sesi kapat: notalar arasında kısa bir sessizlik olur\n    delay(sure / 4);                   // notalar birbirine karışmasın diye kısa ara\n  }\n  delay(2000);                         // melodi bitti, 2 saniye bekle ve tekrarla\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Pasif buzzer'ın içinde kendi osilatörü yoktur: Arduino'nun tone(pin, frekans) komutu pine o frekansta bir kare dalga üretir, buzzer de o sesi çıkarır. Nota frekansları: Do 262, Re 294, Mi 330, Fa 349, Sol 392, La 440 Hz. NOTALAR dizisi hangi notaların, SURELER dizisi bu notaların ne kadar süreceğini tutar (1000/4 = 250 ms çeyrek nota, 1000/2 = 500 ms yarım nota)."
+  ],
+  [
+   "tone ve noTone",
+   "tone(pin, frekans) sesi başlatır, delay() ses sürerken bekletir, noTone(pin) sesi keser. Notalar arasında kısa bir noTone + delay bırakmazsan aynı notalar peş peşe tek uzun ses gibi duyulur."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Aktif buzzer kullanmak: aktif buzzer her frekansta aynı sesi çıkarır, melodi çalamaz. digitalWrite(HIGH) ile pasif buzzer'ı öttürmeye çalışmak: pasif buzzer yalnızca tone() ile çalışır. + ve − bacaklarını ters bağlamak ya da buzzer'ı GND'ye bağlamayı unutmak."
+  ],
+  [
+   "Simülatör notu",
+   "MakersHub Studio'da ses çıkmaz; pasif buzzer'ın üstünde \"çalıyor 392 Hz\" gibi bir etiket görünür. Ses gerçek kartta duyulur (bu proje simülatörde denendi, gerçek kartta denenmedi)."
+  ],
+  [
+   "Dene",
+   "Kendi melodini yazmak için NOTALAR ve SURELER dizilerini, NOTA_SAYISI değerini değiştir. delay(sure / 4) arasını büyütüp küçülterek notaların bağlı ya da kesik çalmasını dene."
+  ]
+ ],
+ "title": "8. Buzzer ile Melodi Çalma"
+}

@@ -1,0 +1,65 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "4 × buton (push button)",
+  "1 × pasif buzzer",
+  "Jumper kablolar (11 adet)"
+ ],
+ "wiring": [
+  [
+   "D2, D3, D4, D5",
+   "1.–4. butonun sol bacağı"
+  ],
+  [
+   "Butonların sağ bacağı (4 adet)",
+   "Alttaki eksi (−) rayı"
+  ],
+  [
+   "D8",
+   "Pasif buzzer + bacağı"
+  ],
+  [
+   "Pasif buzzer − bacağı",
+   "Alttaki eksi (−) rayı"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı"
+  ]
+ ],
+ "img": "assets/devre/butonlu-elektronik-piyano.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Dört butonu c satırına tak: soldaki bacakları 2., 7., 12. ve 17. sütunlarda, sağdaki bacakları iki sütun ötede (4, 9, 14, 19) olsun.",
+  "Her butonun sol bacağının sütunundaki e deliğine D2, D3, D4 ve D5 pinlerinden birer kablo çek (soldan sağa sırayla).",
+  "Her butonun sağ bacağının sütunundaki e deliğinden alttaki mavi (−) rayına birer kablo çek (toplam 4 kablo).",
+  "Pasif buzzer'ı c23 (+) ve c24 (−) deliklerine tak. D8 pinini e23'e, e24'ü alttaki (−) rayına bağla.",
+  "Alttaki (−) rayını bir kabloyla Arduino GND pinine (GND2) bağla.",
+  "Kodu yükle: butonlara bastıkça Do (262 Hz), Re (294 Hz), Mi (330 Hz) ve Fa (349 Hz) çalar; basma bırakılınca ses kesilir."
+ ],
+ "code": "// Butonlu elektronik piyano: her buton farklı bir nota çalar\nconst int BUZZER = 8;                          // D8 -> pasif buzzer (+), buzzer (-) -> GND\nconst int BUTONLAR[] = {2, 3, 4, 5};           // butonların bir ucu bu pinlerde, diğer ucu GND\nconst int NOTALAR[] = {262, 294, 330, 349};    // Do, Re, Mi, Fa (Hz)\nconst int BUTON_SAYISI = 4;\n\nvoid setup() {\n  for (int i = 0; i < BUTON_SAYISI; i++) {\n    pinMode(BUTONLAR[i], INPUT_PULLUP);        // iç direnç: basılmamışken HIGH, basılınca LOW\n  }\n  pinMode(BUZZER, OUTPUT);\n  Serial.begin(9600);\n}\n\nint oncekiBasilan = -1;                        // son durumu hatırla: Seri Monitör'e yalnızca değişince yaz\n\nvoid loop() {\n  int basilan = -1;                            // -1: hiçbir butona basılmıyor\n  for (int i = 0; i < BUTON_SAYISI; i++) {\n    if (digitalRead(BUTONLAR[i]) == LOW) {     // LOW = basılı\n      basilan = i;\n    }\n  }\n\n  if (basilan >= 0) {\n    tone(BUZZER, NOTALAR[basilan]);            // basılan butonun notasını çal\n    if (basilan != oncekiBasilan) {\n      Serial.print(\"Buton \");\n      Serial.print(basilan + 1);\n      Serial.print(\" -> \");\n      Serial.print(NOTALAR[basilan]);\n      Serial.println(\" Hz\");\n    }\n  } else {\n    noTone(BUZZER);                            // hiçbir buton basılı değilse sus\n  }\n  oncekiBasilan = basilan;\n  delay(20);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "pinMode(pin, INPUT_PULLUP) pinin içindeki direnci devreye alır: buton basılı değilken pin HIGH, butona basınca buton pini GND'ye bağladığı için LOW okunur. Bu yüzden harici direnç gerekmez. loop() her turda dört butonu da tarar; basılı olan butonun notasını tone() ile çalar, hiçbiri basılı değilse noTone() ile susar."
+  ],
+  [
+   "Aynı anda iki butona basarsan",
+   "Pasif buzzer tek ses çalar. Kodda en son taranan (en büyük numaralı) basılı buton kazanır; yani 1. ve 3. butona birlikte basarsan 3. butonun notası duyulur."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Butonun iki bacağını aynı şeride takmak (buton hep basılı görünür); butonun bir ucunu GND'ye bağlamayı unutmak (pin boşta kalır, değer rastgele gelir); pasif yerine aktif buzzer kullanmak (tek perde ses çıkar, notalar ayırt edilemez)."
+  ],
+  [
+   "Simülatör notu",
+   "Ses çıkmaz; basılı butonun notası pasif buzzer'ın üstünde \"çalıyor 330 Hz\" gibi görünür. Bu proje simülatörde denendi, gerçek kartta denenmedi."
+  ],
+  [
+   "Dene",
+   "Notaları değiştir: Sol (392) ve La (440) ekleyerek 6 butonlu piyano yap ya da NOTALAR dizisindeki frekansları bir oktav yükselt (iki ile çarp)."
+  ]
+ ],
+ "title": "9. Butonlu Elektronik Piyano"
+}

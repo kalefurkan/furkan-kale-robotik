@@ -1,0 +1,63 @@
+{
+ "sketch": "egilme_alarm",
+ "d": "Eğim sensörü eğildiğinde aktif buzzer alarm verir. İki uçlu bir anahtar gibi çalışan sensörün INPUT_PULLUP ile okunması ve durum değişimini hatırlama öğrenilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × eğim (tilt) sensörü",
+  "1 × aktif buzzer",
+  "Jumper kablolar (4 adet)"
+ ],
+ "wiring": [
+  [
+   "D2",
+   "Eğim sensörünün bir ucu"
+  ],
+  [
+   "GND (GND3)",
+   "Eğim sensörünün öbür ucu"
+  ],
+  [
+   "D8",
+   "Aktif buzzer + bacağı"
+  ],
+  [
+   "GND (GND2)",
+   "Aktif buzzer − bacağı"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Eğim sensörünü c10 ve c12 deliklerine tak (iki ucu arasında bir sütun boşluk kalır).",
+  "D2 pinini e10'a, e12'yi GND3 pinine kablola.",
+  "Aktif buzzer'ı c20 (+) ve c21 (−) deliklerine tak. D8 pinini e20'ye, e21'i GND2 pinine kablola.",
+  "Kodu yükle ve Seri Monitör'ü aç (9600 baud).",
+  "Sensör eğilince (simülatörde sensörün düğmesiyle) buzzer öter ve \"Eğildi!\" yazılır; düz konuma gelince susar."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Eğim sensörünün içinde küçük bir bilye ya da cıva benzeri bir iletken vardır; sensör eğilince iki ucu birbirine bağlanır, yani bir anahtar gibi davranır. Bir ucu GND'ye, diğer ucu INPUT_PULLUP'lı D2'ye bağlandığı için eğilince pin LOW okunur. Kod LOW görünce aktif buzzer'a HIGH verir."
+  ],
+  [
+   "Aktif buzzer",
+   "İçinde osilatör olduğundan HIGH verilince tek bir sabit sesle öter, tone() gerekmez."
+  ],
+  [
+   "Durum değişimini hatırlama",
+   "Seri Monitör'e her turda mesaj yazmamak için alarmVar değişkeni tutulur; mesaj yalnızca eğilme başladığında ve bittiğinde bir kez yazılır."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Sensörün bir ucunu GND'ye bağlamayı unutmak (pin boşta kalır, alarm rastgele çalar); sensörün yönüne dikkat etmemek (bazı sensörler dik dururken kapalı, eğilince açık olur; o zaman koşulu HIGH yap); buzzer'ı pasif seçmek (digitalWrite ile ötmez)."
+  ],
+  [
+   "Simülatör notu",
+   "Simülatörde eğim, sensörün üzerindeki bir düğmeyle taklit edilir; sensörün fiziksel yönü modellenmez. Denemede eğik konumda buzzer öttü, dik konumda sustu."
+  ],
+  [
+   "Dene",
+   "Alarm eğildikten sonra kendiliğinden sussun istemiyorsan alarmı \"mandalla\": alarmVar bir kez true olunca ancak başka bir buton ile sıfırlansın."
+  ]
+ ]
+}

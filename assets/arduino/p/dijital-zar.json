@@ -1,0 +1,70 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "7 × LED (kırmızı)",
+  "7 × 220 Ω direnç",
+  "1 × buton (push button)",
+  "Jumper kablolar (17 adet)"
+ ],
+ "wiring": [
+  [
+   "D2, D3, D4, D5, D6, D7, D8",
+   "Soldan sağa 1.–7. LED'in anodu (L0 ... L6)"
+  ],
+  [
+   "Her LED'in katodu (kısa bacak)",
+   "Kendi 220 Ω direnci; direncin alt ucu kabloyla alttaki eksi (−) rayına"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı"
+  ],
+  [
+   "D9",
+   "Butonun sol bacağı"
+  ],
+  [
+   "GND (GND3)",
+   "Butonun sağ bacağı"
+  ]
+ ],
+ "img": "assets/devre/dijital-zar.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Yedi LED'i breadboard'un üst yarısında c satırına, üç sütun arayla tak (sütun 2–3, 5–6, 8–9, 11–12, 14–15, 17–18, 20–21). Uzun bacaklar (anot) soldaki sütunda olsun.",
+  "Her LED'in kısa bacağıyla aynı sütundaki e deliğine bir 220 Ω direncin bir ucunu tak; direncin öbür ucu breadboard'un ortasındaki oluğu aşıp h deliğine gelsin.",
+  "Her direncin alt ucunun sütunundaki j deliğinden alttaki mavi (−) rayına birer kablo çek; rayı bir kabloyla Arduino GND pinine (GND2) bağla.",
+  "D2'den D8'e kadar pinleri sırayla soldan sağa LED'lerin anot sütunlarına (a satırı) kablola.",
+  "Butonu c24 ve c26 deliklerine tak. D9 pinini e24'e, e26'yı GND3 pinine kablola.",
+  "Kodu yükle: butona bas, LED'ler kısa bir süre karışık desenler gösterip rastgele bir zar yüzünde durur. Seri Monitör'e de \"Zar: 3\" gibi yazılır."
+ ],
+ "code": "// Dijital zar: butona basınca 1-6 arası rastgele sayı, 7 LED ile zar deseni olarak gösterilir\nconst int BUTON = 9;                           // buton: D9 ile GND arası (INPUT_PULLUP)\nconst int LEDLER[] = {2, 3, 4, 5, 6, 7, 8};    // zar üzerindeki 7 nokta (aşağıdaki desen tablosuna bak)\n\n// Zar düzeni:   L0   L1\n//               L2 L3 L4      (L3 ortadaki nokta)\n//               L5   L6\n// Her zar yüzü tek bir sayıyla saklanır: LED'lerin her biri sayının bir bitidir\n// (L0 = 1, L1 = 2, L2 = 4, L3 = 8, L4 = 16, L5 = 32, L6 = 64). Yanacak LED'lerin değerleri toplanır.\nconst int DESEN[] = {\n  0,     // 0: kullanılmaz\n  8,     // 1: L3                         (ortadaki nokta)\n  65,    // 2: L0 + L6                    (çapraz iki nokta)\n  73,    // 3: L0 + L3 + L6\n  99,    // 4: L0 + L1 + L5 + L6          (dört köşe)\n  107,   // 5: L0 + L1 + L3 + L5 + L6     (dört köşe + orta)\n  119    // 6: L0 + L1 + L2 + L4 + L5 + L6 (iki sütun)\n};\n\nvoid zarGoster(int sayi) {\n  for (int i = 0; i < 7; i++) {\n    int yansin = (DESEN[sayi] >> i) & 1;      // i. bit 1 ise bu LED yanacak\n    digitalWrite(LEDLER[i], yansin);\n  }\n}\n\nvoid setup() {\n  for (int i = 0; i < 7; i++) {\n    pinMode(LEDLER[i], OUTPUT);\n  }\n  pinMode(BUTON, INPUT_PULLUP);\n  randomSeed(analogRead(A0));      // boşta duran A0 pini rastgele gürültü okur: her açılışta farklı sayı dizisi\n  Serial.begin(9600);\n  zarGoster(6);                    // açılış testi: bütün noktalar\n}\n\nvoid loop() {\n  if (digitalRead(BUTON) == LOW) {                 // butona basıldı\n    for (int i = 0; i < 8; i++) {                  // \"zar yuvarlanıyor\" animasyonu\n      zarGoster(random(1, 7));\n      delay(60);\n    }\n    int sonuc = random(1, 7);                      // 1, 2, 3, 4, 5 veya 6 (7 dahil değildir)\n    zarGoster(sonuc);\n    Serial.print(\"Zar: \");\n    Serial.println(sonuc);\n    while (digitalRead(BUTON) == LOW) {            // buton bırakılana kadar bekle\n      delay(10);\n    }\n    delay(50);                                     // buton titreşimini atla\n  }\n}\n",
+ "notes": [
+  [
+   "Zar düzeni",
+   "Soldan sağa 7 LED şu noktaları temsil eder: L0 ve L1 üst sıra, L2 ve L4 orta sıra, L3 tam orta, L5 ve L6 alt sıra. Gerçek bir zar yapmak istersen LED'leri bu 3 × 3 düzene göre yerleştir; breadboard'da sırayla dizili olmaları kod için fark yaratmaz, yalnızca hangi pine hangi LED'in bağlı olduğu önemlidir."
+  ],
+  [
+   "random(1, 7)",
+   "random(en küçük, en büyük) üst sınırı DAHİL ETMEZ: random(1, 7) 1, 2, 3, 4, 5 veya 6 üretir. Gerçek zar için random(1, 6) yazarsan 6 hiç gelmez."
+  ],
+  [
+   "randomSeed(analogRead(A0))",
+   "Arduino her açıldığında aynı \"rastgele\" diziyi üretir. Hiçbir şeye bağlı olmayan A0 pini ortamdaki elektriksel gürültüyü okur ve bu rastgele sayı üretecinin başlangıç noktasını değiştirir. Simülatörde A0 boşta sabit bir değer okuduğu için dizi her çalıştırmada aynıdır (denemede sırayla 3, 2, 3, 6 geldi); gerçek kartta her açılışta farklı olur."
+  ],
+  [
+   "Desen tablosu",
+   "Her zar yüzü bir sayıyla saklanır; sayının her biti bir LED'dir (L0 = 1, L1 = 2, L2 = 4, L3 = 8, L4 = 16, L5 = 32, L6 = 64). Örneğin 6 için 1 + 2 + 4 + 16 + 32 + 64 = 119. (DESEN[sayi] >> i) & 1 ifadesi i. LED'in yanıp yanmayacağını verir."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Her LED'e ayrı direnç koymamak: aynı anda altı LED yanabileceği için LED'ler ortak tek dirençle zayıf yanar ve devre yanlış olur. Butonu GND'ye bağlamamak. Bütün LED'leri aynı şeride takmak."
+  ],
+  [
+   "Dene",
+   "Butona basılı tutarken sürekli yuvarlanan, bırakınca duran bir zar yap. Ya da iki zar için ikinci bir LED grubu ekle."
+  ]
+ ],
+ "title": "10. Dijital Zar"
+}
