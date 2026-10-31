@@ -261,7 +261,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     </a>
     <nav class="nav" aria-label="Ana menü">
       <a href="#icerikler">İçerikler</a>
-      <a href="#uygulamalar">Uygulamalar</a>
       <a href="#araclar">Uygulamalarım</a>
       <a href="#yol">Öğrenme yolu</a>
       <a href="#notlar">Atölye notları</a>
@@ -320,25 +319,11 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   </div>
 </section>
 
-<section id="uygulamalar">
-  <div class="wrap">
-    <div class="sec-head">
-      <div>
-        <div class="eyebrow">U2 · Araçlar ve uygulamalar</div>
-        <h2>Her sınıf kademesinde kullandığımız araçlar</h2>
-        <p>2026-2027 yıllık kodlama ve robotik planından: 5 yaştan 7. sınıfa kadar hangi uygulamayla ne çalışıyoruz.</p>
-      </div>
-    </div>
-    <div id="lvl" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px"></div>
-    <div class="apps" id="toolgrid"></div>
-  </div>
-</section>
-
 <section id="araclar">
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <div class="eyebrow">U3 · Uygulamalarım</div>
+        <div class="eyebrow">U2 · Uygulamalarım</div>
         <h2>Kendi geliştirdiğim eğitim uygulamaları</h2>
         <p>Öğrencilerin tarayıcıda deneyerek öğrendiği iki platform.</p>
       </div>
@@ -364,7 +349,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <div class="eyebrow">U4 · Öğrenme yolu</div>
+        <div class="eyebrow">U3 · Öğrenme yolu</div>
         <h2>Sıfırdan otonom robota</h2>
         <p>Nereden başlayacağını bilmiyorsan bu sırayı izle. Her adım bir öncekinin üzerine kurulu.</p>
       </div>
@@ -382,7 +367,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 <section id="notlar">
   <div class="wrap notes-grid">
     <div>
-      <div class="eyebrow">U5 · Atölye notları</div>
+      <div class="eyebrow">U4 · Atölye notları</div>
       <h2 style="font-size:clamp(28px,4vw,40px);margin-top:12px">Kısa paylaşımlar</h2>
       <p style="color:var(--muted);margin-top:10px;max-width:44ch">Uzun bir yazıya dönüşmeyen ama işe yarayan bulgular: bir hata, bir ipucu, masadan bir fotoğraf.</p>
       <form class="compose" id="compose" style="margin-top:24px">
@@ -398,7 +383,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 <section id="hakkimda">
   <div class="wrap about">
     <div class="about-text">
-      <div class="eyebrow">U6 · Hakkımda</div>
+      <div class="eyebrow">U5 · Hakkımda</div>
       <h2>Merhaba, ben Furkan.</h2>
       <p>Robotik ve gömülü sistemler üzerine çalışıyor, öğrendiklerimi Türkçe kaynak olarak paylaşıyorum. Amacım, bir robotu ilk kez hareket ettirmek isteyen herkesin takıldığı yerde elinde çalışan bir örnek olması.</p>
       <p>Yazılarda kullandığım her devreyi önce kendi masamda kuruyorum. Kodlar GitHub'da açık; hata bulursan ya da bir konu önermek istersen yazman yeterli.</p>
@@ -626,37 +611,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   });
 })();
 
-  const LEVELS = ['5 Yaş','1. Sınıf','2. Sınıf','3. Sınıf','4. Sınıf','5. Sınıf','6. Sınıf','7. Sınıf'];
-  const TOOLS = [
-    { n: 'Scratch Jr.', d: 'Blok tabanlı kodlamaya ilk adım.', l: [0,1,2], f: ['Blok kodlama','Serbest etkinlik ve STEM çalışmaları'] },
-    { n: 'Scratch', d: 'Blok tabanlı programlama ortamı.', l: [3,4], f: ['Scratch projeleri','Zamanlama, mesajlaşma blokları, değişken ve fonksiyon'] },
-    { n: 'Kodu Game Lab', d: 'Oyun tasarımı ve programlama.', l: [1,2], f: ['Dijital oyun tasarımı modülü','Draw Your Game ile birlikte'] },
-    { n: 'Draw Your Game', d: 'Çizerek oyun yapma uygulaması.', l: [1,2], f: ['Dijital oyun tasarımı modülü'] },
-    { n: 'Minecraft', d: 'Oyun dünyası ve oyun tasarımı.', l: [3,4,5,6,7], f: ['Görev sistemi, oyun kuralları ve senaryo','Oyun mekaniği, skor ve seviye tasarımı','Oyun projesi'] },
-    { n: 'Tinkercad', d: '3B nesne tasarımı.', l: [3,4], f: ['Tinkercad arayüzü','Basit 3B şekillerden model oluşturma','Dijital ürün tasarımı projesi'] },
-    { n: 'SPIKE', d: 'Robotik yolculuğu: yapılandırılmış proje serisi.', l: [0,1,2,3,4], f: ['Basit makineler (5 yaşta LEGO parçalarıyla)','Sensör ve motor, robot hareket kontrolü','Engel algılama ve basit robot görevleri'] },
-    { n: 'Arduino', d: 'Fiziksel hesaplama ve elektronik.', l: [6], f: ['Sensör verisi okuma, LED ve motor kontrolü','Sensör tabanlı karar, basit IoT mantığı','Akıllı lamba, mesafe alarmı, ışığa duyarlı sistem'] },
-    { n: 'Python', d: 'Metin tabanlı programlamaya geçiş.', l: [5,6,7], f: ['Değişken, veri türleri, koşul ve döngü','Fonksiyon, liste ve diziler','Python ile sınıflandırma ve veri işleme'] },
-    { n: 'TaleBot', d: 'Robotla kodlama.', l: [0], f: ['TaleBot ile kodlama','TaleBot ile 23 Nisan etkinliği'] },
-    { n: 'Cognimates', d: 'Yapay zekâ ile blok kodlama.', l: [2], f: ['Yapay zekâ + blok kodlama'] },
-    { n: 'Code Spark · Kidlo Coding · ABCya', d: 'Küçük yaşlar için kodlama oyunları.', l: [0], f: ['Diziler ve döngüler (Kidlo Coding)','Fare kullanımı ve etkinlik oyunları'] }
-  ];
-  (function () {
-    const bar = document.getElementById('lvl'), grid = document.getElementById('toolgrid');
-    if (!bar || !grid) return;
-    let sel = -1;
-    const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-    function render() {
-      bar.innerHTML = ['Tümü', ...LEVELS].map((t, i) => `<button type="button" class="filter-btn" aria-pressed="${i - 1 === sel}" data-i="${i - 1}">${t}</button>`).join('');
-      const list = TOOLS.filter(t => sel < 0 || t.l.includes(sel));
-      grid.innerHTML = list.map(t => `<article class="app"><div class="app-body">
-        <div class="app-title"><h3>${esc(t.n)}</h3></div><p>${esc(t.d)}</p>
-        <ul class="feat">${t.f.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
-        <div class="app-foot"><span class="platforms">${t.l.map(i => LEVELS[i]).join(' · ')}</span></div></div></article>`).join('');
-    }
-    bar.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; sel = +b.dataset.i; render(); });
-    render();
-  })();
 </script>
 
 </body></html>
