@@ -789,7 +789,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
    "LED'i breadboard'a tak. Uzun bacak (anot) bir sütunda, kısa bacak (katot) başka bir sütunda olsun.",
    "LED'in anot sütununa (uzun bacak) D8 pininden gelen bir kablo bağla.",
    "LED'in katot sütunundan başlayarak 220 Ω direnci tak; direncin diğer ucunu bir kabloyla GND'ye ver.",
-   "Butonu breadboard'ın ortadaki çukurunu aşacak şekilde tak. Bir bacağından D2'ye, karşı bacağından GND'ye kablo çek.",
+   "Butonu breadboard'a tak; iki bacağı ayrı sütunlarda olsun. Bir bacağın sütunundan D2'ye, diğer bacağın sütunundan GND'ye kablo çek.",
    "Arduino IDE'de kartı \"Arduino Uno\" seç, kodu yükle.",
    "Butona bas: her basışta LED'in durumu değişir."
   ],
@@ -847,8 +847,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   "img": "assets/devre/pot-led.png",
   "steps": [
    "Devreyi enerjisiz kur. LED'i ve 220 Ω direnci breadboard'a tak: D9 → LED anot, LED katot → 220 Ω → GND.",
-   "Potansiyometrenin bir dış bacağını 5V'a, diğer dış bacağını GND'ye bağla.",
-   "Potansiyometrenin orta bacağını A0'a bağla.",
+   "Potansiyometreyi breadboard'a tak; üç bacağı ayrı sütunlarda olsun.",
+   "Bir dış bacağın sütunundan 5V'a, diğer dış bacağın sütunundan GND'ye, orta bacağın sütunundan A0'a kablo çek.",
    "Kodu yükle ve Seri Çizici'yi aç (9600 baud).",
    "Potansiyometreyi yavaşça çevir: LED'in parlaklığı ve Seri Çizici'deki 0–255 arası değer birlikte değişir."
   ],
@@ -878,7 +878,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
    "Breadboard",
    "6 × LED (tercihen kırmızı)",
    "1 × 220 Ω direnç",
-   "Jumper kablolar (13 adet)"
+   "Jumper kablolar (14 adet)"
   ],
   "wiring": [
    [
@@ -1143,7 +1143,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
    "Devreyi enerjisiz kur. HC-SR04'ü breadboard'a tak; iki \"göz\" ileri baksın, dört bacak ayrı sütunlarda olsun.",
    "VCC bacağını 5V'a, GND bacağını GND'ye bağla.",
    "TRIG bacağını D7'ye, ECHO bacağını D6'ya bağla.",
-   "Aktif buzzer'ı tak: uzun bacağı D8'e, kısa bacağı GND'ye.",
+   "Aktif buzzer'ı breadboard'a tak. Uzun (+) bacağın sütunundan D8'e, kısa bacağın sütunundan GND'ye kablo çek.",
    "Kodu yükle ve Seri Çizici'yi aç. Elini sensörün önünde yaklaştırıp uzaklaştır; cm değerinin değiştiğini gör.",
    "30 cm içine girince buzzer öter; nesne yaklaştıkça bip aralığı kısalır."
   ],
@@ -1204,8 +1204,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   ],
   "img": "assets/devre/pir-hareket.png",
   "steps": [
-   "Devreyi enerjisiz kur. PIR sensörünün üç bacağını kontrol et: VCC, OUT, GND (kartın üzerinde yazar).",
-   "VCC'yi 5V'a, GND'yi GND'ye, OUT'u D2'ye bağla.",
+   "Devreyi enerjisiz kur. PIR sensörünü breadboard'a tak; VCC, OUT ve GND bacakları ayrı sütunlarda olsun (isimleri kartın üzerinde yazar).",
+   "VCC sütunundan 5V'a, GND sütunundan GND'ye, OUT sütunundan D2'ye kablo çek.",
    "LED devresini kur: D8 → LED anot, LED katot → 220 Ω → GND.",
    "Kodu yükle ve Seri Çizici'yi aç.",
    "Sensörün önünde elini hareket ettir: LED yanar ve \"Hareket var\" yazılır. Hareket durunca bir süre sonra LED söner."
@@ -1241,11 +1241,19 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   "wiring": [
    [
     "5V",
-    "Potansiyometre bir dış bacak ve servo 5V (kırmızı)"
+    "Breadboard + (artı) rayı"
+   ],
+   [
+    "+ rayı",
+    "Potansiyometre bir dış bacak ve servo kırmızı kablo (VCC)"
    ],
    [
     "GND",
-    "Potansiyometre diğer dış bacak ve servo GND (kahverengi ya da siyah)"
+    "Potansiyometre diğer dış bacak"
+   ],
+   [
+    "GND (ikinci GND pini)",
+    "Servo kahverengi ya da siyah kablo"
    ],
    [
     "A0",
@@ -1259,8 +1267,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   "img": "assets/devre/servo-pot.png",
   "steps": [
    "Devreyi enerjisiz kur. Potansiyometreyi breadboard'a tak; üç bacağı ayrı sütunlarda olsun.",
-   "Bir dış bacağını 5V'a, diğer dış bacağını GND'ye bağla. Orta bacağı A0'a bağla.",
-   "Servonun kablolarını renklerine göre bağla: kırmızı 5V, kahverengi ya da siyah GND, turuncu ya da sarı D9.",
+   "Arduino'nun 5V pinini breadboard'un + rayına bağla. Potansiyometrenin bir dış bacağını bu raya, diğer dış bacağını GND'ye bağla. Orta bacağı A0'a bağla.",
+   "Servonun kablolarını renklerine göre bağla: kırmızı + rayına, kahverengi ya da siyah GND'ye, turuncu ya da sarı D9'a.",
    "Kodu yükle. Servo kütüphanesi Arduino IDE ile birlikte gelir, ayrıca kurmana gerek yok.",
    "Potansiyometreyi yavaşça çevir: servo kolu 0°–180° arasında hareket eder."
   ],
