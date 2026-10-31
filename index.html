@@ -119,14 +119,17 @@ section{padding-block:72px;border-bottom:1px solid var(--line)}
 dialog#detail{width:min(880px,96vw);max-height:92vh;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);overflow:auto}
 dialog#detail::backdrop{background:rgba(5,20,13,.6)}
 .dlg{padding:24px;display:grid;gap:24px}
+.dlg section{padding-block:0;border-bottom:0}
 .dlg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
 .dlg-head h3{font-size:clamp(22px,3.5vw,30px)}
 .dlg-head p{color:var(--muted);margin-top:8px;max-width:62ch}
 .dlg-x{flex:none;font:600 14px var(--f-body);padding:8px 12px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .dlg h4{font:600 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--gold-ink);margin:0 0 10px}
 .dlg ul.parts{margin:0;padding-left:18px;display:grid;gap:4px}
-.dlg .diagram{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px}
-.dlg .diagram svg{display:block;width:100%;height:auto;max-height:340px}
+.dlg .diagram{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.dlg .diagram img{display:block;width:100%;height:auto}
+.dlg .diagram figcaption{padding:8px 12px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+.dlg .diagram figcaption a{color:var(--mask)}
 .dlg table.wire{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
 .dlg table.wire td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 .dlg table.wire td:first-child{width:34%;font:500 13px var(--f-mono);color:var(--mask)}
@@ -644,14 +647,14 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   "wiring": [
    [
     "D8",
-    "220 Ω direncin bir ucu"
-   ],
-   [
-    "Direncin diğer ucu",
     "LED anot (uzun bacak)"
    ],
    [
     "LED katot (kısa bacak)",
+    "220 Ω direncin bir ucu"
+   ],
+   [
+    "Direncin diğer ucu",
     "GND"
    ],
    [
@@ -663,21 +666,21 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     "GND"
    ]
   ],
-  "svg": "<svg viewBox=\"0 0 520 270\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"JetBrains Mono, ui-monospace, Menlo, monospace\" font-size=\"11\"><rect x=\"20\" y=\"16\" width=\"110\" height=\"238\" rx=\"8\" fill=\"var(--sunken)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><text x=\"28\" y=\"36\" text-anchor=\"start\" fill=\"var(--ink)\" font-weight=\"700\">Arduino Uno</text><polyline points=\"130,60 150,60\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"64\" text-anchor=\"end\" fill=\"var(--ink)\">D2</text><polyline points=\"130,130 150,130\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"134\" text-anchor=\"end\" fill=\"var(--ink)\">D8</text><polyline points=\"130,230 150,230\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"234\" text-anchor=\"end\" fill=\"var(--ink)\">GND</text><polyline points=\"150,130 190,130\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><rect x=\"190\" y=\"124\" width=\"40\" height=\"12\" fill=\"var(--surface)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><text x=\"210\" y=\"118\" text-anchor=\"middle\" fill=\"var(--muted)\">220 Ω</text><polyline points=\"230,130 300,130\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"300,130 300,140\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polygon points=\"290,140 310,140 300,160\" fill=\"var(--surface)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><polyline points=\"290,160 310,160\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"300,160 300,170\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"316\" y=\"154\" text-anchor=\"start\" fill=\"var(--muted)\">LED</text><text x=\"286\" y=\"138\" text-anchor=\"end\" fill=\"var(--danger)\" font-weight=\"700\">+</text><text x=\"286\" y=\"168\" text-anchor=\"end\" fill=\"var(--ink)\" font-weight=\"700\">−</text><polyline points=\"300,170 300,230\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,60 360,60\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"360\" cy=\"60\" r=\"3.5\" fill=\"var(--ink)\"/><circle cx=\"420\" cy=\"60\" r=\"3.5\" fill=\"var(--ink)\"/><polyline points=\"360,60 390,48\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"390\" y=\"80\" text-anchor=\"middle\" fill=\"var(--muted)\">Buton</text><polyline points=\"420,60 440,60 440,230\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,230 440,230\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"300\" cy=\"230\" r=\"3.5\" fill=\"var(--ink)\"/><text x=\"240\" y=\"252\" text-anchor=\"middle\" fill=\"var(--ink)\">GND</text></svg>",
+  "img": "assets/devre/buton-led.png",
   "steps": [
    "USB kablosunu çıkar; devreyi her zaman enerjisiz kur.",
    "LED'i breadboard'a tak. Uzun bacak (anot) bir sütunda, kısa bacak (katot) başka bir sütunda olsun.",
-   "220 Ω direnci, D8 pininden gelen kablo ile LED'in anot sütunu arasına bağla.",
-   "LED'in katot sütununu bir kabloyla GND'ye ver.",
+   "LED'in anot sütununa (uzun bacak) D8 pininden gelen bir kablo bağla.",
+   "LED'in katot sütunundan başlayarak 220 Ω direnci tak; direncin diğer ucunu bir kabloyla GND'ye ver.",
    "Butonu breadboard'ın ortadaki çukurunu aşacak şekilde tak. Bir bacağından D2'ye, karşı bacağından GND'ye kablo çek.",
    "Arduino IDE'de kartı \"Arduino Uno\" seç, kodu yükle.",
    "Butona bas: her basışta LED'in durumu değişir."
   ],
-  "code": "// Butonla LED kontrolü: her basışta LED açılır / kapanır\nconst int BUTON = 2;   // butonun bir bacağı D2, diğeri GND\nconst int LED = 8;     // D8 -> 220 ohm direnç -> LED\n\nbool ledAcik = false;\nbool oncekiDurum = HIGH;   // INPUT_PULLUP: basılmamışken HIGH\n\nvoid setup() {\n  pinMode(BUTON, INPUT_PULLUP);\n  pinMode(LED, OUTPUT);\n}\n\nvoid loop() {\n  bool durum = digitalRead(BUTON);\n\n  // HIGH -> LOW geçişi = butona yeni basıldı\n  if (oncekiDurum == HIGH && durum == LOW) {\n    ledAcik = !ledAcik;\n    digitalWrite(LED, ledAcik);\n    delay(30);             // kontak titreşimini (bounce) atla\n  }\n  oncekiDurum = durum;\n}\n",
+  "code": "// Butonla LED kontrolü: her basışta LED açılır / kapanır\nconst int BUTON = 2;   // butonun bir bacağı D2, diğeri GND\nconst int LED = 8;     // D8 -> LED -> 220 ohm direnç -> GND\n\nbool ledAcik = false;\nbool oncekiDurum = HIGH;   // INPUT_PULLUP: basılmamışken HIGH\n\nvoid setup() {\n  pinMode(BUTON, INPUT_PULLUP);\n  pinMode(LED, OUTPUT);\n}\n\nvoid loop() {\n  bool durum = digitalRead(BUTON);\n\n  // HIGH -> LOW geçişi = butona yeni basıldı\n  if (oncekiDurum == HIGH && durum == LOW) {\n    ledAcik = !ledAcik;\n    digitalWrite(LED, ledAcik);\n    delay(30);             // kontak titreşimini (bounce) atla\n  }\n  oncekiDurum = durum;\n}\n",
   "notes": [
    [
     "Direnç neden 220 Ω?",
-    "LED'e giden akımı sınırlar: R = (5 V − 2 V) / 0,015 A = 200 Ω. En yakın standart değer 220 Ω'dur. Dirençsiz bağlanan LED (ve pin) zarar görebilir."
+    "LED'e giden akımı sınırlar: R = (5 V − 2 V) / 0,015 A = 200 Ω. En yakın standart değer 220 Ω'dur. Dirençsiz bağlanan LED (ve pin) zarar görebilir. Direnç LED'in önünde ya da arkasında olabilir; seri devrede akım her yerde aynıdır."
    ],
    [
     "INPUT_PULLUP ne yapar?",
@@ -718,23 +721,23 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
    ],
    [
     "D9",
-    "220 Ω direncin bir ucu"
-   ],
-   [
-    "Direncin diğer ucu",
     "LED anot (uzun bacak)"
    ],
    [
     "LED katot (kısa bacak)",
+    "220 Ω direncin bir ucu"
+   ],
+   [
+    "Direncin diğer ucu",
     "GND"
    ]
   ],
-  "svg": "<svg viewBox=\"0 0 520 290\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"JetBrains Mono, ui-monospace, Menlo, monospace\" font-size=\"11\"><rect x=\"20\" y=\"16\" width=\"110\" height=\"258\" rx=\"8\" fill=\"var(--sunken)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><text x=\"28\" y=\"36\" text-anchor=\"start\" fill=\"var(--ink)\" font-weight=\"700\">Arduino Uno</text><polyline points=\"130,50 150,50\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"54\" text-anchor=\"end\" fill=\"var(--ink)\">5V</text><polyline points=\"130,130 150,130\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"134\" text-anchor=\"end\" fill=\"var(--ink)\">A0</text><polyline points=\"130,200 150,200\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"204\" text-anchor=\"end\" fill=\"var(--ink)\">D9</text><polyline points=\"130,260 150,260\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"264\" text-anchor=\"end\" fill=\"var(--ink)\">GND</text><polyline points=\"150,200 190,200\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><rect x=\"190\" y=\"194\" width=\"40\" height=\"12\" fill=\"var(--surface)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><text x=\"210\" y=\"188\" text-anchor=\"middle\" fill=\"var(--muted)\">220 Ω</text><polyline points=\"230,200 300,200\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"300,200 300,210\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polygon points=\"290,210 310,210 300,230\" fill=\"var(--surface)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><polyline points=\"290,230 310,230\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"300,230 300,240\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"316\" y=\"224\" text-anchor=\"start\" fill=\"var(--muted)\">LED</text><text x=\"286\" y=\"208\" text-anchor=\"end\" fill=\"var(--danger)\" font-weight=\"700\">+</text><text x=\"286\" y=\"238\" text-anchor=\"end\" fill=\"var(--ink)\" font-weight=\"700\">−</text><polyline points=\"300,240 300,260\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,50 420,50 420,90\" fill=\"none\" stroke=\"var(--danger)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><rect x=\"414\" y=\"90\" width=\"12\" height=\"40\" fill=\"var(--surface)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><polyline points=\"394,84 408,98\" fill=\"none\" stroke=\"var(--gold)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"394,96 408,110\" fill=\"none\" stroke=\"var(--gold)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"432\" y=\"114\" text-anchor=\"start\" fill=\"var(--muted)\">LDR</text><polyline points=\"420,130 420,160\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,130 420,130\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"420\" cy=\"130\" r=\"3.5\" fill=\"var(--mask)\"/><rect x=\"414\" y=\"160\" width=\"12\" height=\"40\" fill=\"var(--surface)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><text x=\"432\" y=\"184\" text-anchor=\"start\" fill=\"var(--muted)\">10 kΩ</text><polyline points=\"420,200 420,260\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,260 420,260\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"300\" cy=\"260\" r=\"3.5\" fill=\"var(--ink)\"/><text x=\"200\" y=\"278\" text-anchor=\"middle\" fill=\"var(--ink)\">GND</text></svg>",
+  "img": "assets/devre/akilli-lamba.png",
   "steps": [
    "Devreyi enerjisiz kur. LDR ile 10 kΩ direnci breadboard'da aynı sütunda uç uça birleştir; bu bir gerilim bölücüdür.",
    "LDR'nin serbest ucunu 5V'a, 10 kΩ direncin serbest ucunu GND'ye bağla.",
    "İki parçanın birleştiği sütundan A0'a bir kablo çek.",
-   "LED devresini kur: D9 → 220 Ω → LED anot, LED katot → GND.",
+   "LED devresini kur: D9 → LED anot, LED katot → 220 Ω direnç → GND.",
    "Kodu yükle ve Arduino IDE'de Seri Çizici'yi aç (9600 baud).",
    "LDR'nin önünü elinle kapat ve aç. Okunan değerin nasıl değiştiğini izle.",
    "Karanlıkta okuduğun değerle aydınlıkta okuduğun değerin arasında bir sayı seç ve koddaki ESIK'e yaz."
@@ -793,7 +796,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     "Buzzer − (kısa bacak)"
    ]
   ],
-  "svg": "<svg viewBox=\"0 0 520 290\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"JetBrains Mono, ui-monospace, Menlo, monospace\" font-size=\"11\"><rect x=\"20\" y=\"16\" width=\"110\" height=\"258\" rx=\"8\" fill=\"var(--sunken)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><text x=\"28\" y=\"36\" text-anchor=\"start\" fill=\"var(--ink)\" font-weight=\"700\">Arduino Uno</text><polyline points=\"130,50 150,50\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"54\" text-anchor=\"end\" fill=\"var(--ink)\">5V</text><polyline points=\"130,100 150,100\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"104\" text-anchor=\"end\" fill=\"var(--ink)\">D7</text><polyline points=\"130,140 150,140\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"144\" text-anchor=\"end\" fill=\"var(--ink)\">D6</text><polyline points=\"130,210 150,210\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"214\" text-anchor=\"end\" fill=\"var(--ink)\">D8</text><polyline points=\"130,260 150,260\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"264\" text-anchor=\"end\" fill=\"var(--ink)\">GND</text><rect x=\"300\" y=\"40\" width=\"170\" height=\"80\" rx=\"6\" fill=\"var(--surface)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><circle cx=\"340\" cy=\"70\" r=\"16\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\"/><circle cx=\"430\" cy=\"70\" r=\"16\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\"/><text x=\"385\" y=\"108\" text-anchor=\"middle\" fill=\"var(--ink)\" font-weight=\"700\">HC-SR04</text><polyline points=\"325,120 325,132\" fill=\"none\" stroke=\"var(--danger)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"325\" y=\"146\" text-anchor=\"middle\" fill=\"var(--danger)\">VCC</text><polyline points=\"365,120 365,132\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"365\" y=\"146\" text-anchor=\"middle\" fill=\"var(--mask)\">TRIG</text><polyline points=\"405,120 405,132\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"405\" y=\"146\" text-anchor=\"middle\" fill=\"var(--mask)\">ECHO</text><polyline points=\"445,120 445,132\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"445\" y=\"146\" text-anchor=\"middle\" fill=\"var(--ink)\">GND</text><polyline points=\"150,50 285,50 285,160 325,160 325,132\" fill=\"none\" stroke=\"var(--danger)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,100 275,100 275,170 365,170 365,132\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,140 265,140 265,180 405,180 405,132\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,260 445,260 445,132\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,210 330,210\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"360\" cy=\"210\" r=\"22\" fill=\"var(--surface)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><text x=\"360\" y=\"215\" text-anchor=\"middle\" fill=\"var(--danger)\" font-weight=\"700\">+</text><text x=\"360\" y=\"246\" text-anchor=\"middle\" fill=\"var(--muted)\">Buzzer</text><polyline points=\"360,232 360,260\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"360\" cy=\"260\" r=\"3.5\" fill=\"var(--ink)\"/><circle cx=\"445\" cy=\"260\" r=\"3.5\" fill=\"var(--ink)\"/><text x=\"230\" y=\"278\" text-anchor=\"middle\" fill=\"var(--ink)\">GND</text></svg>",
+  "img": "assets/devre/mesafe-alarmi.png",
   "steps": [
    "Devreyi enerjisiz kur. HC-SR04'ü breadboard'a tak; iki \"göz\" ileri baksın, dört bacak ayrı sütunlarda olsun.",
    "VCC bacağını 5V'a, GND bacağını GND'ye bağla.",
@@ -852,7 +855,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     "Servo sinyal (turuncu ya da sarı)"
    ]
   ],
-  "svg": "<svg viewBox=\"0 0 520 260\" role=\"img\" xmlns=\"http://www.w3.org/2000/svg\" font-family=\"JetBrains Mono, ui-monospace, Menlo, monospace\" font-size=\"11\"><rect x=\"20\" y=\"16\" width=\"110\" height=\"228\" rx=\"8\" fill=\"var(--sunken)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><text x=\"28\" y=\"36\" text-anchor=\"start\" fill=\"var(--ink)\" font-weight=\"700\">Arduino Uno</text><polyline points=\"130,40 150,40\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"44\" text-anchor=\"end\" fill=\"var(--ink)\">5V</text><polyline points=\"130,100 150,100\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"104\" text-anchor=\"end\" fill=\"var(--ink)\">A0</text><polyline points=\"130,170 150,170\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"174\" text-anchor=\"end\" fill=\"var(--ink)\">GND</text><polyline points=\"130,220 150,220\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><text x=\"124\" y=\"224\" text-anchor=\"end\" fill=\"var(--ink)\">D9</text><rect x=\"254\" y=\"60\" width=\"12\" height=\"80\" fill=\"var(--surface)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><polyline points=\"260,40 260,60\" fill=\"none\" stroke=\"var(--danger)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"260,140 260,170\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><circle cx=\"260\" cy=\"40\" r=\"3.5\" fill=\"var(--danger)\"/><circle cx=\"260\" cy=\"170\" r=\"3.5\" fill=\"var(--ink)\"/><polyline points=\"150,100 236,100\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polygon points=\"254,100 238,95 238,105\" fill=\"var(--gold)\"/><text x=\"276\" y=\"90\" text-anchor=\"start\" fill=\"var(--muted)\">Potansiyometre</text><text x=\"276\" y=\"104\" text-anchor=\"start\" fill=\"var(--muted)\">orta bacak → A0</text><polyline points=\"150,40 330,40 330,138 380,138\" fill=\"none\" stroke=\"var(--danger)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,170 345,170 345,158 380,158\" fill=\"none\" stroke=\"var(--ink)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><polyline points=\"150,220 360,220 360,178 380,178\" fill=\"none\" stroke=\"var(--mask)\" stroke-width=\"2\" stroke-linejoin=\"round\" stroke-linecap=\"round\"/><rect x=\"380\" y=\"100\" width=\"110\" height=\"90\" rx=\"6\" fill=\"var(--surface)\" stroke=\"var(--ink)\" stroke-width=\"2\"/><text x=\"435\" y=\"118\" text-anchor=\"middle\" fill=\"var(--ink)\" font-weight=\"700\">Servo</text><text x=\"390\" y=\"142\" text-anchor=\"start\" fill=\"var(--danger)\">5V</text><text x=\"390\" y=\"162\" text-anchor=\"start\" fill=\"var(--ink)\">GND</text><text x=\"390\" y=\"182\" text-anchor=\"start\" fill=\"var(--mask)\">SİNYAL</text></svg>",
+  "img": "assets/devre/servo-pot.png",
   "steps": [
    "Devreyi enerjisiz kur. Potansiyometreyi breadboard'a tak; üç bacağı ayrı sütunlarda olsun.",
    "Bir dış bacağını 5V'a, diğer dış bacağını GND'ye bağla. Orta bacağı A0'a bağla.",
@@ -920,7 +923,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     dlg.querySelector('.dlg').innerHTML = `
       <div class="dlg-head"><div><div class="post-meta"><span class="tag">${p.tag}</span></div><h3 id="dt">${escH(p.t)}</h3><p>${escH(p.d)}</p></div><button type="button" class="dlg-x" data-close>Kapat ✕</button></div>
       <section><h4>Malzemeler</h4><ul class="parts">${d.parts.map(x => `<li>${escH(x)}</li>`).join('')}</ul></section>
-      <section><h4>Devre şeması</h4><div class="diagram" role="img" aria-label="${escH(p.t)} devre şeması">${d.svg}</div>
+      <section><h4>Devre şeması</h4><figure class="diagram"><img src="${d.img}" alt="${escH(p.t)} devre şeması: MakersHub Studio simülatöründe çalışırken" loading="lazy"><figcaption>MakersHub Studio simülatöründe, kod çalışırken alınmış ekran görüntüsü. <a href="https://makerlab.furkankale-sosyal.workers.dev" target="_blank" rel="noopener">Simülatörü aç →</a></figcaption></figure>
         <table class="wire"><tbody>${d.wiring.map(w => `<tr><td>${escH(w[0])}</td><td>${escH(w[1])}</td></tr>`).join('')}</tbody></table></section>
       <section><h4>Adım adım</h4><ol class="steps">${d.steps.map(x => `<li><span>${escH(x)}</span></li>`).join('')}</ol></section>
       <section><h4>Kod</h4><div class="codewrap"><button type="button" class="copy" data-copy>Kopyala</button><pre class="code"><code>${escH(d.code)}</code></pre></div></section>
