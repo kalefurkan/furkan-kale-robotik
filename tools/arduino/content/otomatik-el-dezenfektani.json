@@ -50,7 +50,7 @@
   ],
   [
    "Ters diyot ve güç uyarısı",
-   "Pompa motoru ters gerilim üretir; diyot bunu bastırır. MakersHub'ın doğrulayıcısı katodu 5V'a bağlı bu diyot için 'ters bağlı' uyarısı verebilir ve diyodun çevresini kesikli turuncu çizebilir; bu yanlış uyarıdır: bu diyot bilerek ters (flyback) bağlanır ve görevi motor kapanınca oluşan ters gerilimi kısa devre etmektir. Sayfadaki görüntüde bu çerçeve gizlenmiştir. Pompa akımı Arduino pininden değil 5V rayından çekilir; gerçek pompa daha fazla akım çekiyorsa ayrı bir güç kaynağı kullan ve GND'leri birleştir. Elektronik parçaları dezenfektan sıvısından uzak tut."
+   "Pompa motoru ters gerilim üretir; diyot bunu bastırır. Diyodun katodu (çizgili uç) + tarafa bakar; böylece normalde akım geçirmez, yalnızca motor kapanınca oluşan ters gerilimi kendi içinde dolaştırır. MakersHub doğrulayıcısı bu bağlantıyı doğru kabul eder ve uyarı vermez. Pompa akımı Arduino pininden değil 5V rayından çekilir; gerçek pompa daha fazla akım çekiyorsa ayrı bir güç kaynağı kullan ve GND'leri birleştir. Elektronik parçaları dezenfektan sıvısından uzak tut."
   ],
   [
    "Sık yapılan hatalar",

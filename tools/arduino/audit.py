@@ -95,14 +95,9 @@ for i in ids:
             txt0 = json.dumps(s, ensure_ascii=False)
             if not re.search(r"takılı değil|breadboard dışında", txt0): errs.append("(4) serbest parçalar (breadboard dışı) metinde açıklanmamış ('takılı değil' / 'breadboard dışında')")
     # (5) simülatör
-    FLY = "Diyot ters bağlı: anot GND'ye (veya katot 5V'a) gidiyor, akım geçirmez."
     LASER = lambda w: 'GÜVENLİK' in w and 'lazer' in w
-    vw = [w for w in f['validator']['warnings'] if w != FLY and not LASER(w)]
-    if len(vw) != len([w for w in f['validator']['warnings'] if w != FLY]) and not all(k in json.dumps(s, ensure_ascii=False) for k in ('göz', 'gözlük', 'sınıf')): errs.append('lazer: güvenlik notunda göz/gözlük/sınıf ifadeleri yok')
-    nfly = len([w for w in f['validator']['warnings'] if w == FLY])
-    if nfly:  # MakersHub yanlış alarmı: yalnızca güç yolu denetimi diyot yönünü doğruladıysa ve diyot sayısı kadar kabul edilir
-        if f.get('powerIssues') or nfly > f['counts'].get('diode', 0): errs.append("(5) 'Diyot ters bağlı' uyarısı yanlış alarm olarak kabul edilemedi (güç yolu hatası ya da diyot sayısından fazla)")
-        else: warns.append(f"MakersHub yanlış alarmı kabul edildi ({nfly}): doğru bağlı ters (flyback) diyot 'ters bağlı' uyarısı alıyor; ekran görüntüsünde çerçeve gizlenir, notlarda belirtilmeli")
+    vw = [w for w in f['validator']['warnings'] if not LASER(w)]
+    if len(vw) != len(f['validator']['warnings']) and not all(k in json.dumps(s, ensure_ascii=False) for k in ('göz', 'gözlük', 'sınıf')): errs.append('lazer: güvenlik notunda göz/gözlük/sınıf ifadeleri yok')
     if f['validator']['errors'] or vw: errs.append(f"(5) doğrulayıcı: {f['validator']}")
     r = f['runtime']
     if r['error']: errs.append(f"(5) çalışma hatası: {r['error']}")
@@ -138,7 +133,6 @@ for i in ids:
     img = f"{SITE}/{s['img']}"
     if not os.path.exists(img) or os.path.getsize(img) < 20000: errs.append('görüntü yok ya da çok küçük')
     alltxt = json.dumps(s, ensure_ascii=False)
-    if [w for w in f['validator']['warnings'] if not LASER(w)] and not re.search(r'yanlış (uyarı|alarm)', alltxt): errs.append("MakersHub'ın yanlış 'ters bağlı' uyarısı notlarda açıklanmamış ('yanlış uyarı' ifadesi yok)")
     if re.search(r'gerçek kartta (denendi|test edildi|çalıştırıldı)', alltxt): errs.append('doğrulanamaz ifade: gerçek kartta denendi')
     if 'denendi' in alltxt and 'gerçek kartta denenmedi' not in alltxt: warns.append("'denendi' geçiyor: simülatörde denendiği açık yazılmış mı kontrol et")
     # adımlarda pin anılıyor mu (uyarı)

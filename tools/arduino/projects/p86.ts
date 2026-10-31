@@ -29,6 +29,6 @@ const p: Project = {
     b.wire("bb.e26", "bb.B-24", BLK);
   },
   sim: { runMs: 25000, sampleMs: 20 },
-  shoot: { actions: [{ waitText: "Nokta 2" }, { wait: 200 }], settleMs: 100, startWaitMs: 300, hideFlybackFrame: true },
+  shoot: { actions: [{ waitText: "Nokta 2" }, { wait: 200 }], settleMs: 100, startWaitMs: 300 },
 };
 export default p;

@@ -23,6 +23,6 @@ const p: Project = {
   },
   sim: { runMs: 12000, sampleMs: 50, events: [
     { t: 3000, set: { dht1: { tempC: 24 } } }, { t: 6000, set: { dht1: { tempC: 28 } } }, { t: 8000, set: { dht1: { tempC: 26 } } }, { t: 10000, set: { dht1: { tempC: 31 } } } ] },
-  shoot: { actions: [{ wait: 2500 }], settleMs: 300, hideFlybackFrame: true },
+  shoot: { actions: [{ wait: 2500 }], settleMs: 300 },
 };
 export default p;

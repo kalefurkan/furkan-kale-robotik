@@ -16,7 +16,7 @@ LCDS = ["LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sıra
         "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
         "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7)."]
 KUT = "Gerçek derleme servisinin izinli başlıkları arasında DHT.h, LiquidCrystal.h ve Keypad.h yoktur; bu kütüphaneler yalnızca MakersHub simülatöründe çalışır, sitedeki gerçek derleme bu sketch'lerde hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
-FLY = "MakersHub'ın doğrulayıcısı katodu 5V'a bağlı bu diyot için 'ters bağlı' uyarısı verebilir ve diyodun çevresini kesikli turuncu çizebilir; bu yanlış uyarıdır: bu diyot bilerek ters (flyback) bağlanır ve görevi motor kapanınca oluşan ters gerilimi kısa devre etmektir. Sayfadaki görüntüde bu çerçeve gizlenmiştir."
+FLY = "Diyodun katodu (çizgili uç) + tarafa bakar; böylece normalde akım geçirmez, yalnızca motor kapanınca oluşan ters gerilimi kendi içinde dolaştırır. MakersHub doğrulayıcısı bu bağlantıyı doğru kabul eder ve uyarı vermez."
 
 # ---------------- 21
 add("dijital-termometre", "termometre",

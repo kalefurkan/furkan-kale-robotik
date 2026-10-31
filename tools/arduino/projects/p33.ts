@@ -24,6 +24,6 @@ const p: Project = {
   sim: { runMs: 12000, sampleMs: 20, events: [
     { t: 2500, set: { ir1: { detected: false } } }, { t: 4000, set: { ir1: { detected: true } } }, { t: 4300, set: { ir1: { detected: false } } },
     { t: 6000, set: { ir1: { detected: true } } }, { t: 9000, set: { ir1: { detected: false } } }, { t: 10000, set: { ir1: { detected: true } } } ] },
-  shoot: { actions: [{ wait: 400 }], settleMs: 100, hideFlybackFrame: true, startWaitMs: 300 },
+  shoot: { actions: [{ wait: 400 }], settleMs: 100, startWaitMs: 300 },
 };
 export default p;

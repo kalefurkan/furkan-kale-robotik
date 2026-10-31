@@ -40,6 +40,6 @@ const p: Project = {
   },
   sim: { runMs: 30000, sampleMs: 50, events: [
     { t: 6000, set: { soil1: { moisture: 0.8 } } }, { t: 20000, set: { soil1: { moisture: 0.1 } } } ] },
-  shoot: { actions: [{ wait: 600 }], settleMs: 200, hideFlybackFrame: true },
+  shoot: { actions: [{ wait: 600 }], settleMs: 200 },
 };
 export default p;

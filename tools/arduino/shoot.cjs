@@ -54,12 +54,6 @@ const shoot = fs.existsSync(SHOOT) ? JSON.parse(fs.readFileSync(SHOOT, 'utf8')) 
       await page.mouse.click(sv.x, sv.y);
     }
     await page.waitForTimeout(sc.settleMs ?? 400);
-    if (sc.hideFlybackFrame) {
-      // MakersHub doğrulayıcısı 5V'a bağlı katotlu (doğru bağlanmış) ters diyotlara yanlış "ters bağlı" uyarısı çizer (bkz. README, "MakersHub hatası").
-      // audit.py bu uyarıyı yalnızca güç yolu denetimi (diyot yönü doğru) geçerse kabul eder.
-      await page.addStyleTag({ content: 'svg rect[stroke-dasharray="5 3"] { display: none !important; }' });
-      await page.waitForTimeout(150);
-    }
     const box = await page.evaluate(() => {
       const svgs = [...document.querySelectorAll('svg')].map(s => ({ s, r: s.getBoundingClientRect() })).sort((a, b) => b.r.width * b.r.height - a.r.width * a.r.height);
       const { s, r } = svgs[0]; let x1 = 1e9, y1 = 1e9, x2 = -1e9, y2 = -1e9;

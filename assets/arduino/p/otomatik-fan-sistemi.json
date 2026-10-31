@@ -46,7 +46,7 @@
   ],
   [
    "Ters diyot neden gerekli?",
-   "Motor bir bobindir: akımı kesilince uçlarında ters yönde yüksek gerilim doğurur ve transistörü bozabilir. Motora paralel, ters yönde bağlı diyot bu akımı motorun içinde dolaştırır. MakersHub'ın doğrulayıcısı katodu 5V'a bağlı bu diyot için 'ters bağlı' uyarısı verebilir ve diyodun çevresini kesikli turuncu çizebilir; bu yanlış uyarıdır: bu diyot bilerek ters (flyback) bağlanır ve görevi motor kapanınca oluşan ters gerilimi kısa devre etmektir. Sayfadaki görüntüde bu çerçeve gizlenmiştir."
+   "Motor bir bobindir: akımı kesilince uçlarında ters yönde yüksek gerilim doğurur ve transistörü bozabilir. Motora paralel, ters yönde bağlı diyot bu akımı motorun içinde dolaştırır. Diyodun katodu (çizgili uç) + tarafa bakar; böylece normalde akım geçirmez, yalnızca motor kapanınca oluşan ters gerilimi kendi içinde dolaştırır. MakersHub doğrulayıcısı bu bağlantıyı doğru kabul eder ve uyarı vermez."
   ],
   [
    "Histerezis",

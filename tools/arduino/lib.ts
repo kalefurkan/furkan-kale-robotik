@@ -79,7 +79,7 @@ export interface Project {
   /** node tarafı doğrulama: sanal süre ve zamanlı girdi değişiklikleri */
   sim: { runMs: number; events?: { t: number; set: Record<string, Record<string, any>> }[]; sampleMs?: number };
   /** tarayıcı tarafı: ekran görüntüsünden önce yapılacak etkileşimler */
-  shoot?: { actions: Action[]; settleMs?: number; hideFlybackFrame?: boolean; startWaitMs?: number };
+  shoot?: { actions: Action[]; settleMs?: number; startWaitMs?: number };
 }
 
 /**
