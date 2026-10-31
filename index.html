@@ -262,7 +262,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <nav class="nav" aria-label="Ana menü">
       <a href="#icerikler">İçerikler</a>
       <a href="#uygulamalar">Uygulamalar</a>
-      <a href="#araclar">Araçlar</a>
+      <a href="#araclar">Uygulamalarım</a>
       <a href="#yol">Öğrenme yolu</a>
       <a href="#notlar">Atölye notları</a>
       <a href="#hakkimda">Hakkımda</a>
@@ -280,7 +280,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <p class="lede">Arduino'dan ROS 2'ye adım adım yazılar, çalışan proje dosyaları ve kendi geliştirdiğim uygulamalar. Her içerik bir masada denenmiş, kablosu takılmış hâliyle burada.</p>
       <div class="ctas">
         <a class="btn btn-primary" href="#icerikler">İçeriklere göz at →</a>
-        <a class="btn btn-ghost" href="#uygulamalar">Uygulamalarım</a>
+        <a class="btn btn-ghost" href="#araclar">Uygulamalarım</a>
       </div>
       <ul class="topics" aria-label="Konular">
         <li>Scratch Jr.</li><li>Scratch</li><li>Kodu Game Lab</li><li>Minecraft</li><li>Tinkercad</li><li>SPIKE</li><li>Arduino</li><li>Python</li>
@@ -338,45 +338,23 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <div class="eyebrow">U3 · Ücretsiz araçlar</div>
-        <h2>Masada en çok lazım olan iki hesap</h2>
-        <p>Kayıt gerektirmez. Değerleri gir, sonucu ve kopyalanabilir kodu al.</p>
+        <div class="eyebrow">U3 · Uygulamalarım</div>
+        <h2>Kendi geliştirdiğim eğitim uygulamaları</h2>
+        <p>Öğrencilerin tarayıcıda deneyerek öğrendiği iki platform.</p>
       </div>
     </div>
     <div class="tools">
       <div class="tool">
-        <h3>LED direnç hesaplayıcı</h3>
-        <p>R = (V<sub>besleme</sub> − V<sub>LED</sub>) / I. Sonuç, standart E12 serisinde bir üst değere yuvarlanır.</p>
-        <div class="presets" aria-label="LED rengi">
-          <button type="button" data-vf="2.0"><i style="background:#D3302A"></i>Kırmızı 2,0 V</button>
-          <button type="button" data-vf="2.1"><i style="background:#E8B21C"></i>Sarı 2,1 V</button>
-          <button type="button" data-vf="3.0"><i style="background:#2FA65A"></i>Yeşil 3,0 V</button>
-          <button type="button" data-vf="3.2"><i style="background:#2F6FD8"></i>Mavi 3,2 V</button>
-          <button type="button" data-vf="3.2"><i style="background:#F2F2F2;border:1px solid #999"></i>Beyaz 3,2 V</button>
-        </div>
-        <div class="fields">
-          <div class="field"><label for="vs">Besleme (V)</label><input id="vs" type="number" step="0.1" min="0" value="5"></div>
-          <div class="field"><label for="vf">LED ileri (V)</label><input id="vf" type="number" step="0.1" min="0" value="2.0"></div>
-          <div class="field"><label for="ima">Akım (mA)</label><input id="ima" type="number" step="1" min="1" value="15"></div>
-        </div>
-        <div class="result" id="rres" aria-live="polite"></div>
+        <div class="app-title"><h3>PyLearn</h3><span class="status beta">Web sürümü yayında</span></div>
+        <p>Python öğrenme platformu. Türkçe dersler, her ders için otomatik kontrol edilen alıştırmalar ve kodu doğrudan tarayıcıda çalıştıran editör.</p>
+        <ul class="feat"><li>50 modül, 150 ders; modül sonu sınavları</li><li>Python tarayıcı içinde çalışır, kurulum gerekmez</li><li>İlerleme cihazda kalıcı; web ve iOS (Capacitor) için tek kod tabanı</li></ul>
+        <div class="app-foot"><span class="platforms">Web · iOS yolda</span><a href="https://kalefurkan.github.io/pylearn-app/" target="_blank" rel="noopener">Dene →</a></div>
       </div>
-
       <div class="tool">
-        <h3>Servo açı → darbe genişliği</h3>
-        <p>50 Hz servo sinyali için darbe süresini, görev oranını ve ESP32 LEDC değerini hesaplar.</p>
-        <div class="range-row">
-          <input id="ang" type="range" min="0" max="180" value="90" aria-label="Servo açısı">
-          <output id="angout" for="ang">90°</output>
-        </div>
-        <div class="fields">
-          <div class="field"><label for="pmin">0° darbe (µs)</label><input id="pmin" type="number" step="10" value="500"></div>
-          <div class="field"><label for="pmax">180° darbe (µs)</label><input id="pmax" type="number" step="10" value="2500"></div>
-          <div class="field"><label for="bits">LEDC çözünürlük</label>
-            <select id="bits"><option value="10">10 bit</option><option value="12">12 bit</option><option value="14">14 bit</option><option value="16" selected>16 bit</option></select>
-          </div>
-        </div>
-        <div class="result" id="sres" aria-live="polite"></div>
+        <div class="app-title"><h3>MakersHub Studio</h3><span class="status live">Yayında</span></div>
+        <p>Arduino ve 3D tasarımı tarayıcıda öğreten eğitim platformu: 3D editör, devre simülasyonu ve öğretmen için sınıf ve ödev yönetimi.</p>
+        <ul class="feat"><li>3D editör: 18 şekil, Boolean işlemleri, STL / OBJ / GLB dışa aktarma</li><li>Arduino atölyesi: devre editörü, 35 bileşen, kod simülasyonu</li><li>Öğretmen paneli: sınıf, ödev ve teslim değerlendirme</li></ul>
+        <div class="app-foot"><span class="platforms">Web</span><a href="https://makerlab.furkankale-sosyal.workers.dev" target="_blank" rel="noopener">Aç →</a></div>
       </div>
     </div>
   </div>
@@ -618,71 +596,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   chips.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; tag = b.dataset.t; try { localStorage.setItem('fk-tag', tag); } catch (er) {} renderChips(); renderPosts(); });
   document.getElementById('q').addEventListener('input', e => { q = e.target.value.trim(); renderPosts(); });
   renderChips(); renderPosts();
-
-  /* ---------- LED direnç ---------- */
-  const E12 = [10, 12, 15, 18, 22, 27, 33, 39, 47, 56, 68, 82];
-  const BAND = ['#1a1a1a', '#7a4a1f', '#d0302a', '#ec7a1c', '#f2cc1d', '#2f9e4f', '#2f62c8', '#7d3fb3', '#8a8a8a', '#f4f4f4'];
-  const BANDN = ['siyah', 'kahverengi', 'kırmızı', 'turuncu', 'sarı', 'yeşil', 'mavi', 'mor', 'gri', 'beyaz'];
-  const ohm = r => r >= 1e6 ? fmt(r / 1e6, r % 1e6 ? 1 : 0) + ' MΩ' : r >= 1000 ? fmt(r / 1000, r % 1000 ? 1 : 0) + ' kΩ' : fmt(r, r < 10 && r % 1 ? 1 : 0) + ' Ω';
-  function e12up(R) {
-    R = Math.max(R, 1); let ex = Math.floor(Math.log10(R)) - 1, n = R / Math.pow(10, ex);
-    let e = E12.find(v => v >= n - 1e-9); if (!e) { e = 10; ex += 1; }
-    return { v: e * Math.pow(10, ex), d1: Math.floor(e / 10), d2: e % 10, m: ex };
-  }
-  function resistorSVG(b) {
-    const mult = b.m >= 0 ? BAND[b.m] : (b.m === -1 ? '#c9a03a' : '#c0c0c0');
-    return `<svg viewBox="0 0 220 44" width="220" height="44" role="img" aria-label="Renk bantları" style="max-width:100%">
-      <line x1="0" y1="22" x2="220" y2="22" stroke="#9a9a9a" stroke-width="3"/>
-      <rect x="40" y="6" width="140" height="32" rx="14" fill="#e6cf9e" stroke="#a88f5e"/>
-      <rect x="62" y="6" width="9" height="32" fill="${BAND[b.d1]}"/><rect x="82" y="6" width="9" height="32" fill="${BAND[b.d2]}"/>
-      <rect x="102" y="6" width="9" height="32" fill="${mult}"/><rect x="150" y="6" width="9" height="32" fill="#c9a03a"/></svg>`;
-  }
-  const vs = document.getElementById('vs'), vf = document.getElementById('vf'), ima = document.getElementById('ima'), rres = document.getElementById('rres');
-  function calcR() {
-    const V = parseFloat(vs.value), F = parseFloat(vf.value), I = parseFloat(ima.value) / 1000;
-    if (!(V > 0) || !(F >= 0) || !(I > 0)) { rres.innerHTML = '<p class="err">Üç alana da sıfırdan büyük bir sayı gir.</p>'; return; }
-    if (V <= F) { rres.innerHTML = `<p class="err">Besleme gerilimi (${fmt(V, 1)} V), LED'in ileri geriliminden (${fmt(F, 1)} V) yüksek olmalı. Bu değerlerle LED yanmaz.</p>`; return; }
-    const R = (V - F) / I, b = e12up(R), Ireal = (V - F) / b.v * 1000, P = Math.pow(Ireal / 1000, 2) * b.v;
-    const w = P <= 0.125 ? '¼ W' : P <= 0.25 ? '½ W' : P <= 0.5 ? '1 W' : '2 W';
-    const multName = b.m >= 0 ? BANDN[b.m] : (b.m === -1 ? 'altın' : 'gümüş');
-    rres.innerHTML = `
-      <div class="result-main"><div><small>Önerilen direnç (E12)</small><strong>${ohm(b.v)}</strong></div>${resistorSVG(b)}</div>
-      <div class="kv">
-        <div><span>Hesaplanan</span><b>${ohm(Math.round(R * 10) / 10)}</b></div>
-        <div><span>Gerçek akım</span><b>${fmt(Ireal, 1)} mA</b></div>
-        <div><span>Güç</span><b>${fmt(P * 1000, 0)} mW · ${w}</b></div>
-      </div>
-      <p class="mono" style="font-size:12px;color:var(--muted)">Bantlar: ${BANDN[b.d1]} · ${BANDN[b.d2]} · ${multName} · altın (%5)</p>`;
-  }
-  [vs, vf, ima].forEach(el => el.addEventListener('input', calcR));
-  document.querySelectorAll('.presets button').forEach(b => b.addEventListener('click', () => { vf.value = b.dataset.vf; calcR(); }));
-  calcR();
-
-  /* ---------- Servo darbe ---------- */
-  const ang = document.getElementById('ang'), angout = document.getElementById('angout'), pmin = document.getElementById('pmin'), pmax = document.getElementById('pmax'), bits = document.getElementById('bits'), sres = document.getElementById('sres');
-  function calcS() {
-    const a = +ang.value, lo = parseFloat(pmin.value), hi = parseFloat(pmax.value), nb = +bits.value;
-    angout.textContent = a + '°';
-    if (!(lo > 0) || !(hi > lo) || hi > 20000) { sres.innerHTML = '<p class="err">180° darbesi 0° darbesinden büyük ve 20 000 µs altında olmalı.</p>'; return; }
-    const us = Math.round(lo + (hi - lo) * a / 180), duty = us / 20000, ledc = Math.round(duty * (Math.pow(2, nb) - 1));
-    const rad = (180 - a) * Math.PI / 180, hx = 30 + 22 * Math.cos(rad), hy = 32 - 22 * Math.sin(rad);
-    sres.innerHTML = `
-      <div class="result-main"><div><small>Darbe genişliği</small><strong>${fmt(us)} µs</strong></div>
-        <svg viewBox="0 0 60 40" width="90" height="60" aria-hidden="true"><path d="M8 32 A22 22 0 0 1 52 32" fill="none" stroke="var(--line)" stroke-width="3"/>
-        <line x1="30" y1="32" x2="${hx.toFixed(1)}" y2="${hy.toFixed(1)}" stroke="var(--mask)" stroke-width="4" stroke-linecap="round"/><circle cx="30" cy="32" r="4" fill="var(--gold)"/></svg></div>
-      <div class="kv">
-        <div><span>Görev oranı</span><b>%${fmt(duty * 100, 2)}</b></div>
-        <div><span>Periyot</span><b>20 ms</b></div>
-        <div><span>LEDC (${nb} bit)</span><b>${fmt(ledc)}</b></div>
-      </div>
-<pre class="code"><span style="color:var(--muted)">// Arduino</span>
-servo.writeMicroseconds(${us});
-<span style="color:var(--muted)">// ESP32 (Arduino core 3.x)</span>
-ledcAttach(PIN, 50, ${nb});
-ledcWrite(PIN, ${ledc});</pre>`;
-  }
-  [ang, pmin, pmax, bits].forEach(el => el.addEventListener('input', calcS));
-  calcS();
 
   /* ---------- Atölye notları ---------- */
   const NOTES = [
