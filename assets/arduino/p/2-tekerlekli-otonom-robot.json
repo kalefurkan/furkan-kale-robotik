@@ -1,0 +1,110 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × MPU6050 ivmeölçer + jiroskop modülü (GY-521)",
+  "2 × enkoderli DC motor (tur başına 220 tik)",
+  "1 × L298N motor sürücü",
+  "1 × ayarlanabilir güç kaynağı (8 V'a ayarlı; gerçekte 2 × 18650 ya da 6 × AA pil)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur); 65 mm çaplı tekerlekler",
+  "Jumper kablolar (28 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: L298N 5V ucu ve diğer modüllerin VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: L298N GND ve diğer modüllerin GND'si"
+  ],
+  [
+   "D2",
+   "Sol enkoder A çıkışı (kesme pini)"
+  ],
+  [
+   "D3",
+   "Sağ enkoder A çıkışı (kesme pini)"
+  ],
+  [
+   "D4",
+   "Sol enkoder B çıkışı (yön)"
+  ],
+  [
+   "D11",
+   "Sağ enkoder B çıkışı (yön)"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ],
+  [
+   "A4",
+   "MPU6050 SDA"
+  ],
+  [
+   "A5",
+   "MPU6050 SCL"
+  ]
+ ],
+ "img": "assets/devre/2-tekerlekli-otonom-robot.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "L298N ve motorlar için ortak kurulum: L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola. GND ortak olsun: d5 → eksi rayı. e6 → artı rayı (L298N mantık beslemesi Arduino 5V'undan; kartın 5V jumper'ını çıkar).",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Enkoderli motorlar (breadboard dışında, takılı değil): sol motor için e13 → M1, e14 → M2 (OUT1, OUT2); sağ motor için e15 → M1, e16 → M2 (OUT3, OUT4). Enkoder beslemesi: iki motorun VCC ucunu artı rayına, GND ucunu eksi rayına bağla.",
+  "Enkoder sinyalleri: sol A → D2, sol B → D4; sağ A → D3, sağ B → D11. A çıkışları D2 ve D3'e bağlanmalı çünkü Uno'da yalnızca bu pinler harici kesme (attachInterrupt) destekler.",
+  "MPU6050'yi a20 (VCC), a21 (GND), a22 (SCL), a23 (SDA), a24 (AD0) deliklerine tak, AD0'ı boş bırak. e20 → artı rayı, e21 → eksi rayı, A5 → e22, A4 → e23.",
+  "Kodu yükle (simülatörde çalıştır): 2 saniye sonra motorlar ileri döner, enkoder tikleri sayılır ve yaklaşık 50 cm'de (538 tik) durur. Dönüş sırasında jiroskop kaydırıcısını 90 °/s yap; sketch açı 90°'ye ulaşınca durur."
+ ],
+ "code": "// 2 tekerlekli otonom robot: enkoderli 2 DC motor + MPU6050 + L298N\n// Yolu: 50 cm ileri, 90 derece don, bunu 4 kez tekrarla (kare). Mesafe enkoderle, donus jiroskopla olculur.\n#include <Wire.h>\n\nconst int MPU = 0x68;\n\nconst int ENC_SOL_A = 2;       // kesme pini\nconst int ENC_SOL_B = 4;\nconst int ENC_SAG_A = 3;       // kesme pini\nconst int ENC_SAG_B = 11;\n\nconst int ENA = 5;\nconst int IN1 = 7;\nconst int IN2 = 8;\nconst int IN3 = 9;\nconst int IN4 = 10;\nconst int ENB = 6;\n\nconst float TIK_MM = 0.93;     // 1 tik kac mm (tekerlek capi 65 mm, tur basina 220 tik)\nconst int HEDEF_MM = 500;\nconst int HIZ = 200;           // 0-255\nconst float KP_EGIM = 2.0;     // iki tekerlek farki icin duzeltme\n\nvolatile long solTik = 0;\nvolatile long sagTik = 0;\n\nint adim = 0;                  // 0..7: cift = ileri, tek = don\nfloat donAci = 0;\nunsigned long sonZaman = 0;\n\nvoid isrSol() {\n  if (digitalRead(ENC_SOL_B)) {\n    solTik--;\n  } else {\n    solTik++;\n  }\n}\n\nvoid isrSag() {\n  if (digitalRead(ENC_SAG_B)) {\n    sagTik--;\n  } else {\n    sagTik++;\n  }\n}\n\nvoid motor(int sol, int sag) {         // -255..255\n  digitalWrite(IN1, sol > 0 ? HIGH : LOW);\n  digitalWrite(IN2, sol < 0 ? HIGH : LOW);\n  digitalWrite(IN3, sag > 0 ? HIGH : LOW);\n  digitalWrite(IN4, sag < 0 ? HIGH : LOW);\n  analogWrite(ENA, abs(sol));\n  analogWrite(ENB, abs(sag));\n}\n\nfloat jiroZ() {                        // Z ekseni donus hizi (derece/saniye)\n  Wire.beginTransmission(MPU);\n  Wire.write(0x47);\n  Wire.endTransmission(false);\n  Wire.requestFrom(MPU, 2, true);\n  int gz = Wire.read() << 8 | Wire.read();\n  return gz / 131.0;\n}\n\nvoid setup() {\n  pinMode(ENC_SOL_A, INPUT);\n  pinMode(ENC_SOL_B, INPUT);\n  pinMode(ENC_SAG_A, INPUT);\n  pinMode(ENC_SAG_B, INPUT);\n  pinMode(ENA, OUTPUT);\n  pinMode(ENB, OUTPUT);\n  pinMode(IN1, OUTPUT);\n  pinMode(IN2, OUTPUT);\n  pinMode(IN3, OUTPUT);\n  pinMode(IN4, OUTPUT);\n  Serial.begin(9600);\n  Wire.begin();\n  Wire.beginTransmission(MPU);\n  Wire.write(0x6B);\n  Wire.write(0);\n  Wire.endTransmission(true);\n  attachInterrupt(digitalPinToInterrupt(ENC_SOL_A), isrSol, RISING);\n  attachInterrupt(digitalPinToInterrupt(ENC_SAG_A), isrSag, RISING);\n  Serial.println(\"Otonom robot hazir: 2 saniye sonra basliyor\");\n  delay(2000);\n  solTik = 0;\n  sagTik = 0;\n  sonZaman = millis();\n}\n\nvoid loop() {\n  if (adim >= 8) {\n    motor(0, 0);\n    return;\n  }\n\n  if (adim % 2 == 0) {                 // ileri git, iki tekerlek ayni tik sayisinda kalsin\n    long sol = solTik;\n    long sag = sagTik;\n    float mm = (sol + sag) / 2.0 * TIK_MM;\n    if (mm >= HEDEF_MM) {\n      motor(0, 0);\n      Serial.print(\"Kenar \");\n      Serial.print(adim / 2 + 1);\n      Serial.print(\" bitti: \");\n      Serial.print((int)mm);\n      Serial.print(\" mm, tik sol=\");\n      Serial.print(sol);\n      Serial.print(\" sag=\");\n      Serial.println(sag);\n      donAci = 0;\n      adim++;\n      delay(300);\n      sonZaman = millis();          // bekleme suresi aciya katilmasin\n      return;\n    }\n    int duzeltme = (int)(KP_EGIM * (sol - sag));\n    motor(constrain(HIZ - duzeltme, 0, 255), constrain(HIZ + duzeltme, 0, 255));\n  } else {                              // yerinde don: jiroskop acisini topla\n    unsigned long simdi = millis();\n    donAci = donAci + jiroZ() * (simdi - sonZaman) / 1000.0;\n    sonZaman = simdi;\n    if (donAci >= 90) {\n      motor(0, 0);\n      Serial.print(\"Donus bitti: \");\n      Serial.print((int)donAci);\n      Serial.println(\" derece\");\n      solTik = 0;\n      sagTik = 0;\n      adim++;\n      if (adim >= 8) {\n        Serial.println(\"Kare tamamlandi\");\n      }\n      delay(300);\n      return;\n    }\n    motor(-150, 150);\n  }\n  delay(5);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Enkoderli motor, her turda 220 periyot üreten iki kare dalga (A ve B) verir. A kenarı her yükseldiğinde kesme rutini çalışır: o anda B HIGH ise tekerlek geri, LOW ise ileri dönüyordur (A ve B arasında 90° faz farkı vardır). Rutin tik sayacını (solTik, sagTik) artırır ya da azaltır; bu değişkenler volatile tanımlıdır çünkü kesme içinde değişir. Tekerleğin çevresi 65 mm × π ≈ 204 mm ve 1 tur = 220 tik olduğu için 1 tik ≈ 0,93 mm eder; iki tekerleğin ortalama tik sayısı yolu verir. İleri giderken iki tekerlek farklı hızlanırsa robot yan yana kayar: KP_EGIM × (sol − sag) kadar fark, hızlı olan motoru yavaşlatır, yavaş olanı hızlandırır. Dönüşte MPU6050'nin Z ekseni jiroskop hızı (derece/saniye) okunur ve açı = açı + hız × geçen süre ile toplanır (entegrasyon). Açı 90°'ye ulaşınca motorlar durur. Jiroskop zamanla kayar (sapma), bu yüzden uzun yollarda gerçek robotlar enkoderle ya da manyetometreyle düzeltme yapar."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Otonom robot hazir: 2 saniye sonra basliyor\" yazıldı. 2. saniyede iki motor %73 hızla döndü ve yaklaşık 1 saniye sonra \"Kenar 1 bitti: 500 mm, tik sol=538 sag=538\" yazıldı (iki enkoder aynı sayıyı verdi). Dönüş sırasında modül \"A: geri · B: ileri\" gösterdi; jiroskop Z hızı kaydırıcıdan 90 °/s verildiğinde yaklaşık bir saniye sonra \"Donus bitti: 90 derece\" yazıldı. Bu, dört kenar boyunca tekrarlandı: kenarlar 500, 501, 502, 502 mm (tik 538–540) ölçtü ve 12,1. saniyede \"Kare tamamlandi\" yazıldı. Simülatörde jiroskop değeri motorların dönüşünden bağımsız olarak elle verildiği için gerçek dönüşün 90° olup olmadığı doğrulanmadı: yalnızca açı toplama ve durdurma mantığı çalıştı. Enkoder sayımı ise motorların dönüşünden gerçekten üretildi. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde robot hareket etmez: tekerlek yükü, kayma, motor ataleti ve ters EMK yoktur, bu yüzden her iki enkoder kusursuz eşit sayar (gerçekte biri hızlı olur). Jiroskop değeri motorlardan bağımsız, kaydırıcıdan verilir; sapma, gürültü ve ofset (sıfır hız okumasındaki kayma) modellenmez. Gerçek jiroskop dururken bile birkaç °/s okur: başlangıçta yüzlerce örneğin ortalamasıyla ofset kalibrasyonu yapmak gerekir. Dönüş yönünün işareti (saat yönü + ya da −) MPU6050'nin montaj yönüne bağlıdır. Sketch yalnızca Wire.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır. attachInterrupt gerçek Uno'da D2 ve D3'te çalışır."
+  ],
+  [
+   "Güç ve GND",
+   "Motorları Arduino'nun 5V pininden besleme: motorlar yüzlerce mA çeker. Motor gücü ayrı güç kaynağından (pil kutusu) gelir; L298N'in GND'si Arduino GND'sine mutlaka bağlanmalı, yoksa IN/EN sinyalleri anlamsız olur. L298N yaklaşık 2 V düşürür; motor beslemesini motorun istediği gerilimden yaklaşık 2 V yüksek seç. L298N'in dahili serbest dönüş diyotları vardır, ayrıca diyot eklenmez. Güvenlik: pil kutusunu kısa devre yapma (artı ve eksi uçları birbirine değmesin); lityum/Li-ion pil kullanıyorsan yetişkin gözetiminde, koruma devreli paketle çalış; kablolar ısınırsa hemen enerjiyi kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Enkoder A çıkışlarını kesme desteği olmayan pinlere bağlamak; A ve B'yi ters bağlayıp yönü ters saymak; sayaç değişkenini volatile yapmamak; kesme içinde Serial.print kullanmak; tekerlek çapını ya da tur başına tik sayısını yanlış girmek; jiroskop ofsetini hesaba katmamak; sol ve sağ motoru ters yönde monte edip düz giderken dönmek (sağ motorun işaretini çevir)."
+  ],
+  [
+   "Dene",
+   "HEDEF_MM'yi 300 ve 800 yap, ileri mesafenin tik sayısını karşılaştır; dört kenar yerine altıgen çizmek için dönüş açısını 60° yap; KP_EGIM'i 0 yaparak iki tekerlek farkı düzeltmesinin etkisini gör."
+  ]
+ ],
+ "title": "70. 2 Tekerlekli Otonom Robot"
+}

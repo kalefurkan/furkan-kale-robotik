@@ -1,0 +1,105 @@
+{
+ "sketch": "wifi_ev",
+ "d": "Uno'ya SoftwareSerial ile bağlı ESP-01 Wi-Fi modülü AT komutlarıyla ağa katılır ve 80. portta sunucu açar; gelen \"/1/on\" gibi web istekleri 4 kanallı röle modülünü açıp kapatır. Duvar butonları aynı röleleri elle de çevirir. AT komutlarını, 3,3 V / 5 V seviye uyumunu, röle modülünü ve gelen yazıyı durum makinesiyle ayrıştırmayı öğrenirsin. Simülatörde Wi-Fi'ye katılma ve röle/buton mantığı denenir; gerçek ağ ve web isteği denenemez.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × ESP8266 (ESP-01) Wi-Fi modülü",
+  "1 × 4 kanallı röle modülü",
+  "4 × ampul (5 V, rölelerle yakılan lambaları temsil eder)",
+  "2 × buton (duvar anahtarı)",
+  "1 × 1 kΩ direnç (gerilim bölücü)",
+  "1 × 2 kΩ direnç (gerilim bölücü)",
+  "1 × ayarlanabilir güç kaynağı (3,3 V'a ayarlı; gerçekte en az 300 mA veren 3,3 V regülatör, örneğin AMS1117-3.3)",
+  "Jumper kablolar (31 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: röle modülü VCC ve rölelerin COM uçları"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: ESP-01 GND, röle modülü GND, buton uçları ve ampul uçları"
+  ],
+  [
+   "3V3",
+   "ESP-01 CH_PD (etkinleştirme) ucu"
+  ],
+  [
+   "D2",
+   "ESP-01 TX (Arduino'nun RX'i)"
+  ],
+  [
+   "D3",
+   "1 kΩ direncin ucu → ESP-01 RX (Arduino'nun TX'i)"
+  ],
+  [
+   "D4",
+   "Röle modülü IN3"
+  ],
+  [
+   "D5",
+   "Röle modülü IN4"
+  ],
+  [
+   "D6",
+   "Röle modülü IN1"
+  ],
+  [
+   "D7",
+   "Röle modülü IN2"
+  ],
+  [
+   "D8",
+   "Buton 1 (röle 1)"
+  ],
+  [
+   "D9",
+   "Buton 2 (röle 2)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın. Röle uçlarına şebeke gerilimi (220 V) bağlama: bu projede yalnızca 5 V'luk ampuller vardır.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "ESP-01'i a2 (VCC), a3 (GND), a4 (TX), a5 (RX), a6 (CH_PD) deliklerine tak. 3,3 V güç kaynağı (breadboard dışında, takılı değil): + ucunu e2'ye, − ucunu eksi rayına kablola; e3 → eksi rayı. ESP-01'i Arduino'nun 3,3 V pininden besleme: yeterli akım vermez. CH_PD için 3V3 → e6 kablola.",
+  "ESP-01 sinyalleri: D2 → e4 (TX). Gerilim bölücü: 1 kΩ direnci d5 ile d9 arasına, 2 kΩ direnci dikey olarak e5 ile h5 arasına tak; D3 → e9, j5 → eksi rayı. RX girişi 3,3 V'luktur; Arduino'nun 5 V'luk çıkışı bölücüyle yaklaşık 3,3 V'a iner.",
+  "Butonlar: birincisini c14 ve c16 deliklerine tak, D8 → e14, e16 → eksi rayı. İkincisini c20 ve c22 deliklerine tak, D9 → e20, e22 → eksi rayı.",
+  "4 kanallı röle modülü ve 4 ampul breadboard dışında, takılı değil: modül VCC → artı rayı, GND → eksi rayı; IN1 → D6, IN2 → D7, IN3 → D4, IN4 → D5. Her kanalın COM ucu artı rayına, NO ucu ampulün bir ucuna, ampulün diğer ucu eksi rayına kablolanır.",
+  "Kodu yükle (simülatörde çalıştır): ESP-01 AT komutlarına yanıt verir, \"MakersHub\" ağına katılır (yaklaşık 3 saniye sürer) ve sunucu açılır. Ardından butonlara basınca röleler çeker, ampuller yanar. Web isteği simülatörde gelmez."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "ESP-01 üzerinde Wi-Fi işlemcisi vardır ve AT komutlarıyla yönetilir: AT (yanıt testi), AT+CWMODE=1 (istemci kipi), AT+CWJAP=\"ağ\",\"parola\" (ağa katıl), AT+CIPMUX=1 (çoklu bağlantı), AT+CIPSERVER=1,80 (80. portta sunucu aç). Sketch her komutu esp.println() ile gönderir, bekle2() ile cevapta beklenen iki harfi arar (\"OK\" ya da \"IP\") ve sonucu Seri Monitör'e yazar. Bağlandıktan sonra ESP-01 bir web isteği aldığında Arduino'ya \"+IPD,0,..:GET /1/on HTTP/1.1\" gibi bir satır yollar; istekIsle() bu yazıyı harf harf kontrol eden bir durum makinesidir (G, E, T, boşluk, /, kanal numarası, /, on ya da off). Eşleşirse roleYaz() ilgili röleyi çalıştırır. Röle modülü \"LOW'da çeker\" tipindedir: IN pini LOW olunca röle çeker, bu yüzden roleYaz() açmak için LOW yazar. Butonlar INPUT_PULLUP ile okunur; basılınca LOW olur ve röle durumu ters çevrilir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Akilli ev hazir\" yazıldı. 1. saniyede \"AT -> tamam\", 1,5. saniyede \"AT+CWMODE=1 -> tamam\" yazıldı. Wi-Fi'ye katılma komutundan sonra ESP-01 yaklaşık 3 saniye sonra \"WIFI CONNECTED / WIFI GOT IP / OK\" yanıtladı ve modül \"Wi-Fi: MakersHub\" durumuna geçti (sketch 6 saniye bekleyip devam etti); \"AT+CIPMUX=1\" ve \"AT+CIPSERVER=1,80\" de tamam yanıtı aldı, ardından \"Sunucu istek bekliyor\" yazıldı. 9,5. saniyede birinci butona basılınca \"Role 1: ACIK\" yazıldı ve 1. röle çekti (ampul yandı); 10,5. saniyede ikinci buton \"Role 2: ACIK\" yaptı; 11,5. saniyede birinci butona tekrar basılınca \"Role 1: KAPALI\" yazıldı ve röle bıraktı. Web isteğinden röle çalıştırma (+IPD ayrıştırma) simülatörde denenemedi. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde yalnızca ESP-01'in AT komut düzeyi vardır: AT, AT+CWMODE, AT+CWJAP (Wi-Fi'ye katılma), AT+CIPMUX ve AT+CIPSERVER komutları yanıt verir. Gerçek ağ yoktur: tarayıcıdan ya da telefondan gelen bir HTTP isteği (+IPD satırı) simülatörde hiçbir zaman oluşmaz, AT+CIPSEND ile cevap gönderme ve internete çıkma da çalışmaz (ERROR döner). Bu yüzden bu projede web isteğinin işlenmesi simülatörde DOĞRULANMADI; yalnızca Wi-Fi'ye katılma ve röle/buton mantığı doğrulandı. Sketch'teki +IPD ayrıştırma kodu gerçek ESP-01 çıktı biçimine göre yazıldı ama doğrulanmadı: gerçek modülün cevabı sürümüne göre farklı olabilir ve gerçek bir web sayfası göndermek için AT+CIPSEND ve AT+CIPCLOSE komutları da eklenmelidir (bu sketch cevap göndermez, tarayıcı zaman aşımına uğrar ama röle çalışır). ESP-01 çoğu zaman 115200 baud'la gelir; SoftwareSerial bu hızda güvenilmez, önce AT+UART_DEF ile 9600'e düşürmek gerekir. Daha rahat bir çözüm NodeMCU/ESP8266'yı tek başına programlamaktır (ESP8266WiFi.h kütüphanesi, web sunucusu kendi kodunda); bu tür kodlar Uno sketch'i değildir ve simülatörde çalışmaz. Sketch yalnızca SoftwareSerial.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Güç ve GND",
+   "ESP-01 anlık 200 mA'in üstünde çeker; Arduino'nun 3,3 V pini bunu veremez, ayrı bir 3,3 V regülatör kullan ve GND'sini Arduino GND'sine bağla. ESP-01'in girişleri 5 V'a dayanmaz: ESP-01'i 5 V'a bağlama, RX'e 5 V'luk sinyali bölücüsüz verme. ÖNEMLİ GÜVENLİK: Röle modülü şebeke (220 V) gerilimini anahtarlayabilir, ama bu çok tehlikelidir: ölümcül elektrik çarpmasına ve yangına yol açabilir. Şebekeye bağlı hiçbir devreyi yetişkin ve elektrik bilgisi olmayan biri kurmamalıdır; sertifikalı kutu, sigorta ve yalıtım şarttır. Bu projeyi yalnızca düşük gerilimli ampul ve LED'lerle dene."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "ESP-01'i Arduino'nun 3,3 V pininden ya da 5 V'tan beslemek; CH_PD'yi 3,3 V'a bağlamamak (modül yanıt vermez); RX'i gerilim bölücüsüz Arduino pinine bağlamak; ESP-01'in baud hızını kodla uyumsuz bırakmak; röle modülünün \"LOW'da çeker\" olduğunu unutup ters mantık yazmak; GND'leri ortak yapmamak; Wi-Fi parolasını yanlış yazmak; şebeke gerilimini deneyimsiz denemek."
+  ],
+  [
+   "Dene",
+   "Ağ adı ve parolayı kendi ağına göre değiştir; 3. ve 4. rölelere de buton ekle; röle durumlarını Seri Monitör'e her saniye yazan bir özet ekle."
+  ]
+ ],
+ "free": [
+  "psu1",
+  "rl1",
+  "bulb1",
+  "bulb2",
+  "bulb3",
+  "bulb4"
+ ]
+}

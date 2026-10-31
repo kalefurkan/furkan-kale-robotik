@@ -1,0 +1,105 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "2 × IR engel algılama sensörü (kenar çizgisi için, yere bakar)",
+  "1 × HC-SR04 ultrasonik mesafe sensörü",
+  "1 × L298N motor sürücü",
+  "2 × DC motor (robotun sol ve sağ tekerleği)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (26 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: L298N 5V ucu ve diğer modüllerin VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: L298N GND ve diğer modüllerin GND'si"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ],
+  [
+   "D2",
+   "Sol IR sensör OUT"
+  ],
+  [
+   "D3",
+   "Sağ IR sensör OUT"
+  ],
+  [
+   "D4",
+   "HC-SR04 TRIG"
+  ],
+  [
+   "D11",
+   "HC-SR04 ECHO"
+  ]
+ ],
+ "img": "assets/devre/mini-sumo-robot.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "L298N ve motorlar için ortak kurulum: L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola. Motorların ve Arduino'nun GND'si ortak olmalı: d5 → eksi rayı. e6 → artı rayı: bu bağlantıyla L298N'in mantık devresi Arduino'nun 5V'unu kullanır; kartın üzerindeki 5V jumper'ını çıkar.",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Motorlar (breadboard dışında, takılı değil): sol motor için e13 → motor A, e14 → motor B (OUT1, OUT2); sağ motor için e15 → motor A, e16 → motor B (OUT3, OUT4).",
+  "Sol IR sensörü a18 (VCC), a19 (GND), a20 (OUT) deliklerine tak. e18 → artı rayı, e19 → eksi rayı, D2 → e20.",
+  "Sağ IR sensörü a23 (VCC), a24 (GND), a25 (OUT) deliklerine tak. e23 → artı rayı, e24 → eksi rayı, D3 → e25.",
+  "HC-SR04'ü a26 (VCC), a27 (TRIG), a28 (ECHO), a29 (GND) deliklerine tak. e26 → artı rayı, e29 → eksi rayı, D4 → e27, D11 → e28.",
+  "Gerçek robotta IR sensörleri ön köşelerde yere, HC-SR04'ü ortada öne baktır.",
+  "Kodu yükle (simülatörde çalıştır): 5 saniye bekledikten sonra robot döner. HC-SR04 kaydırıcısını 25 cm'ye getir: saldırır. Sol ya da sağ IR sensörün \"engel\" düğmesini aç: robot geri çekilip döner."
+ ],
+ "code": "// Mini sumo robot: 2 IR kenar sensoru + HC-SR04 rakip sensoru + L298N + 2 DC motor\n// Dohyo siyah, kenar cizgisi beyaz: IR sensor beyaz cizgiyi gorunce LOW verir.\nconst int KENAR_SOL = 2;\nconst int KENAR_SAG = 3;\nconst int TRIG = 4;\nconst int ECHO = 11;\n\nconst int ENA = 5;\nconst int IN1 = 7;\nconst int IN2 = 8;\nconst int IN3 = 9;\nconst int IN4 = 10;\nconst int ENB = 6;\n\nconst int RAKIP_CM = 40;       // bundan yakinsa rakip var say\nconst int HIZ = 220;\nconst int ARAMA_HIZ = 130;\n\nint sonDurum = -1;             // 0 bekle, 1 ara, 2 saldir, 3 sol kenar, 4 sag kenar\n\nvoid motor(int sol, int sag) {\n  digitalWrite(IN1, sol > 0 ? HIGH : LOW);\n  digitalWrite(IN2, sol < 0 ? HIGH : LOW);\n  digitalWrite(IN3, sag > 0 ? HIGH : LOW);\n  digitalWrite(IN4, sag < 0 ? HIGH : LOW);\n  analogWrite(ENA, abs(sol));\n  analogWrite(ENB, abs(sag));\n}\n\nlong mesafeOlc() {\n  digitalWrite(TRIG, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(TRIG, LOW);\n  long sure = pulseIn(ECHO, HIGH, 30000);\n  if (sure == 0) {\n    return 400;\n  }\n  return sure / 58;\n}\n\nvoid durum(int d) {                      // durum degisince bir kez yazar\n  if (d == sonDurum) {\n    return;\n  }\n  sonDurum = d;\n  if (d == 0) {\n    Serial.println(\"Bekle: 5 saniye sonra mac basliyor\");\n  } else if (d == 1) {\n    Serial.println(\"Rakip araniyor: yerinde don\");\n  } else if (d == 2) {\n    Serial.println(\"RAKIP VAR: saldir\");\n  } else if (d == 3) {\n    Serial.println(\"SOL KENAR: geri, saga don\");\n  } else {\n    Serial.println(\"SAG KENAR: geri, sola don\");\n  }\n}\n\nvoid setup() {\n  pinMode(KENAR_SOL, INPUT);\n  pinMode(KENAR_SAG, INPUT);\n  pinMode(TRIG, OUTPUT);\n  pinMode(ECHO, INPUT);\n  pinMode(ENA, OUTPUT);\n  pinMode(ENB, OUTPUT);\n  pinMode(IN1, OUTPUT);\n  pinMode(IN2, OUTPUT);\n  pinMode(IN3, OUTPUT);\n  pinMode(IN4, OUTPUT);\n  Serial.begin(9600);\n  motor(0, 0);\n  durum(0);\n  delay(5000);                           // sumo kurali: baslangic bekleme suresi\n}\n\nvoid loop() {\n  bool sol = (digitalRead(KENAR_SOL) == LOW);    // beyaz cizgi goruldu\n  bool sag = (digitalRead(KENAR_SAG) == LOW);\n\n  if (sol || sag) {                      // kenar: once geri, sonra icerideki tarafa don\n    if (sol) {\n      durum(3);\n      motor(-HIZ, -HIZ);\n      delay(300);\n      motor(HIZ, -HIZ);\n      delay(250);\n    } else {\n      durum(4);\n      motor(-HIZ, -HIZ);\n      delay(300);\n      motor(-HIZ, HIZ);\n      delay(250);\n    }\n    motor(0, 0);\n    return;\n  }\n\n  long cm = mesafeOlc();\n  if (cm < RAKIP_CM) {\n    durum(2);\n    motor(HIZ, HIZ);\n  } else {\n    durum(1);\n    motor(ARAMA_HIZ, -ARAMA_HIZ);\n  }\n  delay(40);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Sumo ringi siyahtır ve kenarında beyaz çizgi vardır. IR engel sensörü yansıma alırsa OUT'u LOW yapar: siyah zeminde HIGH, beyaz çizgide LOW okunur. Kodda önce kenar kontrol edilir (en yüksek öncelik): sol sensör beyazı görürse robot 300 ms geri gider ve 250 ms sağa döner; sağ sensör görürse sola döner. Kenar yoksa HC-SR04 ile rakip aranır: mesafe 40 cm'den azsa iki motor tam hızla ileri sürülür (saldırı), değilse robot yerinde yavaşça döner (arama). durum() fonksiyonu yalnızca durum değişince Seri Monitör'e yazar. setup() sonunda 5 saniyelik bekleme sumo kuralını temsil eder; gerçek müsabaka kurallarını (süre, boyut, ağırlık) kendi yarışmanın şartnamesinden kontrol et."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Bekle: 5 saniye sonra mac basliyor\" yazıldı, motorlar durdu. 5. saniyeden sonra \"Rakip araniyor: yerinde don\" yazıldı ve modül \"A: ileri %51 · B: geri %51\" gösterdi. 6,5. saniyede HC-SR04 mesafesi 25 cm yapılınca \"RAKIP VAR: saldir\" yazıldı ve iki motor %86 ile ileri sürüldü. 8. saniyede sol IR sensör beyaz çizgiyi görünce \"SOL KENAR: geri, saga don\" yazıldı: önce iki motor geri, sonra A ileri · B geri, sonra tekrar saldırı. 10. saniyede sağ sensörle \"SAG KENAR: geri, sola don\" yazıldı (A geri · B ileri). 11,5. saniyede mesafe 120 cm olunca robot yeniden aramaya geçti. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde ring, rakip ve çarpışma yoktur; kenar ve rakip sensörlerin düğme/kaydırıcısıyla verilir. IR sensörün gerçek algılama mesafesi, zemin rengi ve ortam ışığından etkilenmesi, HC-SR04'ün dar açısı ve rakibin eğik yüzeyi modellenmez. Kenarda geri çekilirken delay() kullanıldığı için robot o sırada rakibi göremez; gerçek robotta daha hızlı tepki için bu bölüm millis() ile yazılabilir. Bu sketch ek bir kütüphane kullanmaz; yalnızca Arduino çekirdek işlevleri vardır."
+  ],
+  [
+   "Güç ve GND",
+   "Motorları Arduino'nun 5V pininden besleme: motorlar yüzlerce mA çeker. Motor gücü ayrı güç kaynağından (pil kutusu) gelir; L298N'in GND'si Arduino GND'sine mutlaka bağlanmalı, yoksa IN/EN sinyalleri anlamsız olur. L298N yaklaşık 2 V düşürür; motor beslemesini motorun istediği gerilimden yaklaşık 2 V yüksek seç. L298N'in dahili serbest dönüş diyotları vardır, ayrıca diyot eklenmez. Güvenlik: pil kutusunu kısa devre yapma (artı ve eksi uçları birbirine değmesin); lityum/Li-ion pil kullanıyorsan yetişkin gözetiminde, koruma devreli paketle çalış; kablolar ısınırsa hemen enerjiyi kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Kenar sensörü mantığını ters kurmak (modülün siyahta mı beyazda mı LOW verdiğini önce test et); kenar kontrolünü rakip aramadan sonraya koymak (robot saldırırken ringden düşer); sensörleri yerden çok yüksekte tutmak; geri çekilme süresini çok kısa seçmek; motor beslemesinin GND'sini bağlamamak."
+  ],
+  [
+   "Dene",
+   "Rakip sağda görülünce sağa dönmek için HC-SR04'ü bir servoya takmayı düşün; ya da saldırı hızını ve geri çekilme süresini değiştirip simülatörde ardışık durumların zamanlamasına bak."
+  ]
+ ],
+ "title": "65. Mini Sumo Robot"
+}

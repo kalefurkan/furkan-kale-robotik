@@ -1,0 +1,79 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × DS18B20 sıcaklık sensörü (su geçirmez prob)",
+  "1 × röle (5 V, SPDT)",
+  "2 × NPN transistör (örneğin BC547 ya da 2N2222)",
+  "2 × diyot (1N4007; bobin ve motor için ters diyot)",
+  "1 × ampul (5 V, ısıtıcıyı temsil eder)",
+  "1 × mini su pompası (DC motor)",
+  "2 × 1 kΩ direnç (transistör tabanları için)",
+  "1 × 4,7 kΩ direnç (DS18B20 çekme direnci)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "Akvaryum, hortum ve pompa bağlantı parçaları (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (20 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: röle bobini, rölenin COM ucu, DS18B20 VDD ve çekme direnci"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: transistör emitörleri, DS18B20 GND, ampul ve 6 V kaynağın eksisi"
+  ],
+  [
+   "D2",
+   "DS18B20 DQ (1-Wire veri)"
+  ],
+  [
+   "D5",
+   "1 kΩ direnç → pompa transistörü tabanı"
+  ],
+  [
+   "D7",
+   "1 kΩ direnç → röle transistörü tabanı"
+  ]
+ ],
+ "img": "assets/devre/otomatik-akvaryum-kontrolu.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun. Rölenin ısıtıcı ucuna şebeke gerilimi (220 V) bağlama: bu projede yalnızca 5 V'luk ampul vardır.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Röleyi a2 (C1), a3 (C2), a4 (COM), a5 (NO), a6 (NC) deliklerine tak. e2 → artı rayı (bobin C1 ucu). Bobin diyotunu c3 (anot) ve c7 (katot) deliklerine tak; e7 → artı rayı.",
+  "Röle transistörünü a12 (C), a13 (B), a14 (E) deliklerine tak. e12 → e3 (kolektör röle bobininin C2 ucuna), e14 → eksi rayı. 1 kΩ direnci d13 ile d17 arasına tak ve D7 → e17.",
+  "Isıtıcı ampulü (breadboard dışında, takılı değil): e4 → artı rayı (COM), e5 → ampulün A ucu (NO), ampulün B ucu → eksi rayı.",
+  "Pompa transistörünü a18 (C), a19 (B), a20 (E) deliklerine tak; e20 → eksi rayı. 1 kΩ direnci d19 ile d23 arasına tak; D5 → e23. Ters diyotu c18 (anot) ve c22 (katot) deliklerine tak.",
+  "Pompa ve 6 V güç kaynağı (breadboard dışında, takılı değil): e18 → pompa B ucu, e22 → pompa A ucu, a22 → 6 V kaynağın + ucu, 6 V kaynağın − ucu → eksi rayı.",
+  "DS18B20'yi a26 (GND), a27 (DQ), a28 (VDD) deliklerine tak. e26 → eksi rayı, e28 → artı rayı, D2 → d27. 4,7 kΩ direnci dikey olarak e27 ile h27 arasına tak (DQ ile VDD arasında çekme direnci), j27 → artı rayı.",
+  "Kodu yükle (simülatörde çalıştır): DS18B20'yi seçip sıcaklığı 22 °C, 25 °C, 26,5 °C ve 23,5 °C yap; Seri Monitör'de ısıtıcının açılıp kapandığını izle."
+ ],
+ "code": "// Otomatik akvaryum kontrolu: DS18B20 sicaklik sensoru + role (isitici) + NPN suruculu pompa\n// Isitici: sicaklik 24.0'in altina inince acilir, 26.0'in ustune cikinca kapanir (histerezis).\n// Pompa: her 20 saniyenin ilk 5 saniyesinde calisir (zamanlayici). Sensor okunamazsa isitici kapatilir.\n#include <OneWire.h>\n#include <DallasTemperature.h>\n\nOneWire oneWire(2);                    // DQ = D2 (4.7 kOhm cekme direnciyle 5V'a)\nDallasTemperature sensors(&oneWire);\n\nconst int ROLE_PIN = 7;                // NPN -> role bobini (isitici)\nconst int POMPA_PIN = 5;               // 1 kOhm -> NPN tabani (pompa)\n\nconst float ALT_ESIK = 24.0;\nconst float UST_ESIK = 26.0;\nconst unsigned long CEVRIM_MS = 20000;\nconst unsigned long POMPA_MS = 5000;\n\nbool isitici = false;\nbool pompa = false;\n\nvoid isiticiYaz(bool ac) {\n  if (ac == isitici) {\n    return;\n  }\n  isitici = ac;\n  digitalWrite(ROLE_PIN, ac ? HIGH : LOW);\n  if (ac) {\n    Serial.println(\"ISITICI ACIK\");\n  } else {\n    Serial.println(\"ISITICI KAPALI\");\n  }\n}\n\nvoid pompaYaz(bool ac) {\n  if (ac == pompa) {\n    return;\n  }\n  pompa = ac;\n  digitalWrite(POMPA_PIN, ac ? HIGH : LOW);\n  if (ac) {\n    Serial.println(\"POMPA ACIK\");\n  } else {\n    Serial.println(\"POMPA KAPALI\");\n  }\n}\n\nvoid setup() {\n  pinMode(ROLE_PIN, OUTPUT);\n  pinMode(POMPA_PIN, OUTPUT);\n  digitalWrite(ROLE_PIN, LOW);\n  digitalWrite(POMPA_PIN, LOW);\n  Serial.begin(9600);\n  sensors.begin();\n  Serial.print(\"Akvaryum hazir, bulunan sensor: \");\n  Serial.println(sensors.getDeviceCount());\n}\n\nvoid loop() {\n  sensors.requestTemperatures();             // donusum ~750 ms surer\n  float t = sensors.getTempCByIndex(0);\n\n  if (t == DEVICE_DISCONNECTED_C) {          // sensor yok ya da hat bozuk\n    isiticiYaz(false);\n    Serial.println(\"SENSOR HATASI: isitici kapatildi\");\n  } else {\n    Serial.print(\"Sicaklik: \");\n    Serial.print(t, 1);\n    Serial.println(\" C\");\n    if (t < ALT_ESIK) {\n      isiticiYaz(true);\n    } else if (t > UST_ESIK) {\n      isiticiYaz(false);\n    }\n  }\n\n  pompaYaz((millis() % CEVRIM_MS) < POMPA_MS);   // zamanlayici\n  delay(250);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "DS18B20 1-Wire denen tek telli bir hatla haberleşir. OneWire oneWire(2) hattı D2'ye, DallasTemperature sensors(&oneWire) sensörü bu hatta bağlar. DQ hattı bir 4,7 kΩ çekme direnciyle 5V'a bağlı olmalıdır; yoksa sensör bulunamaz ve getTempCByIndex() −127 verir. Döngüde requestTemperatures() ölçüm başlatır (12 bit çözünürlükte yaklaşık 750 ms bloklar) ve getTempCByIndex(0) °C verir. Isıtıcı kontrolü histerezislidir: sıcaklık ALT_ESIK (24) altına inince ısıtıcı açılır, ancak UST_ESIK (26) üstüne çıkınca kapanır; arada durum değişmez, böylece röle sürekli aç-kapa yapmaz. Röle bobini bir elektromıknatıs olduğu için Arduino pininden değil NPN transistörle sürülür; bobine paralel ters diyot (katot + tarafa) kapanırken oluşan gerilim sıçramasını söndürür. Pompa da aynı şekilde 1 kΩ dirençli bir NPN transistörle ve ters diyotla ayrı 6 V kaynaktan sürülür. Pompa zamanlayıcısı millis() % 20000 < 5000 ifadesiyle her 20 saniyenin ilk 5 saniyesinde açılır. Sensör okunamıyorsa (−127) ısıtıcı güvenlik için kapatılır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Akvaryum hazir, bulunan sensor: 1\" yazıldı. İlk okuma 22,0 °C idi (24'ün altı): \"ISITICI ACIK\" yazıldı, röle çekti ve ampul yandı; pompa zamanlayıcısı da ilk 5 saniyede çalıştı (\"POMPA ACIK\", pompa 0,9 hızla döndü, yaklaşık 181 mA çekti) ve 5,8. saniyede \"POMPA KAPALI\" yazıldı. Sıcaklık 25 °C'ye çıkınca ısıtıcı açık kalmaya devam etti (24–26 arası bölge). 26,5 °C'de (26'nın üstü) \"ISITICI KAPALI\" yazıldı ve röle bıraktı. 23,5 °C'ye düşünce 17,8. saniyede \"ISITICI ACIK\" yazıldı. Pompa ikinci kez 20,9. saniyede açıldı ve 25,9. saniyede kapandı (20 saniyelik çevrim). DS18B20'nin değerleri kaydırıcıdan verildiği için ısıtıcının suyu gerçekten ısıtıp ısıtmadığı doğrulanmadı; sensörün çekme direnci olmadan -127 vermesi ve sensör hata yolu bu devrede denenmedi. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde su, ısı iletimi ve ısıtıcının suyu ısıtması yoktur: sıcaklık kaydırıcıdan verilir ve ısıtıcının açık olması sıcaklığı değiştirmez. Gerçek akvaryumda ısınma yavaştır; ısıtıcı kapandıktan sonra bile su bir süre ısınmaya devam eder (ataleti), eşiklerin ve ısıtıcı gücünün balık türüne göre ayarlanması gerekir. DS18B20'nin ±0,5 °C doğruluğu ve ilk okumada 85 °C verme davranışı (ilk dönüşümden önce) gerçek donanımda dikkate alınmalıdır. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki OneWire.h, DallasTemperature.h onların dışındadır, bu yüzden sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir. Kütüphaneler Arduino IDE'ye (OneWire ve DallasTemperature) kurulmalıdır."
+  ],
+  [
+   "Güç ve GND",
+   "ÖNEMLİ GÜVENLİK: Gerçek akvaryum ısıtıcısı şebeke (220 V) gerilimiyle çalışır ve su ile birleşimi ölümcül elektrik çarpmasına yol açabilir. Bu proje ısıtıcıyı yalnızca 5 V'luk bir ampulle temsil eder. Gerçek ısıtıcıyı bu devreye bağlama: bunun için yetişkin ve elektrik bilgisi, sigorta, yalıtılmış sertifikalı kutu, kaçak akım rölesi ve ısıtıcının kendi termostatı gerekir; aksi halde yalnızca hazır akvaryum termostatı kullan. Devreyi ve Arduino'yu suyun yanında ıslanmayacak yerde tut; DS18B20 yalnızca su geçirmez prob olanıyla suya girer. Pompayı Arduino'nun 5V pininden besleme; ayrı kaynak kullan ama GND'yi ortak yap. Pompa susuz çalışmasın."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "4,7 kΩ çekme direncini unutmak (−127 °C okunur); DS18B20'nin GND/DQ/VDD sırasını yanlış takmak (sensör ısınır); tek eşik kullanıp rölenin sürekli aç-kapa yapmasına neden olmak; sensör hatasında ısıtıcıyı açık bırakmak (su kaynayabilir); röle bobinini doğrudan Arduino pinine bağlamak; ters diyotu unutmak; pompanın GND'sini ortak yapmamak; şebeke gerilimini deneyimsiz denemek."
+  ],
+  [
+   "Dene",
+   "ALT_ESIK ve UST_ESIK değerlerini balık türüne göre değiştir (örneğin 26 ve 28); ısıtıcı 10 dakikadan uzun açık kalırsa alarm veren bir zamanlayıcı ekle; setResolution(10) ile ölçüm süresini kısaltıp Seri Monitör'de farkı gör."
+  ]
+ ],
+ "title": "77. Otomatik Akvaryum Kontrolü"
+}

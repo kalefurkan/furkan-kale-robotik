@@ -1,0 +1,110 @@
+{
+ "sketch": "bt_akilli_robot",
+ "d": "Telefondan HC-05 Bluetooth modülüne gönderilen F, B, L, R, S harfleriyle robot ileri, geri, sola, sağa gider ya da durur. Ek özellik olarak HC-SR04 mesafe sensörü ileri giderken engel 15 cm'den yakınsa robotu kendiliğinden durdurur ve D komutuyla mesafeyi telefona yollar. Bluetooth komutu ile otomatik güvenliği birleştirmeyi öğrenirsin. Simülatörde telefon metni modülün kutusundan, engel mesafesi sensörün kaydırıcısından verilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HC-05 Bluetooth modülü",
+  "1 × HC-SR04 ultrasonik mesafe sensörü",
+  "1 × L298N motor sürücü",
+  "2 × DC motor (robotun sol ve sağ tekerleği)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "1 × 1 kΩ direnç (gerilim bölücü)",
+  "1 × 2 kΩ direnç (gerilim bölücü)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (25 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: L298N 5V ucu ve diğer modüllerin VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: L298N GND ve diğer modüllerin GND'si"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ],
+  [
+   "D2",
+   "HC-05 TXD (Arduino'nun RX'i)"
+  ],
+  [
+   "D3",
+   "1 kΩ direncin ucu → HC-05 RXD (Arduino'nun TX'i)"
+  ],
+  [
+   "D4",
+   "HC-SR04 TRIG"
+  ],
+  [
+   "D11",
+   "HC-SR04 ECHO"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "L298N ve motorlar için ortak kurulum: L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola. Motorların ve Arduino'nun GND'si ortak olmalı: d5 → eksi rayı. e6 → artı rayı: bu bağlantıyla L298N'in mantık devresi Arduino'nun 5V'unu kullanır; kartın üzerindeki 5V jumper'ını çıkar.",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Motorlar (breadboard dışında, takılı değil): sol motor için e13 → motor A, e14 → motor B (OUT1, OUT2); sağ motor için e15 → motor A, e16 → motor B (OUT3, OUT4).",
+  "HC-05'i a17 (VCC), a18 (GND), a19 (TXD), a20 (RXD) deliklerine tak. e17 → artı rayı, e18 → eksi rayı, e19 → D2.",
+  "Gerilim bölücü: 1 kΩ direnci d20 ile d24 arasına, 2 kΩ direnci dikey olarak e20 ile h20 arasına tak. D3 pinini e24'e, j20'yi eksi rayına kablola. Böylece Arduino'nun 5 V'luk TX çıkışı HC-05'in RXD girişine yaklaşık 3,3 V olarak gelir.",
+  "HC-SR04'ü a26 (VCC), a27 (TRIG), a28 (ECHO), a29 (GND) deliklerine tak. e26 → artı rayı, e29 → eksi rayı, D4 → e27 (TRIG), D11 → e28 (ECHO).",
+  "Kodu yükle (simülatörde çalıştır): HC-05'i seç, kutuya F yaz ve \"Telefondan gönder\"e bas: iki motor ileri döner. Sonra HC-SR04 kaydırıcısını 10 cm'ye getir: robot kendiliğinden durur. B, L, R, S, 1–9 ve D komutlarını da dene."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "HC-05 telefondan gelen harfleri seri hat (UART) üzerinden Arduino'ya iletir; SoftwareSerial bt(2, 3) D2'yi RX, D3'ü TX yapar (9600 baud). Her harf bir komuttur: F, B, L, R, S son komut olarak komut değişkenine kaydedilir ve motor() ile L298N'e uygulanır; 1–9 hızı 80–255 arası PWM'e çevirir. Ek güvenlik: komut F iken 100 ms'de bir HC-SR04 ile mesafe ölçülür (pulseIn ile, süre/58 = cm). Mesafe GUVENLI_CM (15 cm) değerinden küçükse robot otomatik durur, Seri Monitör'e yazılır ve telefona \"ENGEL! Durdum\" gönderilir. Geri (B) ve dönüş komutlarında bu denetim yoktur, böylece robot engelden geri çıkabilir. D komutu mesafeyi ölçüp bt.print() ile telefona yollar."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Simülatörde gerçek Bluetooth eşleşmesi yoktur; \"telefondan\" gelen harf modülün kutusuna yazılıp gönderilir. Seri Monitör'de \"Akilli robot hazir\" yazdı. 1,5. saniyede F gönderilince \"Komut: F\" yazıldı ve L298N modülü \"A: ileri %78 · B: ileri %78\" gösterdi. 3. saniyede HC-SR04 mesafesi 10 cm yapılınca \"ENGEL 10 cm: otomatik durdu\" yazıldı ve motorlar \"boşta\" oldu (yaklaşık 0,02 sn içinde). 4,5. saniyede engel hâlâ 10 cm iken B gönderilince robot geri gitti (\"A: geri %78 · B: geri %78\"): geri komutu engel denetiminden geçmez. Mesafe 100 cm'ye dönünce 6. saniyedeki F robotu yeniden ileri sürdü; 7,5. saniyedeki D komutu \"Mesafe gonderildi: 100\" yazdırdı; 9. saniyedeki S motorları durdurdu. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde Bluetooth eşleşmesi, telefon uygulaması ve robotun gerçek hareketi yoktur; mesafe tek kaydırıcıdan gelir. Sensörün görüş açısı, hızlı gidişte durma mesafesi ve motor ataleti modellenmez: gerçek robot 15 cm'de durmak için hızına göre daha erken frenlemelidir. Sketch yalnızca SoftwareSerial.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Güç ve GND",
+   "Motorları Arduino'nun 5V pininden besleme: motorlar yüzlerce mA çeker. Motor gücü ayrı güç kaynağından (pil kutusu) gelir; L298N'in GND'si Arduino GND'sine mutlaka bağlanmalı, yoksa IN/EN sinyalleri anlamsız olur. L298N yaklaşık 2 V düşürür; motor beslemesini motorun istediği gerilimden yaklaşık 2 V yüksek seç. L298N'in dahili serbest dönüş diyotları vardır, ayrıca diyot eklenmez. Güvenlik: pil kutusunu kısa devre yapma (artı ve eksi uçları birbirine değmesin); lityum/Li-ion pil kullanıyorsan yetişkin gözetiminde, koruma devreli paketle çalış; kablolar ısınırsa hemen enerjiyi kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "TXD ve RXD'yi çapraz bağlamamak; RXD'yi gerilim bölücüsüz D3'e bağlamak; HC-05 hızını (9600) kodla uyumsuz bırakmak; motor beslemesinin GND'sini Arduino GND'sine bağlamamak; ECHO'ya zaman aşımı koymamak; engel denetimini geri gitme komutuna da koymak (robot engelden çıkamaz)."
+  ],
+  [
+   "Dene",
+   "GUVENLI_CM'i 25 yap ve hızı 9 (255) ile 1 (80) arasında değiştirip simülatörde robotun hâlâ güvenle durup durmadığını yorumla; telefona her saniye mesafeyi kendiliğinden gönderen bir özellik ekle."
+  ]
+ ],
+ "free": [
+  "psu1",
+  "m1",
+  "m2"
+ ]
+}

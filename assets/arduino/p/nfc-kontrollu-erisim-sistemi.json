@@ -1,0 +1,99 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × PN532 NFC/RFID modülü (I2C kipinde)",
+  "1 × 16x2 LCD ekran (HD44780)",
+  "1 × 220 Ω direnç (LCD arka ışığı)",
+  "Jumper kablolar (20 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: LCD VDD ve arka ışık direncinin ucu"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: LCD VSS, V0, RW ve K"
+  ],
+  [
+   "D12",
+   "LCD RS"
+  ],
+  [
+   "D11",
+   "LCD E"
+  ],
+  [
+   "D5",
+   "LCD D4"
+  ],
+  [
+   "D4",
+   "LCD D5"
+  ],
+  [
+   "D3",
+   "LCD D6"
+  ],
+  [
+   "D2",
+   "LCD D7"
+  ],
+  [
+   "A4",
+   "PN532 SDA (I2C veri)"
+  ],
+  [
+   "A5",
+   "PN532 SCL (I2C saat)"
+  ],
+  [
+   "D6",
+   "PN532 IRQ (kart algılama kesmesi)"
+  ],
+  [
+   "D7",
+   "PN532 RST (sıfırlama)"
+  ]
+ ],
+ "img": "assets/devre/nfc-kontrollu-erisim-sistemi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "LCD'yi breadboard'un en üst sırasına (a satırı) tak: 12 pini sırayla 2–13. sütunlara gelsin (VSS, VDD, V0, RS, RW, E, D4, D5, D6, D7, A, K). Gerçek 16x2 LCD'nin 16 pini vardır; D0–D3 pinleri 4 bit modda boş kalır, simülatördeki ekran yalnızca kullanılan 12 pini gösterir.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "LCD güç kabloları: e2 → eksi rayı (VSS), e3 → artı rayı (VDD), e4 → eksi rayı (V0), e6 → eksi rayı (RW), e13 → eksi rayı (K). Arka ışık için 220 Ω direnci d12 ile d16 arasına tak (A bacağı üzerinden) ve e16 → artı rayı.",
+  "LCD veri kabloları: D12 → e5 (RS), D11 → e7 (E), D5 → e8 (D4), D4 → e9 (D5), D3 → e10 (D6), D2 → e11 (D7).",
+  "PN532'yi a20 (VCC), a21 (GND), a22 (SDA), a23 (SCL), a24 (IRQ), a25 (RST) deliklerine tak. e20 → artı rayı, e21 → eksi rayı.",
+  "I2C ve kontrol kabloları: A4 → e22 (SDA), A5 → e23 (SCL), D6 → e24 (IRQ), D7 → e25 (RST). Gerçek PN532 kartında üzerindeki anahtarlarla I2C kipini seçmek gerekir (genellikle DIP anahtar: bir ucu kapalı, bir ucu açık).",
+  "Kodu yükle (simülatörde çalıştır): PN532'yi seçip \"Kart yok — yaklaştır\" düğmesine bas: kart A1:B2:C3:D4 okunur ve LCD'de \"ERISIM VAR\" ve \"Hos geldin Ali\" yazar. Kart UID'sini değiştirip yetkisiz kartı da dene."
+ ],
+ "code": "// NFC kontrollu erisim sistemi: PN532 (I2C) + 16x2 LCD\n// Kart okununca UID yetkili listesiyle karsilastirilir; sonuc LCD'ye ve Seri Monitor'e yazilir.\n#include <Wire.h>\n#include <Adafruit_PN532.h>\n#include <LiquidCrystal.h>\n\nconst int IRQ_PIN = 6;\nconst int RST_PIN = 7;\nAdafruit_PN532 nfc(IRQ_PIN, RST_PIN);\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\n\n// Yetkili kartlarin 4 baytlik UID'leri (kendi kartlarinin UID'sini once Seri Monitor'den ogren)\nbyte YETKILI[2][4] = {\n  {0xA1, 0xB2, 0xC3, 0xD4},    // kart 0: Ali\n  {0xDE, 0xAD, 0xBE, 0xEF}     // kart 1: Ayse\n};\n\nuint8_t uid[7];                // okunan kartin UID baytlari\nuint8_t uzunluk = 0;           // UID uzunlugu (4 ya da 7)\n\nint kartBul() {                // yetkili kart numarasi, yoksa -1\n  if (uzunluk != 4) {\n    return -1;\n  }\n  for (int k = 0; k < 2; k++) {\n    bool ayni = true;\n    for (int i = 0; i < 4; i++) {\n      if (uid[i] != YETKILI[k][i]) {\n        ayni = false;\n      }\n    }\n    if (ayni) {\n      return k;\n    }\n  }\n  return -1;\n}\n\nvoid uidYaz() {                // her bayti 2 hane hex yazar\n  for (uint8_t i = 0; i < uzunluk; i++) {\n    if (uid[i] < 16) {\n      Serial.print(\"0\");\n    }\n    Serial.print(uid[i], HEX);\n  }\n}\n\nvoid setup() {\n  Serial.begin(9600);\n  lcd.begin(16, 2);\n  lcd.print(\"NFC erisim\");\n  nfc.begin();\n  uint32_t surum = nfc.getFirmwareVersion();\n  if (!surum) {\n    lcd.setCursor(0, 1);\n    lcd.print(\"PN532 YOK\");\n    Serial.println(\"PN532 bulunamadi: kablolari kontrol et\");\n    while (true) {\n      delay(1000);\n    }\n  }\n  nfc.SAMConfig();\n  Serial.print(\"PN532 hazir, yazilim v\");\n  Serial.println((surum >> 16) & 0xFF);\n  lcd.clear();\n  lcd.print(\"Karti yaklastir\");\n}\n\nvoid loop() {\n  uzunluk = 0;\n  bool okundu = nfc.readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uzunluk, 300);\n  if (!okundu) {\n    return;                      // kart yok, tekrar dene\n  }\n  Serial.print(\"Kart UID: \");\n  uidYaz();\n  int kart = kartBul();\n  lcd.clear();\n  if (kart == 0) {\n    Serial.println(\"  -> ERISIM VAR (Ali)\");\n    lcd.print(\"ERISIM VAR\");\n    lcd.setCursor(0, 1);\n    lcd.print(\"Hos geldin Ali\");\n  } else if (kart == 1) {\n    Serial.println(\"  -> ERISIM VAR (Ayse)\");\n    lcd.print(\"ERISIM VAR\");\n    lcd.setCursor(0, 1);\n    lcd.print(\"Hos geldin Ayse\");\n  } else {\n    Serial.println(\"  -> ERISIM YOK\");\n    lcd.print(\"ERISIM YOK\");\n    lcd.setCursor(0, 1);\n    lcd.print(\"Yetkisiz kart\");\n  }\n  delay(2000);\n  lcd.clear();\n  lcd.print(\"Karti yaklastir\");\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "PN532, 13,56 MHz'lik NFC/RFID kartlarla haberleşen bir çiptir. Adafruit_PN532 nfc(IRQ, RST) kurucusu IRQ ve RST pinlerinin hangi Arduino pinlerine bağlı olduğunu söyler. setup() içinde nfc.begin() modülü başlatır, getFirmwareVersion() modülün yanıt verip vermediğini kontrol eder (0 dönerse modül bulunamamıştır) ve SAMConfig() kart okuma kipini ayarlar. loop() içinde readPassiveTargetID(PN532_MIFARE_ISO14443A, uid, &uzunluk, 300) en çok 300 ms bekleyerek yakındaki bir kartın UID'sini uid dizisine yazar; kart yoksa false döner. Zaman aşımı verilmezse çağrı kart gelene kadar program bekler. Kod UID'yi 4 baytlık yetkili kartlarla (YETKILI dizisi) bayt bayt karşılaştırır; eşleşirse erişim verilir. Sonuç LCD'ye yazılır, UID Seri Monitör'e hex olarak (her bayt iki haneli) basılır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta Seri Monitör'e \"PN532 hazir, yazilim v1\" yazıldı ve LCD'de \"Karti yaklastir\" göründü. 3. saniyede kart A1B2C3D4 yaklaştırılınca \"Kart UID: A1B2C3D4 -> ERISIM VAR (Ali)\" yazıldı, LCD \"ERISIM VAR\" / \"Hos geldin Ali\" gösterdi ve 2 saniye sonra \"Karti yaklastir\"a döndü. 6,5. saniyede UID 12345678 olan kart için \"-> ERISIM YOK\" yazıldı ve LCD \"ERISIM YOK\" / \"Yetkisiz kart\" gösterdi. 9,5. saniyede UID DEADBEEF olan kart için \"ERISIM VAR (Ayse)\" yazıldı ve LCD \"Hos geldin Ayse\" gösterdi. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde yalnızca ISO14443A kartın UID okuması modellenir: NFC alan fiziği, okuma mesafesi, anten ayarı, kart blok okuma/yazma, NDEF mesajları ve kart emülasyonu yoktur. Kart modülün düğmesiyle \"yaklaştırılır\"; gerçek kartta kartın modüle dokunması, metal yüzeyin etkisi ve çoklu kart çakışması olur. UID numarası kolayca kopyalanabilir: yalnızca UID'ye dayanan kontrol gerçek bir güvenlik sistemi için yetersizdir; bu proje yalnızca öğrenme amaçlıdır, kapı, kasa gibi gerçek erişim kontrolünde kullanma. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki Adafruit_PN532.h, LiquidCrystal.h onların dışındadır, bu yüzden sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir."
+  ],
+  [
+   "Güç ve GND",
+   "PN532 modüllerinin çoğu 3,3 V ile 5 V arasında çalışır ama kartında 5 V'a dayanıp dayanmadığını kontrol et; çıplak çip 3,3 V ister. I2C pinleri Uno'da A4 (SDA) ve A5 (SCL)'dir, başka pinlerde Wire çalışmaz."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Modülün I2C kipini seçmeyi unutmak (varsayılan HSU/SPI olabilir); IRQ ve RST pinlerini kurucudaki numaralarla uyuşmayacak şekilde bağlamak; readPassiveTargetID'yi zaman aşımsız çağırıp programın kart gelene dek kilitlenmesine şaşırmak; UID dizisini 7 bayttan küçük tanımlamak (7 baytlık kartlarda taşar); UID'yi tek başına güvenli saymak; LCD'ye Türkçe harf yazmak (ekranda ? görünür)."
+  ],
+  [
+   "Dene",
+   "Üçüncü bir yetkili kart ekle (YETKILI dizisini 3 satıra çıkar); yetkisiz kart 3 kez okununca LCD'de \"ALARM\" göstersin; UID'yi okuyup hex olarak LCD'nin alt satırına yazdır."
+  ]
+ ],
+ "title": "76. NFC Kontrollü Erişim Sistemi"
+}

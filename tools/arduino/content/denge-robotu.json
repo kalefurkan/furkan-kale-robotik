@@ -1,0 +1,99 @@
+{
+ "sketch": "denge_robotu",
+ "d": "MPU6050 ivmeölçer + jiroskop robotun eğim açısını ölçer; kod açıyı tamamlayıcı filtreyle hesaplayıp PD denetimiyle iki motoru eğilme yönüne sürer. I2C ile ham register okumayı, atan2 ile açı bulmayı, jiroskopla ivmeölçeri birleştirmeyi ve geri besleme denetimini öğrenirsin. Simülatörde fiziksel denge yoktur: yalnızca sensör okuması ve motor komutları doğrulanır; gerçek denge ayarı donanımda yapılır.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × MPU6050 ivmeölçer + jiroskop modülü (GY-521)",
+  "1 × L298N motor sürücü",
+  "2 × DC motor (robotun sol ve sağ tekerleği)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur); iki tekerlekli, ağırlık merkezi yüksek dik şasi",
+  "Jumper kablolar (20 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: L298N 5V ucu ve diğer modüllerin VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: L298N GND ve diğer modüllerin GND'si"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ],
+  [
+   "A5",
+   "MPU6050 SCL (I2C saat)"
+  ],
+  [
+   "A4",
+   "MPU6050 SDA (I2C veri)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "L298N ve motorlar için ortak kurulum: L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola. Motorların ve Arduino'nun GND'si ortak olmalı: d5 → eksi rayı. e6 → artı rayı: bu bağlantıyla L298N'in mantık devresi Arduino'nun 5V'unu kullanır; kartın üzerindeki 5V jumper'ını çıkar.",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Motorlar (breadboard dışında, takılı değil): sol motor için e13 → motor A, e14 → motor B (OUT1, OUT2); sağ motor için e15 → motor A, e16 → motor B (OUT3, OUT4).",
+  "MPU6050'yi a20 (VCC), a21 (GND), a22 (SCL), a23 (SDA), a24 (AD0) deliklerine tak. AD0'ı boş bırak (adres 0x68). e20 → artı rayı, e21 → eksi rayı.",
+  "I2C kabloları: A5 → e22 (SCL), A4 → e23 (SDA).",
+  "Gerçek robotta MPU6050'yi şasiye sağlam, motor aksına yakın ve robotun öne arkaya eğildiği eksen kart üzerindeki X ekseniyle (gx) uyumlu olacak şekilde monte et.",
+  "Kodu yükle (simülatörde çalıştır): MPU6050'yi seçip yuvarlanma açısı kaydırıcısını 5°'ye getir: motor sürücüsünde ileri hız yüzdesi birkaç saniye içinde artar. −8°'ye getirince geri yöne döner."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Robot ters sarkaç gibidir: öne devrilirse tekerlekler öne kaçarak onu altından yakalamalıdır. MPU6050 açılışta uyku modundadır; setup() içinde 0x6B register'ına 0 yazılarak uyandırılır. loop() içinde 0x3B adresinden 14 bayt okunur: ivme (ax, ay, az), sıcaklık ve jiroskop (gx, gy, gz). İvmeölçerden açı atan2(ay, az) ile bulunur ama titreşimlere duyarlıdır; jiroskop hızı (gx/131 derece/saniye) yumuşaktır ama zamanla kayar. Tamamlayıcı filtre ikisini birleştirir: aci = 0,98 × (aci + hiz × dt) + 0,02 × ivmeAci. PD denetimi motor çıkışını KP × aci + KD × hiz olarak hesaplar: robot ne kadar eğikse ve ne kadar hızlı eğiliyorsa tekerlekler o kadar güçlü sürülür. Açı 45°'yi aşarsa robot düşmüş sayılıp motorlar durdurulur. Çıkışın işareti iki motorun yönünü, büyüklüğü PWM'i belirler."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Denge robotu hazir\" yazıldı; açı 0° iken motorlar boşta (aci=0.0 motor=0). MPU6050 kaydırıcısı 1,5. saniyede 5°'ye alınınca filtrelenmiş açı yavaş yavaş arttı (2 saniyede 3,1°, 2,5 saniyede 4,2°) ve motor çıkışı 76'dan 104'e çıktı; L298N modülü iki motoru birlikte ileri sürdü (yaklaşık %5'ten %45'e). 3. saniyede açı −8° yapılınca çıkış −85 ve −151 oldu, motorlar geri yöne döndü. 4,5. saniyede jiroskop hızı 20°/s verilince çıkışa KD katkısı eklendi (hiz=20.0). 7. saniyede açı 50° yapılınca filtre açısı 47,2°'ye ulaştığında (8,6. saniye) \"motor=0\" oldu: robot düşmüş sayıldı ve motorlar durdu. Bu davranışlar yalnızca sensör okumasının ve motor komutunun doğru çalıştığını gösterir; simülatörde robot gerçekten dengelenmez çünkü motorun hareketi eğim açısını değiştirmez (kapalı çevrim fiziği yoktur). Gerçek kartta ve gerçek robotta denenmedi; KP ve KD değerleri gerçek robotta ayarlanmalıdır."
+  ],
+  [
+   "Simülatör sınırı",
+   "Denge robotu geri besleme ile çalışır: motor hareketi açıyı değiştirir. Simülatörde açı kaydırıcıdan verilir ve motorun hareketine bağlı değildir, bu yüzden PD denetiminin robotu gerçekten dengeleyip dengelemediği, KP/KD'nin doğruluğu ve sistemin kararlılığı denenemez. Motor ataleti, ölü bölge (düşük PWM'de motorun hiç dönmemesi), tekerlek kayması, I2C gürültüsü ve MPU6050'nin sapması modellenmez. KP, KD, filtre katsayısı ve bir ofset (robotun gerçek denge açısı) donanımda deneyerek ayarlanır; bu ayar saatler sürebilir. Sketch yalnızca Wire.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır, MPU6050 için ayrı kütüphane gerekmez."
+  ],
+  [
+   "Güç ve GND",
+   "Motorları Arduino'nun 5V pininden besleme: motorlar yüzlerce mA çeker. Motor gücü ayrı güç kaynağından (pil kutusu) gelir; L298N'in GND'si Arduino GND'sine mutlaka bağlanmalı, yoksa IN/EN sinyalleri anlamsız olur. L298N yaklaşık 2 V düşürür; motor beslemesini motorun istediği gerilimden yaklaşık 2 V yüksek seç. L298N'in dahili serbest dönüş diyotları vardır, ayrıca diyot eklenmez. Güvenlik: pil kutusunu kısa devre yapma (artı ve eksi uçları birbirine değmesin); lityum/Li-ion pil kullanıyorsan yetişkin gözetiminde, koruma devreli paketle çalış; kablolar ısınırsa hemen enerjiyi kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Açı eksenini yanlış seçmek (robot yan yana eğilirken ölçüm boşa gider); motor yönünü ters bağlamak (robot eğildiği yöne kaçmak yerine devrilmeyi hızlandırır: çıkışın işaretini ya da motor kablolarını ters çevir); MPU6050'yi uyku modundan çıkarmayı unutmak (tüm değerler 0); dt'yi hesaba katmadan jiroskopu entegre etmek; ağırlık merkezini çok aşağı koymak ya da şasiyi çok titrek yapmak; KP'yi çok büyük seçip robotu sarsıntıya sokmak."
+  ],
+  [
+   "Dene",
+   "KP değerini 10 ve 40 yapıp aynı 5°'lik açıda motor çıkışının nasıl değiştiğine bak; filtre katsayısını 0,98'den 0,90'a düşürüp açının ivmeölçere ne kadar daha hızlı yaklaştığını gözle; robotun düşme açısını (DUSME_ACI) değiştir."
+  ]
+ ],
+ "free": [
+  "psu1",
+  "m1",
+  "m2"
+ ]
+}

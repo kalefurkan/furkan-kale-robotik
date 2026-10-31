@@ -1,0 +1,111 @@
+{
+ "sketch": "cizgi_izleyen",
+ "d": "Beş kanallı IR sensör dizisi zemindeki siyah çizgiyi görür; kod çizginin konumunu hesaplayıp L298N ile sol ve sağ motoru farklı hızda sürerek robotu çizgide tutar. Çizgi algılayıcıdan konum bulmayı, orantılı (P) kontrolü ve iki motoru PWM ile sürmeyi öğrenirsin. Simülatörde çizgi, dizinin kanal düğmeleriyle verilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × 5 kanallı IR çizgi sensörü dizisi (TCRT5000)",
+  "1 × L298N motor sürücü",
+  "2 × DC motor (robotun sol ve sağ tekerleği)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (23 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: L298N 5V ucu ve diğer modüllerin VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: L298N GND ve diğer modüllerin GND'si"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ],
+  [
+   "D2",
+   "IR dizisi OUT1 (en sol kanal)"
+  ],
+  [
+   "D3",
+   "IR dizisi OUT2"
+  ],
+  [
+   "D4",
+   "IR dizisi OUT3 (orta kanal)"
+  ],
+  [
+   "D11",
+   "IR dizisi OUT4"
+  ],
+  [
+   "D12",
+   "IR dizisi OUT5 (en sağ kanal)"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "L298N ve motorlar için ortak kurulum: L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola. Motorların ve Arduino'nun GND'si ortak olmalı: d5 → eksi rayı. e6 → artı rayı: bu bağlantıyla L298N'in mantık devresi Arduino'nun 5V'unu kullanır; kartın üzerindeki 5V jumper'ını çıkar.",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Motorlar (breadboard dışında, takılı değil): sol motor için e13 → motor A, e14 → motor B (OUT1, OUT2); sağ motor için e15 → motor A, e16 → motor B (OUT3, OUT4).",
+  "IR dizisini a20 (VCC), a21 (GND), a22 (OUT1), a23 (OUT2), a24 (OUT3), a25 (OUT4), a26 (OUT5) deliklerine tak. e20 → artı rayı, e21 → eksi rayı.",
+  "Sensör çıkışları: D2 → e22 (OUT1), D3 → e23 (OUT2), D4 → e24 (OUT3), D11 → e25 (OUT4), D12 → e26 (OUT5).",
+  "Gerçek robotta IR dizisini şasinin önüne, yere 5–10 mm yükseklikte bakacak biçimde, OUT1 solda olacak yönde monte et.",
+  "Kodu yükle (simülatörde çalıştır): IR dizisini seçip kanal düğmeleriyle çizgiyi ortaya (OUT3), sola (OUT1–OUT2) ya da sağa (OUT4–OUT5) getir; L298N modülünde sol ve sağ motor hızlarının değiştiğini izle."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Her IR kanalı yere kızılötesi ışık gönderir ve yansımayı ölçer: siyah çizgi ışığı yutar, açık renkli zemin yansıtır. Bu modülde siyah çizginin üstündeki kanalın çıkışı HIGH, zeminin üstündeki LOW olur. Kod, OUT1'den OUT5'e kanalları okur ve her çizgi gören kanala bir konum puanı verir (−200, −100, 0, +100, +200). Konum, puanların ortalamasıdır; 0 çizginin tam ortada olduğunu, eksi değer çizginin solda, artı değer sağda olduğunu gösterir. Düzeltme = konum × KP / 100 hesaplanır; sol motora TEMEL + düzeltme, sağ motora TEMEL − düzeltme verilir. Çizgi sağdaysa sol motor hızlanır, sağ motor yavaşlar ve robot sağa döner. Hiçbir kanal çizgiyi görmezse robot çizgiyi en son gördüğü tarafa doğru yerinde döner. Motor yönü IN pinleriyle, hızı ENA/ENB pinlerindeki analogWrite() PWM'iyle ayarlanır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta Seri Monitör'e \"Cizgi izleyen robot hazir\" yazıldı. Çizgi OUT2'deyken (hafif sol) sol=125, sağ=215 çıktı: L298N modülü \"A: ileri %49 · B: ileri %84\" gösterdi, yani sağ motor daha hızlı döndü ve robot sola döner. Çizgi ortaya (OUT3) gelince sol=170, sağ=170 oldu (iki motor eşit hızda, modülde \"A: ileri %67 · B: ileri %67\"). Çizgi OUT1'e (en sol) kayınca sol=80, sağ=255; OUT4'e gelince sol=215, sağ=125; OUT5'e (en sağ) gelince sol=255, sağ=80 oldu. Hiçbir kanal çizgiyi görmeyince çizgi en son sağda görüldüğü için sol=150, sağ=−150 oldu: sol motor ileri, sağ motor geri, robot yerinde sağa döndü. OUT2 ve OUT3 birlikte çizgiyi görünce konum −50 olarak hesaplandı (sol=148, sağ=192). Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde robot hareket etmez ve çizgi pisti yoktur: çizgi konumu dizinin kanal düğmeleriyle verilir; yalnızca motor sürücüsünün ve motorların tepkisi görülür. Gerçek sensörlerde çizgi eşiği kart üzerindeki potla ayarlanır, ortam ışığı ve yüzey rengi sonucu etkiler; bazı kartlarda çıkış mantığı ters olabilir (çizgide LOW). Motor ataleti, tekerlek kayması, pil gerilimi düşüşü ve keskin dönüşler modellenmez; KP ve TEMEL değerlerini gerçek robotta deneyerek ayarlamak gerekir. Bu sketch ek bir kütüphane kullanmaz; yalnızca Arduino çekirdek işlevleri vardır."
+  ],
+  [
+   "Güç ve GND",
+   "Motorları Arduino'nun 5V pininden besleme: motorlar yüzlerce mA çeker. Motor gücü ayrı güç kaynağından (pil kutusu) gelir; L298N'in GND'si Arduino GND'sine mutlaka bağlanmalı, yoksa IN/EN sinyalleri anlamsız olur. L298N yaklaşık 2 V düşürür; motor beslemesini motorun istediği gerilimden yaklaşık 2 V yüksek seç. L298N'in dahili serbest dönüş diyotları vardır, ayrıca diyot eklenmez. Güvenlik: pil kutusunu kısa devre yapma (artı ve eksi uçları birbirine değmesin); lityum/Li-ion pil kullanıyorsan yetişkin gözetiminde, koruma devreli paketle çalış; kablolar ısınırsa hemen enerjiyi kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Motor beslemesinin GND'sini Arduino GND'sine bağlamamak; sensör sırasını ters monte etmek (robot çizgiden kaçar); TEMEL hızı çok yüksek seçmek (robot virajda çizgiyi kaçırır); KP'yi çok büyük yapmak (robot sağa sola titrer); sensörü yerden çok yüksekte tutmak; ENA/ENB'yi boş bırakıp hız kontrolü beklemek."
+  ],
+  [
+   "Dene",
+   "KP değerini 20 ve 80 yaparak simülatörde sol/sağ hız farkının nasıl değiştiğine bak; kanal puanlarını kullanıp hata değişimini de ekleyerek (türev, D terimi) robotun titremesini azaltmayı dene."
+  ]
+ ],
+ "free": [
+  "psu1",
+  "m1",
+  "m2"
+ ]
+}

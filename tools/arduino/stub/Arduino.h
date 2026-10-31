@@ -46,3 +46,11 @@ void setup(); void loop();
 #define DEC 10
 #define HEX 16
 #define BIN 2
+#define RISING 3
+#define FALLING 2
+#define CHANGE 1
+#define digitalPinToInterrupt(p) ((p) == 2 ? 0 : ((p) == 3 ? 1 : -1))
+void attachInterrupt(uint8_t, void (*)(void), int);
+void detachInterrupt(uint8_t);
+void interrupts();
+void noInterrupts();

@@ -1,0 +1,85 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × ESP8266 (ESP-01) Wi-Fi modülü",
+  "1 × toprak nem sensörü",
+  "1 × NPN transistör (örneğin BC547 ya da 2N2222)",
+  "1 × diyot (1N4007, pompa için ters diyot)",
+  "1 × mini su pompası (DC motor)",
+  "2 × 1 kΩ direnç (biri gerilim bölücü, biri transistör tabanı)",
+  "1 × 2 kΩ direnç (gerilim bölücü)",
+  "2 × ayarlanabilir güç kaynağı (biri 3,3 V'a ayarlı: Wi-Fi modülü için; biri 6 V'a ayarlı: pompa için; gerçekte 3,3 V regülatör ve 4 × AA pil kutusu)",
+  "Hortum, su kabı ve saksı (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (18 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: toprak nem sensörü VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: ESP-01, sensör, transistör emitörü, her iki güç kaynağının eksi uçları"
+  ],
+  [
+   "3V3",
+   "ESP-01 CH_PD (etkinleştirme) ucu"
+  ],
+  [
+   "D2",
+   "ESP-01 TX (Arduino'nun RX'i)"
+  ],
+  [
+   "D3",
+   "1 kΩ direncin ucu → ESP-01 RX (Arduino'nun TX'i)"
+  ],
+  [
+   "A0",
+   "Toprak nem sensörü OUT"
+  ],
+  [
+   "D5",
+   "1 kΩ direnç → NPN transistör tabanı (pompa sürücüsü)"
+  ]
+ ],
+ "img": "assets/devre/web-tabanli-akilli-sulama.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynakları kapalı olsun.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "ESP-01'i a2 (VCC), a3 (GND), a4 (TX), a5 (RX), a6 (CH_PD) deliklerine tak. 3,3 V güç kaynağı (breadboard dışında, takılı değil): + ucunu e2'ye, − ucunu eksi rayına kablola; e3 → eksi rayı; 3V3 → e6 (yalnızca CH_PD için). Arduino'nun 3,3 V pininden ESP-01'i besleme: yeterli akım vermez.",
+  "ESP-01 sinyalleri: D2 → e4. Gerilim bölücü: 1 kΩ direnci d5 ile d9 arasına, 2 kΩ direnci dikey olarak e5 ile h5 arasına tak; D3 → e9, j5 → eksi rayı.",
+  "Toprak nem sensörünü a12 (VCC), a13 (OUT), a14 (GND) deliklerine tak. e12 → artı rayı, A0 → e13, e14 → eksi rayı.",
+  "NPN transistörü a18 (C), a19 (B), a20 (E) deliklerine tak. Tabana 1 kΩ direnci d19 ile d23 arasına tak; D5 → e23. e20 → eksi rayı. Ters diyotu c18 (anot) ve c22 (katot) deliklerine tak.",
+  "Pompa ve 6 V güç kaynağı (breadboard dışında, takılı değil): e18 → pompa B ucu (transistör kolektörü), e22 → pompa A ucu, a22 → 6 V güç kaynağının + ucu, 6 V kaynağın − ucu → eksi rayı. Diyotun katodu (+ taraf) pompanın A ucuyla aynı noktadadır.",
+  "Kodu yükle (simülatörde çalıştır): ESP-01 Wi-Fi'ye katılır (yaklaşık 7. saniye), sonra toprak nemi her saniye yazılır. Toprak nem sensörünü seçip nemi azalt: toprak kuruyunca pompa çalışır; nemi artırınca durur."
+ ],
+ "code": "// Web tabanli akilli sulama: toprak nem sensoru + NPN suruculu pompa + ESP-01 (AT komutlari)\n// Otomatik mod: toprak kuruysa pompa calisir, yeterince islaninca durur (histerezis) ve en fazla MAKS_POMPA_MS calisir.\n// Web komutlari (ESP-01'den \"+IPD...:GET /p\" gibi): /p pompa ac, /s pompa durdur, /a otomatik mod\n#include <SoftwareSerial.h>\n\nSoftwareSerial esp(2, 3);      // RX = D2 (ESP TX), TX = D3 (ESP RX, bolucu uzerinden)\n\nconst int NEM_PIN = A0;\nconst int POMPA_PIN = 5;       // 1 kOhm direncle NPN tabanina\n\nconst int KURU_ESIK = 700;     // bu degerin ustu: kuru (sensor kuruda yuksek gerilim verir)\nconst int ISLAK_ESIK = 500;    // bu degerin alti: yeterince islak\nconst unsigned long MAKS_POMPA_MS = 5000;   // pompa bir seferde en fazla bu kadar calissin\n\nbool otomatik = true;\nbool pompaAcik = false;\nunsigned long pompaBaslangic = 0;\nunsigned long sonOlcum = 0;\nint asama = 0;\n\nint nemOku() {                 // 8 okumanin ortalamasi\n  long toplam = 0;\n  for (int i = 0; i < 8; i++) {\n    toplam += analogRead(NEM_PIN);\n    delay(2);\n  }\n  return toplam / 8;\n}\n\nvoid pompa(bool ac) {\n  if (ac == pompaAcik) {\n    return;\n  }\n  pompaAcik = ac;\n  digitalWrite(POMPA_PIN, ac ? HIGH : LOW);\n  if (ac) {\n    pompaBaslangic = millis();\n    Serial.println(\"POMPA ACIK\");\n  } else {\n    Serial.println(\"POMPA KAPALI\");\n  }\n}\n\nbool bekle2(char a, char b, int ms) {\n  char onceki = 0;\n  bool bulundu = false;\n  unsigned long t0 = millis();\n  while (millis() - t0 < ms) {\n    while (esp.available() > 0) {\n      char c = esp.read();\n      if (onceki == a && c == b) {\n        bulundu = true;\n      }\n      onceki = c;\n    }\n    delay(2);\n  }\n  return bulundu;\n}\n\nvoid istekIsle(char c) {       // \"GET /p\", \"GET /s\", \"GET /a\" ayristirir\n  if (asama == 0) {\n    asama = (c == 'G') ? 1 : 0;\n  } else if (asama == 1) {\n    asama = (c == 'E') ? 2 : 0;\n  } else if (asama == 2) {\n    asama = (c == 'T') ? 3 : 0;\n  } else if (asama == 3) {\n    asama = (c == ' ') ? 4 : 0;\n  } else if (asama == 4) {\n    asama = (c == '/') ? 5 : 0;\n  } else if (asama == 5) {\n    if (c == 'p') {\n      otomatik = false;\n      pompa(true);\n      Serial.println(\"Web: manuel pompa ac\");\n    } else if (c == 's') {\n      otomatik = false;\n      pompa(false);\n      Serial.println(\"Web: pompa durdur\");\n    } else if (c == 'a') {\n      otomatik = true;\n      Serial.println(\"Web: otomatik mod\");\n    }\n    asama = 0;\n  }\n}\n\nvoid setup() {\n  pinMode(POMPA_PIN, OUTPUT);\n  digitalWrite(POMPA_PIN, LOW);\n  Serial.begin(9600);\n  esp.begin(9600);\n  Serial.println(\"Akilli sulama hazir\");\n  delay(500);\n  esp.println(\"AT+CWMODE=1\");\n  bekle2('O', 'K', 500);\n  esp.println(\"AT+CWJAP=\\\"MakersHub\\\",\\\"12345678\\\"\");\n  if (bekle2('I', 'P', 6000)) {\n    Serial.println(\"Wi-Fi baglandi\");\n  } else {\n    Serial.println(\"Wi-Fi BAGLANAMADI\");\n  }\n  esp.println(\"AT+CIPMUX=1\");\n  bekle2('O', 'K', 500);\n  esp.println(\"AT+CIPSERVER=1,80\");\n  bekle2('O', 'K', 500);\n  Serial.println(\"Sunucu hazir (web tarafi simulatorde denenemez)\");\n}\n\nvoid loop() {\n  while (esp.available() > 0) {\n    istekIsle(esp.read());\n  }\n\n  int nem = nemOku();\n  if (millis() - sonOlcum >= 1000) {\n    sonOlcum = millis();\n    Serial.print(\"Toprak: \");\n    Serial.print(nem);\n    Serial.print(pompaAcik ? \"  pompa acik\" : \"  pompa kapali\");\n    Serial.println(otomatik ? \"  [oto]\" : \"  [manuel]\");\n  }\n\n  if (otomatik) {\n    if (!pompaAcik && nem > KURU_ESIK) {\n      pompa(true);\n    } else if (pompaAcik && nem < ISLAK_ESIK) {\n      pompa(false);\n    }\n  }\n  if (pompaAcik && millis() - pompaBaslangic >= MAKS_POMPA_MS) {\n    pompa(false);              // guvenlik: sensor bozuksa pompa surekli calismasin\n    otomatik = false;\n    Serial.println(\"SURE DOLDU: pompa durduruldu, otomatik mod kapandi\");\n  }\n  delay(50);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Toprak nem sensörü kuru toprakta yüksek, ıslak toprakta düşük gerilim verir (analogRead değeri kuruda yüksek). Kod 8 okumanın ortalamasını alır. Otomatik modda iki eşik kullanılır: değer KURU_ESIK (700) üstüne çıkınca pompa açılır, ISLAK_ESIK (500) altına inince kapanır. Aradaki bölgede pompa durumu değişmez; buna histerezis denir ve pompanın sürekli aç-kapa yapmasını önler. Pompa Arduino pininden doğrudan sürülemez (pin 20 mA verir, pompa yüzlerce mA çeker): D5 pini 1 kΩ dirençle NPN transistörün tabanına gider, transistör pompayı ayrı 6 V kaynaktan geçirir. Pompa bir bobin olduğu için kapanırken ters gerilim üretir; pompaya paralel ters diyot (katot + tarafa) bu gerilimi söndürür. Güvenlik: pompa bir seferde en fazla 5 saniye çalışır; süre dolarsa (sensör bozuk ya da su bitmişse) pompa durur ve otomatik mod kapanır. Web tarafında ESP-01'den gelen \"GET /p\" (pompayı aç), \"GET /s\" (durdur), \"GET /a\" (otomatik) satırları istekIsle() durum makinesiyle çözülür."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Akilli sulama hazir\" yazıldı; ESP-01 7. saniyede Wi-Fi'ye katıldı, 8. saniyede \"Sunucu hazir\" yazıldı. Toprak nemi varsayılan olarak 0,5 iken \"Toprak: 588 pompa kapali\" okundu (588 < 700, pompa kapalı). 10. saniyede nem 0,15 yapılınca değer 821'e çıktı ve 10,03. saniyede \"POMPA ACIK\" yazıldı; pompa modeli 0,9 hızla döndü ve yaklaşık 181 mA çekti. 13. saniyede nem 0,75 yapılınca değer 422'ye düştü (422 < 500) ve \"POMPA KAPALI\" yazıldı. 16. saniyede nem 0,1 yapılıp kuru bırakılınca (değer 855) pompa yeniden açıldı ve 5 saniye sonra, 21. saniyede \"SURE DOLDU: pompa durduruldu, otomatik mod kapandi\" yazıldı; sonraki satırlarda mod [manuel] göründü. Web komutları (/p, /s, /a) simülatörde gelmediği için doğrulanmadı. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde yalnızca ESP-01'in AT komut düzeyi vardır: AT, AT+CWMODE, AT+CWJAP (Wi-Fi'ye katılma), AT+CIPMUX ve AT+CIPSERVER komutları yanıt verir. Gerçek ağ yoktur: tarayıcıdan ya da telefondan gelen bir HTTP isteği (+IPD satırı) simülatörde hiçbir zaman oluşmaz, AT+CIPSEND ile cevap gönderme ve internete çıkma da çalışmaz (ERROR döner). Bu yüzden bu projede web komutlarının (+IPD satırı) işlenmesi simülatörde DOĞRULANMADI; yalnızca toprak nemi, pompa mantığı ve Wi-Fi'ye katılma doğrulandı. Simülatörde sensör değeri bir kaydırıcıdan verilir ve pompa suyu toprağa taşımaz: toprağın gerçekten ıslanıp ıslanmadığı doğrulanamaz. Gerçek toprak nem sensörleri (özellikle dirençli olanlar) zamanla paslanır ve değerleri kalibrasyon ister; eşikleri kendi sensörüne göre ayarla. Sketch SoftwareSerial.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır. Daha rahat çözüm NodeMCU/ESP8266'yı tek başına programlamaktır (ESP8266WiFi.h ve ESP8266WebServer.h); bu kodlar Uno sketch'i değildir ve simülatörde çalışmaz."
+  ],
+  [
+   "Güç ve GND",
+   "Pompayı Arduino'nun 5V pininden besleme; ayrı kaynak kullan ama GND'yi ortak yap (6 V kaynağın eksisi eksi rayında). Ters diyotu mutlaka tak ve yönüne dikkat et (çizgili uç, katot, + tarafa). ESP-01 için 3,3 V regülatör kullan; 5 V'a bağlama. SU VE ELEKTRİK: Devreyi suyun yakınında kurarken Arduino, breadboard ve kablolar ıslanmamalı; pompa ve devre ayrı yerde, su kabı altta olsun. Yalnızca düşük gerilimli (6 V) pompa kullan; şebeke gerilimli pompayı bu devrede kullanma. Pompayı susuz çalıştırma; bu yüzden 5 saniyelik güvenlik süresi vardır."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Pompayı doğrudan Arduino pinine bağlamak; ters diyotu unutmak ya da ters takmak (transistör bozulur); 6 V kaynağın GND'sini Arduino GND'sine bağlamamak (transistör çalışmaz); histerezis olmadan tek eşik kullanıp pompanın titremesine neden olmak; maksimum çalışma süresi koymamak (taşma, kuru çalışma); toprak nem sensörünü sürekli ıslak bırakıp paslandırmak; CH_PD'yi bağlamamak."
+  ],
+  [
+   "Dene",
+   "KURU_ESIK ve ISLAK_ESIK değerlerini değiştirip simülatörde pompanın hangi nemlerde açılıp kapandığına bak; pompa kapanınca 30 saniye beklemeden tekrar açılmasını engelleyen bir bekleme süresi ekle."
+  ]
+ ],
+ "title": "73. Web Tabanlı Akıllı Sulama"
+}

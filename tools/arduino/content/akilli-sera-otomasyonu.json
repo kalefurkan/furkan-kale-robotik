@@ -1,0 +1,85 @@
+{
+ "sketch": "sera",
+ "d": "DHT22 sera havasının sıcaklığını ve nemini, toprak nem sensörü toprağın kuruluğunu ölçer. Sıcaklık 28 °C'yi ya da hava nemi %85'i aşınca fan açılır; toprak kuruysa pompa en fazla 3 saniye sulama yapar ve sonraki sulamaya kadar 10 saniye bekler. Birden çok sensörle birden çok çıkışı yönetmeyi, histerezisi, transistörle fan ve pompa sürmeyi ve sulamada güvenlik sınırlarını öğrenirsin. Simülatörde sensör değerleri kaydırıcılardan verilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × DHT22 sıcaklık ve nem sensörü",
+  "1 × toprak nem sensörü",
+  "2 × NPN transistör (örneğin BC547 ya da 2N2222): fan ve pompa sürücüsü",
+  "2 × diyot (1N4007): motorlar için ters diyot",
+  "1 × fan (6 V DC motor)",
+  "1 × mini su pompası (DC motor)",
+  "2 × 1 kΩ direnç (transistör tabanları için)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "Sera iskeleti, saksı, su kabı ve hortum (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (20 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: DHT22 VCC ve toprak nem sensörü VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: sensörler, transistör emitörleri ve 6 V kaynağın eksisi"
+  ],
+  [
+   "D4",
+   "DHT22 DATA"
+  ],
+  [
+   "A0",
+   "Toprak nem sensörü OUT"
+  ],
+  [
+   "D5",
+   "1 kΩ direnç → pompa transistörü tabanı"
+  ],
+  [
+   "D6",
+   "1 kΩ direnç → fan transistörü tabanı"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "DHT22'yi a2 (VCC), a3 (DATA), a4 (GND) deliklerine tak. e2 → alttaki artı rayı, D4 → e3, e4 → alttaki eksi rayı.",
+  "Toprak nem sensörünü a8 (VCC), a9 (OUT), a10 (GND) deliklerine tak. e8 → alttaki artı rayı, A0 → e9, e10 → alttaki eksi rayı.",
+  "6 V güç kaynağı (breadboard dışında, takılı değil): + ucunu üstteki artı (+) rayına (6 V rayı), − ucunu alttaki eksi rayına kablola. Bu üst ray Arduino'nun 5V'una bağlı değildir; karıştırma.",
+  "Fan sürücüsü: NPN'yi a14 (C), a15 (B), a16 (E) deliklerine tak, e16 → eksi rayı. 1 kΩ direnci d15 ile d19 arasına tak, D6 → e19. Ters diyotu c14 (anot) ve c18 (katot) deliklerine tak. Fan (breadboard dışında): e14 → fan B ucu, e18 → fan A ucu, a18 → üstteki 6 V rayı.",
+  "Pompa sürücüsü: NPN'yi a22 (C), a23 (B), a24 (E) deliklerine tak, e24 → eksi rayı. 1 kΩ direnci d23 ile d27 arasına tak, D5 → e27. Ters diyotu c22 (anot) ve c26 (katot) deliklerine tak. Pompa (breadboard dışında): e22 → pompa B ucu, e26 → pompa A ucu, a26 → üstteki 6 V rayı.",
+  "Kodu yükle (simülatörde çalıştır): DHT22'yi seçip sıcaklığı 30 °C'ye çıkar: fan açılır. Toprak nem sensörünü seçip nemi azalt: pompa 3 saniye çalışır."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Kod her turda DHT22'den sıcaklık (t) ve hava nemi (h), toprak sensöründen analog değer (toprak) okur. Fan: sıcaklık SICAK_ACIK'ı (28 °C) ya da hava nemi HAVA_NEMI_ACIK'ı (%85) aşarsa açılır; fan ancak sıcaklık 26 °C'nin altına inince ve nem %80'in altına inince kapanır (histerezis, fanın sürekli aç-kapa yapmasını önler). DHT22 okunamazsa (NaN) güvenlik için fan açılır. Pompa: toprak değeri TOPRAK_KURU'dan (700) büyükse ve son sulamadan en az 10 saniye geçtiyse pompa açılır; 3 saniye sonra ya da toprak yeterince ıslanınca (değer 500'ün altına inince) kapanır. Böylece sensör bozuk olsa bile pompa 3 saniyeden uzun çalışmaz ve su taşmaz. Fan ve pompa yüzlerce mA çeker; Arduino pininden doğrudan sürülmez: her biri 1 kΩ dirençle bir NPN transistörün tabanına bağlıdır, ters diyot motorun kapanırken ürettiği gerilim sıçramasını söndürür; motorlar ayrı 6 V kaynaktan beslenir."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Sera hazir\" yazıldı; DHT22 30 °C gösterdiği için hemen \"FAN ACIK\" yazıldı (fan modeli 0,9 hızla döndü, yaklaşık 181 mA çekti). 4. saniyede sıcaklık 24 °C yapılınca \"FAN KAPALI\" yazıldı. Toprak nemi başlangıçta 588 okundu (eşik 700'ün altı, sulama yok). 8. saniyede toprak kuruyunca (değer 855) \"POMPA ACIK\" yazıldı; pompa çalıştı ve tam 3 saniye sonra (11. saniyede) \"POMPA KAPALI\" yazıldı, toprak hâlâ kuru olduğu halde güvenlik süresi yüzünden durdu. 13. saniyede toprak ıslanınca değer 455'e düştü. 15. saniyede hava nemi %90 yapılınca sıcaklık 24 °C olmasına rağmen \"FAN ACIK\" yazıldı; 19. saniyede nem %60'a inince \"FAN KAPALI\". 22. saniyede toprak yeniden kurutulunca \"POMPA ACIK\", 3 saniye sonra \"POMPA KAPALI\" yazıldı. Gerçek sera ve gerçek bitkide denenmedi. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde sera, bitki, ısınma ve havalandırmanın sıcaklığı düşürmesi yoktur: sıcaklık ve nem kaydırıcıdan verilir ve fan/pompa değeri değiştirmez. Pompanın toprağı gerçekten ıslatıp ıslatmadığı, hortum ve su basıncı doğrulanamaz. Gerçek DHT22'nin 2 saniyelik okuma sınırı, ±0,5 °C doğruluk hatası ve toprak sensörünün zamanla paslanması modellenmez; eşikleri kendi sensörüne göre ayarla. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki DHT.h onların dışındadır, bu yüzden sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir. DHT.h için Arduino IDE'ye DHT sensor library kurulmalıdır."
+  ],
+  [
+   "Güç ve GND",
+   "Fan ve pompayı Arduino'nun 5V pininden besleme; ayrı 6 V kaynak kullan ama GND'yi ortak yap. Ters diyotların yönüne dikkat et (çizgili uç, katot, + tarafa). SU VE ELEKTRİK: Sera nemli bir ortamdır; Arduino, breadboard, pil ve bağlantıları ıslanmayacak kapalı bir kutuda tut, yalnızca düşük gerilimli (6 V) fan ve pompa kullan, şebeke gerilimini bu devrede kullanma. Pompayı susuz çalıştırma. Pil kutusunu kısa devre yapma."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Fan ya da pompayı doğrudan Arduino pinine bağlamak; ters diyotu unutmak ya da ters takmak; 6 V kaynağın GND'sini Arduino GND'sine bağlamamak; üstteki 6 V rayını Arduino 5V'una karıştırmak (kısa devre/hasar); pompaya maksimum çalışma süresi koymamak; tek eşik kullanıp fanın sürekli aç-kapa yapmasına neden olmak; sıcaklığı ve nemi birbirinden bağımsız düşünüp fanı gereksiz çalıştırmak."
+  ],
+  [
+   "Dene",
+   "SICAK_ACIK değerini 25 yap ve fanın hangi sıcaklıkta açıldığını izle; POMPA_BEKLEME süresini 5 ve 20 saniye yaparak sulama aralığını değiştir; gece (ışık düşükken) sulama yapmayan bir LDR koşulu ekle."
+  ]
+ ],
+ "free": [
+  "psu1",
+  "fan1",
+  "pump1"
+ ]
+}

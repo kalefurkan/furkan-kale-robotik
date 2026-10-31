@@ -1,0 +1,90 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × IR alıcı (VS1838B) ve 21 tuşlu mini kumanda",
+  "1 × L298N motor sürücü",
+  "2 × DC motor (robotun sol ve sağ tekerleği)",
+  "1 × ayarlanabilir güç kaynağı (6 V'a ayarlı; gerçekte 4 × AA pil kutusu)",
+  "Robot şasisi, 2 tekerlek, bilyalı (sarhoş) tekerlek ve pil kutusu (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (19 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: L298N 5V ucu ve diğer modüllerin VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: L298N GND ve diğer modüllerin GND'si"
+  ],
+  [
+   "D5",
+   "L298N ENA (sol motor hızı, PWM)"
+  ],
+  [
+   "D6",
+   "L298N ENB (sağ motor hızı, PWM)"
+  ],
+  [
+   "D7",
+   "L298N IN1"
+  ],
+  [
+   "D8",
+   "L298N IN2"
+  ],
+  [
+   "D9",
+   "L298N IN3"
+  ],
+  [
+   "D10",
+   "L298N IN4"
+  ],
+  [
+   "D2",
+   "IR alıcı OUT (sinyal)"
+  ]
+ ],
+ "img": "assets/devre/uzaktan-kumandali-robot.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın ve güç kaynağı kapalı olsun.",
+  "L298N ve motorlar için ortak kurulum: L298N'i breadboard'un en üst sırasına (a satırı) tak: 13 pini sırayla a4–a16 deliklerine gelsin (12V, GND, 5V, ENA, IN1, IN2, IN3, IN4, ENB, OUT1, OUT2, OUT3, OUT4).",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Güç kaynağı (breadboard dışında, takılı değil): + ucunu e4'e (12V), − ucunu e5'e (GND) kablola. Motorların ve Arduino'nun GND'si ortak olmalı: d5 → eksi rayı. e6 → artı rayı: bu bağlantıyla L298N'in mantık devresi Arduino'nun 5V'unu kullanır; kartın üzerindeki 5V jumper'ını çıkar.",
+  "Kontrol kabloları: D5 → e7 (ENA), D7 → e8 (IN1), D8 → e9 (IN2), D9 → e10 (IN3), D10 → e11 (IN4), D6 → e12 (ENB).",
+  "Motorlar (breadboard dışında, takılı değil): sol motor için e13 → motor A, e14 → motor B (OUT1, OUT2); sağ motor için e15 → motor A, e16 → motor B (OUT3, OUT4).",
+  "IR alıcıyı a20 (OUT), a21 (GND), a22 (VCC) deliklerine tak. Dikkat: VS1838B'nin pin sırası OUT, GND, VCC'dir (modül kartlarında sıra farklı olabilir, üzerindeki yazıya bak).",
+  "e21 → eksi rayı, e22 → artı rayı, D2 → e20 (OUT).",
+  "Kodu yükle (simülatörde çalıştır): IR alıcıyı seçip kumanda tuşunu 2 yap ve \"Kumandada tuşa bas\" düğmesine bas: Seri Monitör'de \"Kod: FF18E7 -> ILERI\" görünür ve iki motor ileri döner. 4, 6, 8, 5 ve VOL+ tuşlarını da dene."
+ ],
+ "code": "// Uzaktan kumandali robot: IR alici (VS1838B) + 21 tuslu kumanda + L298N + 2 DC motor\n// 2 ileri, 8 geri, 4 sola, 6 saga, 5 dur, VOL+ / VOL- hiz\n#include <IRremote.h>\n\nconst int IR_PIN = 2;\nIRrecv irrecv(IR_PIN);\ndecode_results results;\n\nconst int ENA = 5;\nconst int IN1 = 7;\nconst int IN2 = 8;\nconst int IN3 = 9;\nconst int IN4 = 10;\nconst int ENB = 6;\n\nint hiz = 180;                 // 0-255\nint sol = 0;                   // son yon komutlari (-1, 0, 1)\nint sag = 0;\n\nvoid surucu() {                // son komutu motorlara uygular\n  digitalWrite(IN1, sol > 0 ? HIGH : LOW);\n  digitalWrite(IN2, sol < 0 ? HIGH : LOW);\n  digitalWrite(IN3, sag > 0 ? HIGH : LOW);\n  digitalWrite(IN4, sag < 0 ? HIGH : LOW);\n  analogWrite(ENA, hiz);\n  analogWrite(ENB, hiz);\n}\n\nvoid setup() {\n  pinMode(ENA, OUTPUT);\n  pinMode(ENB, OUTPUT);\n  pinMode(IN1, OUTPUT);\n  pinMode(IN2, OUTPUT);\n  pinMode(IN3, OUTPUT);\n  pinMode(IN4, OUTPUT);\n  Serial.begin(9600);\n  irrecv.enableIRIn();\n  surucu();\n  Serial.println(\"Kumandali robot hazir\");\n}\n\nvoid loop() {\n  if (irrecv.decode(&results)) {\n    unsigned long kod = results.value;\n    Serial.print(\"Kod: \");\n    Serial.print(kod, HEX);\n    Serial.print(\" -> \");\n    if (kod == 0xFF18E7) {            // tus 2\n      sol = 1;\n      sag = 1;\n      Serial.println(\"ILERI\");\n    } else if (kod == 0xFF4AB5) {     // tus 8\n      sol = -1;\n      sag = -1;\n      Serial.println(\"GERI\");\n    } else if (kod == 0xFF10EF) {     // tus 4\n      sol = -1;\n      sag = 1;\n      Serial.println(\"SOLA\");\n    } else if (kod == 0xFF5AA5) {     // tus 6\n      sol = 1;\n      sag = -1;\n      Serial.println(\"SAGA\");\n    } else if (kod == 0xFF38C7) {     // tus 5\n      sol = 0;\n      sag = 0;\n      Serial.println(\"DUR\");\n    } else if (kod == 0xFFA857) {     // VOL+\n      hiz = min(hiz + 25, 255);\n      Serial.print(\"HIZ \");\n      Serial.println(hiz);\n    } else if (kod == 0xFFE01F) {     // VOL-\n      hiz = max(hiz - 25, 80);\n      Serial.print(\"HIZ \");\n      Serial.println(hiz);\n    } else {\n      Serial.println(\"taninmayan tus\");\n    }\n    surucu();\n    irrecv.resume();                  // sonraki kodu bekle\n  }\n  delay(20);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "VS1838B, kumandanın 38 kHz ile titreşen kızılötesi ışığını algılayıp sinyali OUT pininden verir. IRremote kütüphanesi bu sinyali çözer: IRrecv irrecv(2) alıcının D2'ye bağlı olduğunu söyler, irrecv.enableIRIn() dinlemeyi başlatır, irrecv.decode(&results) yeni bir kod geldiyse true döner ve kodu results.value içine koyar. Her tuşun kendine ait 32 bitlik bir kodu vardır (örneğin 2 tuşu FF18E7). Kod, eşleştiği komuta göre sol ve sağ motorun yönünü ayarlar; VOL+ hızı 25 artırır (en çok 255), VOL- 25 azaltır (en az 80). Okumadan sonra irrecv.resume() çağrılmalıdır; çağrılmazsa alıcı yeni kod almaz. Tanınmayan tuş için \"taninmayan tus\" yazılır ve robot son komutuna devam eder. Bu sketch IRremote'un eski (2.x) sürümünün API'sini kullanır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta Seri Monitör'e \"Kumandali robot hazir\" yazıldı (motorlar durağan, L298N \"fren\"). 1. saniyede tuş 2 gönderilince \"Kod: FF18E7 -> ILERI\" yazıldı ve modül \"A: ileri %71 · B: ileri %71\" gösterdi. Tuş 4 ile \"FF10EF -> SOLA\" (A geri · B ileri), tuş 6 ile \"FF5AA5 -> SAGA\" (A ileri · B geri), tuş 8 ile \"FF4AB5 -> GERI\" (iki motor geri) görüldü. VOL+ \"FFA857 -> HIZ 205\" yazdırdı ve hız %71'den %80'e çıktı. Kumandada tanımlı olmayan 7 tuşu \"FF42BD -> taninmayan tus\" yazdırdı ve robot son komutunda (ileri) kaldı. 5 tuşu \"FF38C7 -> DUR\" yazdırdı ve motorlar durdu. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde 38 kHz taşıyıcı ve darbe zamanlaması yoktur; yalnızca çözülmüş kod iletilir, yalnızca NEC protokolü ve bu 21 tuşlu kumanda desteklenir, tuşa basılı tutma tekrarı yoktur. Gerçek kumandalarda kod değerleri markaya göre farklıdır: kendi kumandanın kodlarını önce Seri Monitör'e yazdırıp öğren. Gerçek ortamda güneş ışığı ve lambalar alıcıyı şaşırtabilir. IRremote 2.x ve 4.x sürümlerinin API'si farklıdır; bu sketch eski API'dir. Gerçek derleme servisi yalnızca Arduino.h, Servo.h, Wire.h, SPI.h, EEPROM.h ve SoftwareSerial.h başlıklarını kabul eder; bu sketch'teki IRremote.h onların dışındadır, bu yüzden sitedeki gerçek derleme bu sketch'te hata verir. Gerçek kart için Arduino IDE'ye ilgili kütüphaneyi kurmak gerekir. Ayrıca kütüphane sürümü eski/yeni API uyumuna bağlıdır; Arduino IDE'de kurduğun sürümü kontrol et."
+  ],
+  [
+   "Güç ve GND",
+   "Motorları Arduino'nun 5V pininden besleme: motorlar yüzlerce mA çeker. Motor gücü ayrı güç kaynağından (pil kutusu) gelir; L298N'in GND'si Arduino GND'sine mutlaka bağlanmalı, yoksa IN/EN sinyalleri anlamsız olur. L298N yaklaşık 2 V düşürür; motor beslemesini motorun istediği gerilimden yaklaşık 2 V yüksek seç. L298N'in dahili serbest dönüş diyotları vardır, ayrıca diyot eklenmez. Güvenlik: pil kutusunu kısa devre yapma (artı ve eksi uçları birbirine değmesin); lityum/Li-ion pil kullanıyorsan yetişkin gözetiminde, koruma devreli paketle çalış; kablolar ısınırsa hemen enerjiyi kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "IR alıcının OUT, GND, VCC bacaklarını yanlış sırada takmak (alıcı ısınır, bozulur); irrecv.resume() çağırmayı unutmak (bir tuştan sonra kumanda çalışmaz); kendi kumandanın kodlarını bilmeden örnekteki kodları kullanmak; alıcıyı robotun gövdesinin altına gizlemek (kumandadan ışık gelmez); motor beslemesinin GND'sini Arduino GND'sine bağlamamak."
+  ],
+  [
+   "Dene",
+   "Kumandadaki 1 tuşuyla robotu bir saniye ileri götürüp kendiliğinden durduran bir komut ekle; ya da PLAY tuşuna basınca robotun yerinde dönmesini sağla."
+  ]
+ ],
+ "title": "64. Uzaktan Kumandalı Robot"
+}

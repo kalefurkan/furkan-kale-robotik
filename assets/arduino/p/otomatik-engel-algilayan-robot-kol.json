@@ -1,0 +1,74 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × HC-SR04 ultrasonik mesafe sensörü",
+  "2 × servo motor (SG90): biri taban, biri kavrama",
+  "Robot kol gövdesi, kıskaç ve sensör tutucu (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (12 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: HC-SR04 VCC ve iki servonun VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: HC-SR04 GND ve servo GND'leri"
+  ],
+  [
+   "D2",
+   "HC-SR04 TRIG"
+  ],
+  [
+   "D3",
+   "HC-SR04 ECHO"
+  ],
+  [
+   "D9",
+   "Taban servosu sinyali"
+  ],
+  [
+   "D10",
+   "Kavrama servosu sinyali"
+  ]
+ ],
+ "img": "assets/devre/otomatik-engel-algilayan-robot-kol.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "HC-SR04'ü a4 (VCC), a5 (TRIG), a6 (ECHO), a7 (GND) deliklerine tak. e4 → artı rayı, e7 → eksi rayı, D2 → e5, D3 → e6.",
+  "Taban servosunu a10 (SIG), a11 (VCC), a12 (GND) deliklerine tak. D9 → e10, e11 → artı rayı, e12 → eksi rayı.",
+  "Kavrama servosunu a14 (SIG), a15 (VCC), a16 (GND) deliklerine tak. D10 → e14, e15 → artı rayı, e16 → eksi rayı.",
+  "Gerçek kolda HC-SR04'ü taban servosunun döndürdüğü kola, kıskacın bakış yönünde monte et.",
+  "Kodu yükle (simülatörde çalıştır): taban servosu 3° adımlarla döner. Tarama sürerken HC-SR04 kaydırıcısını 15 cm'ye indirip bırak: kavrama kapanır, 1,5 saniye sonra açılır."
+ ],
+ "code": "// Otomatik engel algilayan robot kol: taban servosu HC-SR04'u tarar, nesne bulunca kavrama servosu kapanir\n#include <Servo.h>\n\nconst int TRIG = 2;\nconst int ECHO = 3;\n\nServo taban;\nServo kavrama;\n\nconst int ESIK_CM = 20;        // bundan yakin nesne bulundu say\nconst int ACIK = 100;          // kavrama acisi: acik\nconst int KAPALI = 40;         // kavrama acisi: kapali\n\nint aci = 0;\nint yon = 3;                   // her adimda 3 derece (eksi = geri tarama)\n\nlong mesafeOlc() {\n  digitalWrite(TRIG, LOW);\n  delayMicroseconds(2);\n  digitalWrite(TRIG, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(TRIG, LOW);\n  long sure = pulseIn(ECHO, HIGH, 30000);\n  if (sure == 0) {\n    return 400;\n  }\n  return sure / 58;\n}\n\nvoid setup() {\n  pinMode(TRIG, OUTPUT);\n  pinMode(ECHO, INPUT);\n  taban.attach(9);\n  kavrama.attach(10);\n  taban.write(aci);\n  kavrama.write(ACIK);\n  Serial.begin(9600);\n  Serial.println(\"Algilayan kol hazir: taraniyor\");\n  delay(500);\n}\n\nvoid loop() {\n  taban.write(aci);\n  delay(60);                   // servonun gitmesini bekle\n  long cm = mesafeOlc();\n\n  if (cm < ESIK_CM) {\n    Serial.print(\"NESNE: aci=\");\n    Serial.print(aci);\n    Serial.print(\" mesafe=\");\n    Serial.print(cm);\n    Serial.println(\" cm\");\n    kavrama.write(KAPALI);     // tut\n    Serial.println(\"Kavrama KAPANDI\");\n    delay(1500);\n    kavrama.write(ACIK);       // birak\n    Serial.println(\"Kavrama ACILDI\");\n    delay(500);\n    aci = aci + yon * 5;       // nesnenin ilerisine gec, ayni nesneyi tekrar sayma\n  } else {\n    aci = aci + yon;\n  }\n\n  if (aci >= 180) {            // sinira gelince yon degistir\n    aci = 180;\n    yon = -3;\n    Serial.println(\"Tarama: geri\");\n  } else if (aci <= 0) {\n    aci = 0;\n    yon = 3;\n    Serial.println(\"Tarama: ileri\");\n  }\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Taban servosu her adımda aci değişkeninin değerine gider (60 ms bekleme servonun dönmesi için zaman tanır), ardından HC-SR04 ile mesafe ölçülür. Mesafe ESIK_CM (20 cm) altındaysa nesne bulunmuştur: kod açıyı ve mesafeyi yazar, kavrama servosunu KAPALI (40°) konumuna getirir, 1,5 saniye bekler, ACIK (100°) konumuna getirir. Aynı nesneyi tekrar saymamak için tarama yönünde 5 adım (15°) ileri atlanır. Açı 180° ya da 0°'ye ulaşınca yon işareti değişir ve tarama geri yönde sürer."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Algilayan kol hazir: taraniyor\" yazıldı, servolar 0° ve 100°'de. Taban servosu yaklaşık saniyede 45° hızla taradı (60 ms bekleme + ölçüm süresi). 3. saniyede mesafe 15 cm yapılınca \"NESNE: aci=111 mesafe=15 cm\" ve \"Kavrama KAPANDI\" yazıldı, kavrama servosu 40°'ye gitti, 1,5 saniye sonra \"Kavrama ACILDI\" yazıldı (100°). 6,2. saniyede 180°'ye varılınca \"Tarama: geri\" yazıldı. Geri taramada 7. saniyedeki 12 cm'lik nesne 144°'de, 9,5. saniyedeki 18 cm'lik nesne 111°'de bulundu. 13,6. saniyede 0°'ye varılınca \"Tarama: ileri\" yazıldı. Nesnenin bulunduğu açı, kaydırıcının değiştirildiği ana bağlıdır; simülatörde gerçek nesne yoktur. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde kol fiziksel olarak dönmez ve kıskaç nesneyi tutamaz; HC-SR04 sensörünün kolla birlikte dönüp farklı yönlere baktığı da modellenmez, mesafe tek kaydırıcıdan gelir. Gerçek HC-SR04'ün açısı yaklaşık 15°'dir; kol hızlı dönerse nesneyi kaçırabilir ya da yan yüzeylerden yanlış okuyabilir. Kavrama açıları (40°/100°) gerçek kıskaca göre ayarlanmalıdır. Sketch yalnızca Servo.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Güç ve GND",
+   "İki SG90 ve sensör kısa süreli yüzlerce mA çeker; gerçek kolda USB beslemesi çoğunlukla yeter, ama kavrama servosu nesneye sıkışıp zorlanırsa akım yükselir: kavrama açısını nesneye göre sınırla. Sorun olursa servolara ayrı bir 5 V kaynak kullan ve GND'yi ortak yap. Hareketli kıskaca parmaklarını yaklaştırma."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Servo dönmesini beklemeden hemen ölçüm yapmak (açı değil önceki yönün mesafesi okunur); aynı nesneyi her adımda yeniden bulup kavrama servosunu titretmek; ECHO için zaman aşımı koymamak; servoları ve sensörü aynı pine bağlamak; kavramayı çok kapatıp servoyu zorlamak."
+  ],
+  [
+   "Dene",
+   "Nesne bulununca tabanı 90°'ye döndürüp nesneyi oraya taşıyıp bırakan bir \"al ve taşı\" hareketi ekle; ESIK_CM'i 10 ve 30 yapıp simülatörde hangi mesafelerde yakalandığını karşılaştır."
+  ]
+ ],
+ "title": "68. Otomatik Engel Algılayan Robot Kol"
+}

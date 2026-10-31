@@ -1,0 +1,88 @@
+{
+ "sketch": "dort_ayakli",
+ "d": "Sekiz servo, dört bacağın kalça ve diz eklemlerini sürer; robot çapraz bacak çiftleriyle (tırap yürüyüşü) adım atar. Servo dizilerini (Servo kalca[4]; Servo diz[4];), açı hesabını ve yürüyüşün evrelere ayrılmasını öğrenirsin. Simülatörde bacakların açıları servo modüllerinden izlenir; robot fiziksel olarak yürümez.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "8 × servo motor (SG90): 4 kalça, 4 diz",
+  "Robot gövdesi, 4 bacak parçası, servo boynuzları ve vidalar (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Harici 5 V güç kaynağı, en az 3 A (devre dışı mekanik parça: simülatörde servolar Arduino'nun 5V pininden beslenir)",
+  "Jumper kablolar (26 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: sekiz servonun kırmızı (VCC) kabloları"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: sekiz servonun kahverengi (GND) kabloları"
+  ],
+  [
+   "D2",
+   "Ön sol bacak kalça servosu sinyali"
+  ],
+  [
+   "D3",
+   "Ön sağ bacak kalça servosu sinyali"
+  ],
+  [
+   "D4",
+   "Arka sol bacak kalça servosu sinyali"
+  ],
+  [
+   "D5",
+   "Arka sağ bacak kalça servosu sinyali"
+  ],
+  [
+   "D6",
+   "Ön sol bacak diz servosu sinyali"
+  ],
+  [
+   "D7",
+   "Ön sağ bacak diz servosu sinyali"
+  ],
+  [
+   "D8",
+   "Arka sol bacak diz servosu sinyali"
+  ],
+  [
+   "D9",
+   "Arka sağ bacak diz servosu sinyali"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Servoları sırayla breadboard'un a satırına tak: servo 1 için a2 (SIG), a3 (VCC), a4 (GND); servo 2 için a5, a6, a7; servo 3 için a8, a9, a10 ... servo 8 için a23, a24, a25. Gerçek SG90 kablolarının renkleri turuncu/sarı (sinyal), kırmızı (VCC), kahverengi (GND)'dir. Simülatörde servo gövdeleri üst üste biner; bu yalnızca çizimdir, gerçekte servolar robotun bacaklarında durur ve 3'lü kablolarla breadboard'a ya da servo kalkanına bağlanır.",
+  "Her servo için üç kablo: sinyal D2…D9 pinlerinden e2, e5, e8, e11, e14, e17, e20, e23 deliklerine (servo 1 → D2, servo 2 → D3, ..., servo 8 → D9). VCC: e3, e6, e9, e12, e15, e18, e21, e24 → artı rayı. GND: e4, e7, e10, e13, e16, e19, e22, e25 → eksi rayı.",
+  "Servo numaralarının görevi: 1–4 kalça (ön sol, ön sağ, arka sol, arka sağ), 5–8 diz (aynı sırayla).",
+  "Kodu yükle (simülatörde çalıştır): servolar önce 90°'ye gider, 1,5 saniye sonra yürüyüş başlar. Servo modüllerinin açılarını izle."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Her bacağın iki servosu vardır: kalça bacağı öne arkaya sallar, diz ayağı kaldırır ya da indirir. Servo kalca[4] ve Servo diz[4] dizileriyle sekiz servo for döngüleriyle yönetilir. Tırap yürüyüşünde çapraz bacaklar birlikte hareket eder: önce ön sol + arka sağ havaya kalkar (diz 55°), yerdeki iki bacak (ön sağ ve arka sol) kalçadan geriye iter (±25°), sonra havadaki bacaklar öne sallanır, sonra ayaklar yere iner (diz 90°). Sonra aynı evreler diğer çapraz çift için tekrarlanır. Sol ve sağ servolar gövdeye aynalı takıldığı için aynı yön için kalça açısı bir yanda 90°+25°, diğer yanda 90°−25° olur. Her 4 adımdan sonra robot 90° dik duruşa döner ve 3 saniye bekler."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta sekiz servo da 90°'de ve beslemeli göründü; Seri Monitör'e \"Dort ayakli robot hazir: ayakta\" yazıldı. 1,5. saniyede \"Adim 1: on sol + arka sag one\" yazıldı: ön sağ kalça 115°, arka sol kalça 65° (yerdeki bacaklar geri iter), ön sol ve arka sağ dizler 55° (ayak havada). 0,2 saniye sonra ön sol kalça 115°, arka sağ kalça 65° (havadaki bacaklar öne), sonra dizler 90°'ye döndü. 2,1. saniyede \"on sag + arka sol one\" ile diğer çapraz çift aynı evreleri yaptı. Bir tam adım (iki yarım adım) yaklaşık 1,2 saniye sürdü; 4 adımdan sonra (6,3. saniyede) \"4 adim tamam: ayakta bekle\" yazıldı ve tüm servolar 90°'ye döndü. Robot fiziksel olarak hareket etmediği için yürüyüşün gerçekten ileri gidip gitmediği, bacak uzunluğu ve zemin sürtünmesi doğrulanmadı. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde servolar yalnızca verilen açıya gider: tork, hız, gövde ağırlığı, denge ve zemin yoktur. Gerçek yürüyüşte açılar (ILERI, KALDIR) bacak ölçüne göre deneyerek ayarlanır ve servoların orta konumu (90°) montajda dikkatle kalibre edilmelidir. Servo kütüphanesi bu başlıkta en çok 12 servoya izin verir; sekiz servo bunun içindedir. Uno'nun 5V pini ve USB sekiz servoyu taşıyamaz: simülatörde güç sorunu görünmez, ama gerçek robotta ayrı bir 5 V güç kaynağı gerekir. Sketch yalnızca Servo.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Güç ve GND",
+   "Bir SG90 hareket ederken 200–500 mA, takılı kalınca 700 mA'e kadar çeker; sekiz servo birlikte birkaç amper çekebilir. Gerçek robotta servoları USB'den ya da Arduino'nun 5V pininden besleme: Arduino resetlenir ya da bozulur. Servoları en az 3 A verebilen ayrı bir 5 V kaynaktan (örneğin BEC / pil + regülatör) besle ve kaynağın GND'sini Arduino GND'sine bağla. Sıcak pil ve kısa devreye dikkat et; lityum pilleri yetişkin gözetiminde, koruma devreli kullan. Servo ısınırsa ya da homurdanırsa hemen enerjiyi kes."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Servoları Arduino 5V pininden beslemek; GND'leri birleştirmemek; kalçanın sağ ve sol tarafını aynı yönde sürmek (bacaklar birbirine karşı iter); servo boynuzlarını 90° konumunda takmamak; çok büyük açı vermek (servo mekanik sınıra dayanıp ısınır); aynı anda tüm servolara hareket komutu verip akım çekişini zirveye çıkarmak."
+  ],
+  [
+   "Dene",
+   "ILERI ve KALDIR değerlerini değiştirip simülatörde servo açılarının nasıl değiştiğine bak; geri yürüyüş için kalcaYaz'daki yön işaretini ters çevir; sağa dönüş için sol bacaklara sağ bacaklardan büyük adım ver."
+  ]
+ ]
+}

@@ -1,0 +1,105 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × ESP8266 (ESP-01) Wi-Fi modülü",
+  "1 × DHT22 sıcaklık ve nem sensörü",
+  "1 × LDR (ışık direnci)",
+  "1 × 4 kanallı röle modülü",
+  "4 × ampul (5 V; lamba, vantilatör, ısıtıcı ve prizi temsil eder)",
+  "1 × 1 kΩ direnç (gerilim bölücü)",
+  "1 × 2 kΩ direnç (gerilim bölücü)",
+  "1 × 10 kΩ direnç (LDR bölücüsü)",
+  "1 × ayarlanabilir güç kaynağı (3,3 V'a ayarlı; gerçekte en az 300 mA veren 3,3 V regülatör, örneğin AMS1117-3.3)",
+  "Jumper kablolar (33 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: DHT22 VCC, LDR üst ucu, röle modülü VCC ve rölelerin COM uçları"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: ESP-01 GND, DHT22 GND, 10 kΩ direnç, röle modülü GND ve ampul uçları"
+  ],
+  [
+   "3V3",
+   "ESP-01 CH_PD (etkinleştirme) ucu"
+  ],
+  [
+   "D2",
+   "ESP-01 TX (Arduino'nun RX'i)"
+  ],
+  [
+   "D3",
+   "1 kΩ direncin ucu → ESP-01 RX (Arduino'nun TX'i)"
+  ],
+  [
+   "D4",
+   "DHT22 DATA"
+  ],
+  [
+   "A0",
+   "LDR ile 10 kΩ direncin ortak noktası"
+  ],
+  [
+   "D5",
+   "Röle modülü IN1 (lamba)"
+  ],
+  [
+   "D6",
+   "Röle modülü IN2 (vantilatör)"
+  ],
+  [
+   "D7",
+   "Röle modülü IN3 (ısıtıcı)"
+  ],
+  [
+   "D8",
+   "Röle modülü IN4 (priz)"
+  ]
+ ],
+ "img": "assets/devre/mqtt-akilli-ev-sistemi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın. Röle uçlarına şebeke gerilimi (220 V) bağlama: bu projede yalnızca 5 V'luk ampuller vardır.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "ESP-01'i a2 (VCC), a3 (GND), a4 (TX), a5 (RX), a6 (CH_PD) deliklerine tak. 3,3 V güç kaynağı (breadboard dışında, takılı değil): + ucunu e2'ye, − ucunu eksi rayına kablola; e3 → eksi rayı; 3V3 → e6 (yalnızca CH_PD için).",
+  "ESP-01 sinyalleri: D2 → e4. Gerilim bölücü: 1 kΩ direnci d5 ile d9 arasına, 2 kΩ direnci dikey olarak e5 ile h5 arasına tak; D3 → e9, j5 → eksi rayı.",
+  "DHT22'yi a12 (VCC), a13 (DATA), a14 (GND) deliklerine tak. e12 → artı rayı, D4 → e13, e14 → eksi rayı.",
+  "LDR'yi c20 ve c21 deliklerine tak. 10 kΩ direnci d21 ile d25 arasına tak. e20 → artı rayı, A0 → e21, e25 → eksi rayı.",
+  "4 kanallı röle modülü ve 4 ampul breadboard dışında, takılı değil: modül VCC → artı rayı, GND → eksi rayı; IN1 → D5, IN2 → D6, IN3 → D7, IN4 → D8. Her kanalın COM ucu artı rayına, NO ucu ampulün bir ucuna, ampulün diğer ucu eksi rayına kablolanır.",
+  "Kodu yükle (simülatörde çalıştır): ESP-01 Wi-Fi'ye katılır, broker bağlantısı başarısız olur (beklenen), sonra her 5 saniyede ölçümler yazılır. DHT22'nin sıcaklığını 30 °C'ye çıkar: vantilatör rölesi çeker. LDR ışığını azalt: lamba rölesi çeker."
+ ],
+ "code": "// MQTT akilli ev dugumu: DHT22 + LDR + 4 kanalli role modulu + ESP-01 (AT komutlari)\n// Otomasyon (sim'de dogrulanir): karanlikta lamba, sicakta vantilator, soguk havada isitici.\n// MQTT (sim'de DOGRULANMAZ): olcumler \"ev/salon/...\" konularina yayinlanir, \"ev/salon/role/N\" konusundan komut gelir.\n// Bu sketch'te yayin yerel olarak Seri Monitor'e yazilir; gercek MQTT icin NodeMCU + PubSubClient kodu notlarda.\n#include <SoftwareSerial.h>\n#include <DHT.h>\n\nSoftwareSerial esp(2, 3);      // RX = D2 (ESP TX), TX = D3 (ESP RX, bolucu uzerinden)\nDHT dht(4, DHT22);             // DATA = D4\n\nconst int LDR_PIN = A0;\nconst int ROLE_PIN[4] = {5, 6, 7, 8};   // IN1 lamba, IN2 vantilator, IN3 isitici, IN4 priz (modul LOW'da ceker)\nconst int KARANLIK = 300;      // bu degerin alti karanlik (LDR 10 kOhm ile bolucu)\nconst float SICAK = 28.0;\nconst float SOGUK = 18.0;\n\nbool acik[4] = {false, false, false, false};\nunsigned long sonYayin = 0;\nbool brokerVar = false;\n\nbool bekle2(char a, char b, int ms) {\n  char onceki = 0;\n  bool bulundu = false;\n  unsigned long t0 = millis();\n  while (millis() - t0 < ms) {\n    while (esp.available() > 0) {\n      char c = esp.read();\n      if (onceki == a && c == b) {\n        bulundu = true;\n      }\n      onceki = c;\n    }\n    delay(2);\n  }\n  return bulundu;\n}\n\nvoid roleYaz(int k, bool durum) {\n  if (acik[k] == durum) {\n    return;\n  }\n  acik[k] = durum;\n  digitalWrite(ROLE_PIN[k], durum ? LOW : HIGH);\n  Serial.print(\"Role \");\n  Serial.print(k + 1);\n  if (durum) {\n    Serial.println(\": ACIK\");\n  } else {\n    Serial.println(\": KAPALI\");\n  }\n}\n\nvoid setup() {\n  for (int i = 0; i < 4; i++) {\n    pinMode(ROLE_PIN[i], OUTPUT);\n    digitalWrite(ROLE_PIN[i], HIGH);     // baslangicta hepsi kapali\n  }\n  Serial.begin(9600);\n  esp.begin(9600);\n  dht.begin();\n  Serial.println(\"MQTT ev dugumu hazir\");\n  delay(500);\n  esp.println(\"AT+CWMODE=1\");\n  bekle2('O', 'K', 500);\n  esp.println(\"AT+CWJAP=\\\"MakersHub\\\",\\\"12345678\\\"\");\n  if (bekle2('I', 'P', 6000)) {\n    Serial.println(\"Wi-Fi baglandi\");\n  } else {\n    Serial.println(\"Wi-Fi BAGLANAMADI\");\n  }\n  esp.println(\"AT+CIPSTART=\\\"TCP\\\",\\\"192.168.1.10\\\",1883\");   // MQTT broker (TCP 1883)\n  brokerVar = bekle2('O', 'K', 1500);\n  if (brokerVar) {\n    Serial.println(\"Broker'a TCP baglanti kuruldu\");\n  } else {\n    Serial.println(\"Broker'a baglanilamadi: olcumler yalnizca Seri Monitor'e yazilacak\");\n  }\n}\n\nvoid loop() {\n  float t = dht.readTemperature();\n  float h = dht.readHumidity();\n  int isik = analogRead(LDR_PIN);\n\n  // otomasyon\n  roleYaz(0, isik < KARANLIK);                 // lamba\n  if (!isnan(t)) {\n    if (t > SICAK) {\n      roleYaz(1, true);                        // vantilator\n    } else if (t < SICAK - 2) {\n      roleYaz(1, false);\n    }\n    if (t < SOGUK) {\n      roleYaz(2, true);                        // isitici\n    } else if (t > SOGUK + 2) {\n      roleYaz(2, false);\n    }\n  }\n\n  // \"yayin\": her 5 saniyede bir konu = deger\n  if (millis() - sonYayin >= 5000) {\n    sonYayin = millis();\n    Serial.print(\"MQTT ev/salon/sicaklik = \");\n    Serial.println(t, 1);\n    Serial.print(\"MQTT ev/salon/nem = \");\n    Serial.println(h, 1);\n    Serial.print(\"MQTT ev/salon/isik = \");\n    Serial.println(isik);\n    if (brokerVar) {\n      Serial.println(\"(broker bagli: gercek yayin burada yapilirdi)\");\n    }\n  }\n  delay(100);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "MQTT, cihazların mesajları \"konu\" (topic) adı altında bir sunucuya (broker) yayınladığı (publish) ve ilgilenenlerin o konuya abone olduğu (subscribe) hafif bir haberleşme biçimidir; örneğin ev/salon/sicaklik konusuna 24.0 yayınlanır, ev/salon/role/1 konusuna 1 gelirse 1. röle açılır. Bu sketch Uno'da çalışır; ESP-01 yalnızca AT komutlarıyla Wi-Fi'ye katılır ve broker'ın TCP 1883 portuna bağlanmayı dener (AT+CIPSTART). MQTT paketlerini (CONNECT, PUBLISH) gerçekten oluşturmak AT yazılımıyla zordur; bu yüzden sketch yayınları yerel olarak \"MQTT konu = değer\" satırları biçiminde Seri Monitör'e yazar ve gerçek MQTT için aşağıdaki NodeMCU kodunu önerir. Otomasyon: LDR değeri KARANLIK (300) altındaysa lamba rölesi açılır; sıcaklık 28 °C üstüne çıkınca vantilatör açılır ve 26 °C altına inince kapanır; 18 °C altında ısıtıcı açılır ve 20 °C üstünde kapanır (iki eşik: histerezis). Röle modülü LOW'da çeker; roleYaz() bunu halleder."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"MQTT ev dugumu hazir\" yazıldı; ESP-01 7. saniyede Wi-Fi'ye katıldı. Broker bağlantısı (AT+CIPSTART) ERROR aldı ve \"Broker'a baglanilamadi\" yazıldı; simülatör \"gerçek ağ yok\" uyarısı verdi. 8,5. saniyedeki ilk yayın satırları \"ev/salon/sicaklik = 24.0\", \"nem = 50.0\", \"isik = 732\" oldu. 14. saniyede sıcaklık 30 °C yapılınca \"Role 2: ACIK\" (vantilatör) yazıldı; 19. saniyede LDR ışığı azalınca (değer 14) \"Role 1: ACIK\" (lamba); 23. saniyede sıcaklık 21 °C olunca \"Role 2: KAPALI\"; 26. saniyede 15 °C olunca \"Role 3: ACIK\" (ısıtıcı); 29. saniyede sıcaklık 24 °C ve ışık geri gelince \"Role 1: KAPALI\" ve \"Role 3: KAPALI\" yazıldı. Gerçek MQTT yayını, abonelik ve dışarıdan gelen komutlar simülatörde doğrulanmadı. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde yalnızca ESP-01'in AT komut düzeyi vardır: AT, AT+CWMODE, AT+CWJAP (Wi-Fi'ye katılma), AT+CIPMUX ve AT+CIPSERVER komutları yanıt verir. Gerçek ağ yoktur: tarayıcıdan ya da telefondan gelen bir HTTP isteği (+IPD satırı) simülatörde hiçbir zaman oluşmaz, AT+CIPSEND ile cevap gönderme ve internete çıkma da çalışmaz (ERROR döner). Bu yüzden bu projede MQTT yayını ve aboneliği simülatörde DOĞRULANMADI; yalnızca sensör okuması, röle otomasyonu ve Wi-Fi'ye katılma doğrulandı. MQTT için ESP8266'nın bağımsız bir mikrodenetleyici olarak kendi koduyla çalıştığı yapı (NodeMCU) çok daha uygundur; bu kod Uno sketch'i değildir, simülatörde çalıştırılamaz. Sketch SoftwareSerial.h ve DHT.h kullanır; gerçek derleme servisi yalnızca SoftwareSerial.h'ı bilir, DHT.h Arduino IDE'ye (DHT sensor library) kurulmalıdır. LDR değeri ve eşik (300) ortama göre ayarlanır."
+  ],
+  [
+   "NodeMCU",
+   "NodeMCU karşılığı (gerçek MQTT, simülatörde ÇALIŞMAZ ve doğrulanmadı): ESP8266'yı tek başına programlarsan Wi-Fi ve MQTT kendi kodunda olur. Örnek iskelet:\n#include <ESP8266WiFi.h>\n#include <PubSubClient.h>\nconst char* AG = \"ag_adi\";  const char* PAROLA = \"parola\";  const char* BROKER = \"192.168.1.10\";\nWiFiClient wifi;  PubSubClient mqtt(wifi);\nconst int ROLE1 = D1;   // LOW'da çeken röle modülü\nvoid gelen(char* konu, byte* veri, unsigned int boy) {\n  if (boy > 0 && String(konu) == \"ev/salon/role/1\") { digitalWrite(ROLE1, veri[0] == '1' ? LOW : HIGH); }\n}\nvoid baglan() {\n  while (!mqtt.connected()) {\n    if (mqtt.connect(\"salon-dugumu\")) { mqtt.subscribe(\"ev/salon/role/1\"); } else { delay(2000); }\n  }\n}\nvoid setup() {\n  pinMode(ROLE1, OUTPUT);  digitalWrite(ROLE1, HIGH);\n  WiFi.begin(AG, PAROLA);\n  while (WiFi.status() != WL_CONNECTED) { delay(500); }\n  mqtt.setServer(BROKER, 1883);  mqtt.setCallback(gelen);\n}\nvoid loop() {\n  if (!mqtt.connected()) { baglan(); }\n  mqtt.loop();\n  // her 5 saniyede: mqtt.publish(\"ev/salon/sicaklik\", \"24.0\");\n}\nBu kod ESP8266 çekirdeğiyle (ESP8266WiFi.h) ve PubSubClient kütüphanesiyle Arduino IDE'de derlenir; broker olarak yerel bir Mosquitto sunucusu kullanılabilir."
+  ],
+  [
+   "Güç ve GND",
+   "ESP-01 anlık 200 mA'in üstünde çeker; Arduino'nun 3,3 V pini bunu veremez, ayrı bir 3,3 V regülatör kullan ve GND'yi ortak yap; ESP-01'i 5 V'a bağlama. ÖNEMLİ GÜVENLİK: Röle modülü şebeke (220 V) gerilimini anahtarlayabilir, ama bu ölümcül elektrik çarpmasına ve yangına yol açabilir. Şebekeye bağlı hiçbir devreyi yetişkin ve elektrik bilgisi olmadan kurma; sertifikalı kutu, sigorta ve yalıtım şarttır. MQTT sunucusuna parola koymadan internete açma: kimliği doğrulanmamış bir broker herkes tarafından kontrol edilebilir. Isıtıcı gibi ısı üreten yükleri asla gözetimsiz bırakma."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "ESP-01'i 5 V'tan ya da 3,3 V pininden beslemek; CH_PD'yi bağlamamak; röle modülünün LOW'da çektiğini unutmak; LDR bölücüsünde 10 kΩ'u unutup A0'ı boş bırakmak; tek eşik kullanıp vantilatörü sürekli aç-kapa yapmak; MQTT konularını büyük/küçük harf farkıyla karıştırmak (konu adları büyük/küçük harfe duyarlıdır); brokerı parolasız internete açmak."
+  ],
+  [
+   "Dene",
+   "SICAK eşiğini 25 yap ve vantilatörün simülatörde hangi sıcaklıkta açılıp kapandığına bak; priz kanalını (IN4) manuel kontrol için ayır ve Seri Monitör'den gelen bir komutla çalıştır."
+  ]
+ ],
+ "title": "75. MQTT Akıllı Ev Sistemi"
+}

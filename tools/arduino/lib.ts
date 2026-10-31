@@ -111,3 +111,32 @@ export function typeKeys(id: string, seq: string, start: number, hold = 100, gap
     { t: start + i * (hold + gap) + hold, set: { [id]: { key: "" } } },
   ]);
 }
+
+/**
+ * L298N robot sürücü bloğu (p42 ile aynı yerleşim): L298N a4..a16 (12V GND 5V ENA IN1 IN2 IN3 IN4 ENB OUT1..OUT4),
+ * 6 V güç kaynağı + iki DC motor breadboard dışında, GND ortak (e5 <- PSU -, d5 -> eksi ray), mantık 5V: e6 -> artı ray.
+ * Arduino: ENA D5, IN1 D7, IN2 D8, IN3 D9, IN4 D10, ENB D6. 16 kablo.
+ */
+export function l298Block(b: Builder, volts = 6, motor: "dcmotor" | "encmotor" = "dcmotor") {
+  b.wire("uno.5V", "bb.B+1", RED);
+  b.wire("uno.GND2", "bb.B-1", BLK);
+  b.plug("a4", { id: "drv1", type: "l298n", pin: "V12" });
+  b.free("psu1", "psu", 330, 330, { volts });
+  b.free("m1", motor, 560, 330);
+  b.free("m2", motor, 700, 330);
+  b.wire("bb.e4", "psu1.P", ORG);
+  b.wire("bb.e5", "psu1.N", BLK);
+  b.wire("bb.d5", "bb.B-5", BLK);
+  b.wire("bb.e6", "bb.B+4", RED);
+  b.wire("uno.D5", "bb.e7", GRN);
+  b.wire("uno.D7", "bb.e8", YEL);
+  b.wire("uno.D8", "bb.e9", BLU);
+  b.wire("uno.D9", "bb.e10", WHT);
+  b.wire("uno.D10", "bb.e11", ORG);
+  b.wire("uno.D6", "bb.e12", GRN);
+  const [pa, pb] = motor === "encmotor" ? ["M1", "M2"] : ["A", "B"];
+  b.wire("bb.e13", `m1.${pa}`, YEL);
+  b.wire("bb.e14", `m1.${pb}`, BLK);
+  b.wire("bb.e15", `m2.${pa}`, YEL);
+  b.wire("bb.e16", `m2.${pb}`, BLK);
+}

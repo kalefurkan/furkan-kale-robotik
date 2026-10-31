@@ -28,7 +28,8 @@ def classify(t):
     if 'pasif buzzer' in l: return 'passivebuzzer'
     if 'aktif buzzer' in l: return 'buzzer'
     if re.search(r'Ω\s*direnç', t): return 'resistor'
-    for k, typ in [('hc-05', 'hc05'), ('l298n', 'l298n'), ('joystick', 'joystick'), ('rc522', 'rc522'), ('sd kart', 'sdcard'), ('ds3231', 'ds3231'), ('neo-6m', 'neo6m'),
+    for k, typ in [('ir sensör dizisi', 'irarray'), ('ir çizgi', 'irarray'), ('ir alıcı', 'irreceiver'), ('mpu6050', 'mpu6050'), ('enkoderli', 'encmotor'), ('esp8266', 'esp8266'), ('esp-01', 'esp8266'),
+                   ('dht22', 'dht22'), ('bme280', 'bme280'), ('pn532', 'pn532'), ('tcs3200', 'tcs3200'), ('ds18b20', 'ds18b20'), ('güneş paneli', 'solarpanel'), ('hc-05', 'hc05'), ('l298n', 'l298n'), ('joystick', 'joystick'), ('rc522', 'rc522'), ('sd kart', 'sdcard'), ('ds3231', 'ds3231'), ('neo-6m', 'neo6m'),
                    ('nrf24', 'nrf24'), ('4 kanallı röle', 'relay4'), ('as608', 'as608'), ('hx711', 'hx711'), ('mq-135', 'mq135'), (r'mq-2\b', 'mq2'), ('sw-420', 'sw420'),
                    ('acs712', 'acs712'), ('ses sensörü', 'soundsensor'), ('ampul', 'bulb'), ('potansiyometre', 'pot'), ('rgb', 'rgbled'), (r'\bldr\b', 'ldr'), ('lm35', 'lm35'), ('dht11', 'dht11'), ('hc-sr04', 'hcsr04'), ('ttp223', 'ttp223'),
                    ('eğim', 'tilt'), ('tilt', 'tilt'), ('lcd', 'lcd16x2'), ('servo', 'servo'), (r'\bpir\b', 'pir'),
@@ -63,6 +64,7 @@ for i in ids:
             else: errs.append(f'Jumper satırında adet yok: {t}')
             continue
         if t.lower().startswith('breadboard'): has_bb = True; continue
+        if 'devre dışı mekanik parça' in t: continue
         typ = classify(t)
         if not typ: errs.append(f'(1) tanınmayan malzeme satırı: {t}'); continue
         m = re.match(r'(\d+)\s*×', t); n = int(m.group(1)) if m else 1
@@ -100,6 +102,10 @@ for i in ids:
     if f['validator']['errors'] or vw: errs.append(f"(5) doğrulayıcı: {f['validator']}")
     r = f['runtime']
     if r['error']: errs.append(f"(5) çalışma hatası: {r['error']}")
+    if by[i].get('sim') is False:  # simülatörde çalışamayan bölüm (ör. ESP-01 gerçek ağ) için beklenen uyarılar kabul edilir; notta 'Simülatör sınırı' zorunlu
+        allowed = [w for w in r['warnings'] if 'gerçek ağ yok' in w]
+        r = dict(r, warnings=[w for w in r['warnings'] if w not in allowed])
+        if allowed and not any(n[0].startswith('Simülatör sınırı') for n in s['notes']): errs.append("sim:false uyarısı için notlarda 'Simülatör sınırı' yok")
     if r['warnings'] or r['shorted'] or r['overcurrent'] or r['lcdProblem'] or r['diagnostics']: errs.append(f'(5) simülatör uyarısı: {r}')
     if not (f['serial'] or f['toneLog'] or f['buzLog'] or f['ledLog'] or any(f['lcd'].values())): errs.append('(5) gözlenen davranış yok (seri/ton/buzzer/LED/LCD boş)')
     if f.get('powerIssues'): errs.append(f"güç yolu: {f['powerIssues']}")

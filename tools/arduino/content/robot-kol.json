@@ -1,0 +1,86 @@
+{
+ "sketch": "robot_kol",
+ "d": "Analog joystick dört servolu robot kolu (taban, omuz, dirsek, kavrama) yönlendirir: joystick butonuna basınca kontrol, taban + omuz ile kavrama + dirsek arasında geçer. Joystick'i analogRead ile okumayı, servoyu kademeli (1 derece) döndürmeyi, açı sınırlarını ve butonla mod değiştirmeyi öğrenirsin. Simülatörde joystick eksenleri kaydırıcılarla, buton düğmeyle verilir.",
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × analog joystick modülü",
+  "4 × servo motor (SG90)",
+  "Robot kol gövdesi: taban, kollar, kıskaç parçaları ve vidalar (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Harici 5 V güç kaynağı, en az 2 A (devre dışı mekanik parça: simülatörde servolar Arduino'nun 5V pininden beslenir)",
+  "Jumper kablolar (19 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: joystick +5V ve dört servonun VCC'si"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: joystick GND ve servo GND'leri"
+  ],
+  [
+   "A0",
+   "Joystick VRx (yatay eksen)"
+  ],
+  [
+   "A1",
+   "Joystick VRy (dikey eksen)"
+  ],
+  [
+   "D2",
+   "Joystick SW (buton, INPUT_PULLUP)"
+  ],
+  [
+   "D3",
+   "Servo 1 (taban) sinyali"
+  ],
+  [
+   "D4",
+   "Servo 2 (omuz) sinyali"
+  ],
+  [
+   "D5",
+   "Servo 3 (dirsek) sinyali"
+  ],
+  [
+   "D6",
+   "Servo 4 (kavrama) sinyali"
+  ]
+ ],
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "Joystick'i a4 (GND), a5 (+5V), a6 (VRx), a7 (VRy), a8 (SW) deliklerine tak. e4 → eksi rayı, e5 → artı rayı, e6 → A0, e7 → A1, e8 → D2.",
+  "Servoları a12 (SIG), a13 (VCC), a14 (GND); a15, a16, a17; a18, a19, a20; a21, a22, a23 deliklerine sırayla tak (servo 1–4: taban, omuz, dirsek, kavrama).",
+  "Servo sinyalleri: D3 → e12, D4 → e15, D5 → e18, D6 → e21. Servo güç kabloları: e13, e16, e19, e22 → artı rayı; e14, e17, e20, e23 → eksi rayı.",
+  "Gerçek kolu kurarken servoları mekanik parçalara 90° konumunda tak.",
+  "Kodu yükle (simülatörde çalıştır): joystick'i seçip yatay kaydırıcıyı sağa çek: taban servosu yavaşça artar. Joystick butonuna basınca mod 1'e geçer ve yatay eksen kavramayı, dikey eksen dirseği sürer."
+ ],
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "Joystick her eksende 0–1023 arası bir gerilim verir; orta konum yaklaşık 512'dir. Kod okumayı eşiklerle değerlendirir: 650'den büyükse açıyı bir derece artırır, 370'ten küçükse bir derece azaltır, arada hiçbir şey yapmaz (ölü bölge). Böylece servo joystick'i ne kadar ittiğine değil ne kadar süre ittiğine göre yavaş ve yumuşak hareket eder; açı 0–180° arasında sınırlanır (min/max). Servo kol[4] dizisi dört servoyu yönetir. Joystick butonu INPUT_PULLUP ile okunur (basılınca LOW); 300 ms'den sık basış sayılmaz (basit debounce); her basışta mod 0 ↔ 1 değişir. Açılar yarım saniyede bir, değiştiyse Seri Monitör'e yazılır."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Robot kol hazir: mod 0 (taban + omuz)\" yazıldı, dört servo 90°'de. 1. saniyede joystick X'i sağa çekilince taban açısı saniyede yaklaşık 50° hızla arttı (92° → 117° → 139°); 2. saniyede X orta konuma gelince taban 139°'de durdu. 2,5. saniyede Y aşağı çekilince omuz 90°'den 41°'ye indi. 4,5. saniyede buton basılınca \"Mod 1: kavrama (X) + dirsek (Y)\" yazıldı; Y yukarı çekilince dirsek 139°'ye çıktı, X sola çekilince kavrama 90°'den 16°'ye indi. 9,5. saniyede buton \"Mod 0\"a döndürdü; X'in sağa çekilmesi tabanı 162° ve 178°'ye çıkardı. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde kol gerçekten hareket etmez, yük ve yerçekimi, servoların hızı ve gücü modellenmez; joystick'in yay, ölü bölge ve gürültü özellikleri yoktur. Gerçek joystick orta konumu 512'den biraz kayabilir (eşikleri buna göre ayarla). Gerçek kolda her servonun mekanik sınırı farklıdır; açıları kolun çarpmayacağı aralığa sınırla. Servo.h kütüphanesi en çok 12 servo destekler. Sketch yalnızca Servo.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Güç ve GND",
+   "Dört SG90 birlikte hareket ederken bir amperden fazla akım çekebilir. USB'den ya da Arduino 5V pininden beslersen Arduino resetlenebilir; gerçek kolda servolara ayrı bir 5 V (2 A ve üzeri) kaynak kullan ve GND'yi Arduino GND'siyle ortak yap. Kıskaç bir şeye sıkışıp servoyu zorlarsa servo ısınır ve bozulur: kıskaç açısını sınırla. Hareketli kolun yakınına parmaklarını sokma."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "Servoları Arduino 5V pininden beslemek; GND'leri ortak yapmamak; SW'yi INPUT_PULLUP yapmayı unutmak (buton rastgele okunur); doğrudan map(analogRead, ...) kullanıp servoyu joystick'in yay konumuna sıçratmak; açıyı 0–180 dışında sınırlamamak; joystick orta konumu 512 sanıp ölü bölge bırakmamak (servo titrer)."
+  ],
+  [
+   "Dene",
+   "Hızı joystick'in itme miktarına göre değiştir (kıpırdama büyüklüğünü map ile 1–4 derece yap); ya da iki servonun açılarını EEPROM'a kaydedip kolu hareketi tekrarlatan bir mod ekle."
+  ]
+ ]
+}

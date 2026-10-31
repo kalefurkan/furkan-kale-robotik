@@ -1,0 +1,88 @@
+{
+ "parts": [
+  "Arduino Uno ve USB kablosu",
+  "Breadboard",
+  "1 × TCS3200 renk sensörü modülü",
+  "1 × IR engel algılama sensörü (atığın geldiğini algılar)",
+  "1 × servo motor (SG90, yönlendirici)",
+  "Atık haznesi, kayma rampası, 4 atık kutusu ve servo kolu (devre dışı mekanik parça: devre görüntüsünde yoktur)",
+  "Jumper kablolar (16 adet)"
+ ],
+ "wiring": [
+  [
+   "5V",
+   "Alttaki artı (+) rayı: TCS3200 VCC, IR sensör VCC ve servo VCC"
+  ],
+  [
+   "GND (GND2)",
+   "Alttaki eksi (−) rayı: TCS3200 GND ve OE, IR sensör GND, servo GND"
+  ],
+  [
+   "D2",
+   "IR sensör OUT"
+  ],
+  [
+   "D4",
+   "TCS3200 S0"
+  ],
+  [
+   "D5",
+   "TCS3200 S1"
+  ],
+  [
+   "D6",
+   "TCS3200 S2"
+  ],
+  [
+   "D7",
+   "TCS3200 S3"
+  ],
+  [
+   "D8",
+   "TCS3200 OUT"
+  ],
+  [
+   "D9",
+   "Servo sinyali"
+  ]
+ ],
+ "img": "assets/devre/otomatik-atik-ayristirma-sistemi.png",
+ "steps": [
+  "Devreyi enerjisiz kur: USB kablosu takılı olmasın.",
+  "Arduino 5V pinini alttaki artı (+) rayına, GND2 pinini alttaki eksi (−) rayına kablola.",
+  "TCS3200'ü a2 (VCC), a3 (GND), a4 (S0), a5 (S1), a6 (S2), a7 (S3), a8 (OUT), a9 (OE) deliklerine tak. e2 → artı rayı, e3 → eksi rayı, e9 (OE) → eksi rayı (çıkış etkin).",
+  "Renk sensörü sinyalleri: D4 → e4 (S0), D5 → e5 (S1), D6 → e6 (S2), D7 → e7 (S3), D8 → e8 (OUT).",
+  "IR engel sensörünü a14 (VCC), a15 (GND), a16 (OUT) deliklerine tak. e14 → artı rayı, e15 → eksi rayı, D2 → e16.",
+  "Servoyu a20 (SIG), a21 (VCC), a22 (GND) deliklerine tak. D9 → e20, e21 → artı rayı, e22 → eksi rayı.",
+  "Gerçek sistemde renk sensörünü atığın durduğu yere yakın (1–2 cm) ve ortam ışığından korunmuş bir yere, IR sensörü atığın düştüğü yere, servo kolunu çıkış rampasının önüne monte et.",
+  "Kodu yükle (simülatörde çalıştır): TCS3200'ü seçip rengi mavi yap (R 30, G 40, B 220), IR sensörün engel düğmesini aç: servo plastik kutusuna döner. Rengi yeşil ve kırmızı yapıp tekrar dene."
+ ],
+ "code": "// Otomatik atik ayristirma: IR sensor (atik geldi) + TCS3200 renk sensoru + servo (yonlendirici)\n// Renge gore: mavi = plastik, yesil = cam, kirmizi = metal, diger = genel. Servo ilgili kutuya doner.\nconst int S0 = 4;\nconst int S1 = 5;\nconst int S2 = 6;\nconst int S3 = 7;\nconst int SENSOR_OUT = 8;\nconst int IR_PIN = 2;\nconst int SERVO_PIN = 9;\n\n#include <Servo.h>\nServo yonlendirici;\n\nconst int KUTU_ACI[4] = {20, 65, 115, 160};   // 0 plastik, 1 cam, 2 metal, 3 genel\nconst int ORTA = 90;\n\nint okuRenk(int s2, int s3) {                  // 0-255 arasi parlaklik (acik renk = yuksek)\n  digitalWrite(S2, s2);\n  digitalWrite(S3, s3);\n  delay(30);\n  long darbe = pulseIn(SENSOR_OUT, LOW);       // mikrosaniye, parlaksa kisa\n  if (darbe == 0) {\n    return 0;                                  // darbe gelmedi (sensor bagli degil)\n  }\n  long frekans = 500000L / darbe;              // Hz: yarim periyottan frekans\n  int deger = map(frekans, 1000, 20000, 0, 255);   // siyah = 1 kHz, beyaz = 20 kHz (%20 olcek)\n  return constrain(deger, 0, 255);\n}\n\nint siniflandir(int r, int g, int b) {         // kutu numarasi dondurur\n  if (r < 60 && g < 60 && b < 60) {\n    return 3;                                  // cok koyu: genel\n  }\n  if (b > r + 40 && b > g + 20) {\n    return 0;                                  // mavi: plastik\n  }\n  if (g > r + 40 && g > b + 40) {\n    return 1;                                  // yesil: cam\n  }\n  if (r > g + 40 && r > b + 40) {\n    return 2;                                  // kirmizi: metal\n  }\n  return 3;                                    // diger: genel\n}\n\nvoid setup() {\n  pinMode(S0, OUTPUT);\n  pinMode(S1, OUTPUT);\n  pinMode(S2, OUTPUT);\n  pinMode(S3, OUTPUT);\n  pinMode(SENSOR_OUT, INPUT);\n  pinMode(IR_PIN, INPUT);\n  digitalWrite(S0, HIGH);                      // frekans olcegi %20\n  digitalWrite(S1, LOW);\n  yonlendirici.attach(SERVO_PIN);\n  yonlendirici.write(ORTA);\n  Serial.begin(9600);\n  Serial.println(\"Atik ayirma hazir\");\n}\n\nvoid loop() {\n  if (digitalRead(IR_PIN) == LOW) {            // atik geldi (engel var)\n    delay(300);                                // atik otursun\n    int r = okuRenk(LOW, LOW);\n    int g = okuRenk(HIGH, HIGH);\n    int b = okuRenk(LOW, HIGH);\n    int kutu = siniflandir(r, g, b);\n    Serial.print(\"Renk R=\");\n    Serial.print(r);\n    Serial.print(\" G=\");\n    Serial.print(g);\n    Serial.print(\" B=\");\n    Serial.print(b);\n    if (kutu == 0) {\n      Serial.println(\" -> PLASTIK kutusu\");\n    } else if (kutu == 1) {\n      Serial.println(\" -> CAM kutusu\");\n    } else if (kutu == 2) {\n      Serial.println(\" -> METAL kutusu\");\n    } else {\n      Serial.println(\" -> GENEL kutu\");\n    }\n    yonlendirici.write(KUTU_ACI[kutu]);\n    delay(1000);                               // atigin kaymasi icin bekle\n    yonlendirici.write(ORTA);\n    while (digitalRead(IR_PIN) == LOW) {       // atik gidene kadar bekle\n      delay(50);\n    }\n    delay(200);\n  }\n  delay(50);\n}\n",
+ "notes": [
+  [
+   "Nasıl çalışıyor?",
+   "TCS3200, ışığı kırmızı, yeşil, mavi ya da filtresiz ölçer ve parlaklığa orantılı frekansta bir kare dalga verir. S0 ve S1 çıkış frekansının ölçeğini seçer (kodda S0 = HIGH, S1 = LOW: %20 ölçek); S2 ve S3 filtreyi seçer: (LOW, LOW) kırmızı, (HIGH, HIGH) yeşil, (LOW, HIGH) mavi. okuRenk() filtreyi ayarlar, 30 ms bekler ve pulseIn(OUT, LOW) ile kare dalganın LOW yarım periyodunu mikrosaniye olarak ölçer; parlak renkte süre kısa olur. Süre frekansla ters orantılıdır: frekans = 500000 / süre. Bu modelde siyah yaklaşık 1 kHz, beyaz yaklaşık 20 kHz verdiği için frekans map() ile 0–255 arasına çevrilir. Üç ölçüm (R, G, B) siniflandir() fonksiyonuna verilir: mavi baskınsa plastik, yeşil baskınsa cam, kırmızı baskınsa metal kutusu seçilir; üçü de çok düşükse ya da hiçbiri baskın değilse genel kutuya gider. IR sensör atık gelince LOW olur: kod 300 ms bekler (atığın oturması için), rengi ölçer, servoyu kutunun açısına (20°, 65°, 115° ya da 160°) çevirir, 1 saniye sonra ortaya (90°) döndürür ve atık gidene kadar bekler."
+  ],
+  [
+   "Simülatörde gözlenen",
+   "Açılışta \"Atik ayirma hazir\" yazıldı ve servo 90°'de durdu. 3. saniyede renk R30 G40 B220 yapılıp IR sensör engel gösterince 3,39. saniyede \"Renk R=29 G=39 B=217 -> PLASTIK kutusu\" yazıldı ve servo 20°'ye döndü; 1 saniye sonra 90°'ye geri geldi. 8. saniyede yeşil (R30 G200 B40) için \"R=29 G=203 B=39 -> CAM kutusu\" yazıldı ve servo 65°'ye gitti. 12. saniyede kırmızı (R220 G40 B40) için \"R=217 G=39 B=39 -> METAL kutusu\", servo 115°. 15,5. saniyede gri (R120 G120 B120) için \"R=120 G=120 B=120 -> GENEL kutu\" yazıldı ve servo 160°'ye döndü. Ölçülen değerler verilen renklerden en çok 5 birim saptı. Gerçek renkli atıklarda ve gerçek ışıkta denenmedi. Gerçek kartta ve gerçek motorlarla denenmedi."
+  ],
+  [
+   "Simülatör sınırı",
+   "Simülatörde atık, rampa, kayma ve kutular yoktur; atığın rengi kaydırıcıdan verilir. Renk sensörü modeli tamamen doğrusal ve gürültüsüzdür: gerçek TCS3200 ortam ışığına, atığın parlaklığına, yüzey yansımasına ve sensör mesafesine çok duyarlıdır; her renk için beyaz ve siyah kalibrasyonu yapılmalı ve eşikler (örneğin 40 ve 60) denenerek ayarlanmalıdır. Şeffaf cam ve parlak metal rengi güvenilir ayırmaz; gerçek ayrıştırma sistemleri başka sensörler (örneğin metal algılayıcı, ağırlık) kullanır. Simülatör S0 = LOW, S1 = LOW'da sensörü kapatır. Sketch yalnızca Servo.h kullanır; bu başlık gerçek derleme servisinin izinli başlıkları arasındadır."
+  ],
+  [
+   "Güç ve GND",
+   "TCS3200, IR sensör ve bir SG90 USB'den beslenebilir; ancak servo kutuya sıkışırsa akım yükselir: açıları kutulara çarpmayacak şekilde ayarla. Hareketli kola parmaklarını yaklaştırma. Sensörün yanındaki LED'e uzun süre doğrudan bakma."
+  ],
+  [
+   "Sık yapılan hatalar",
+   "S2/S3 filtre sırasını karıştırmak (R ve B yer değiştirir); OE'yi bağlamamak ya da HIGH yapmak (çıkış kapalı olur, darbe gelmez); pulseIn'e zaman aşımı vermemek (sensör bağlı değilken program bekler); pulseIn değerini doğrudan renk sanmak (süre parlaklıkla ters orantılıdır); atık oturmadan renk okumak; farklı ışıkta kalibrasyon yapmadan eşikleri sabit saymak."
+  ],
+  [
+   "Dene",
+   "Mavi için eşiği ayarla (b > r + 40 kuralını 20 ve 80 yap) ve hangi renklerin farklı kutuya düştüğüne bak; sarı (R 220, G 200, B 40) bir atığı 'genel' kutuya yönlendiren yeni bir kural ve beşinci bir kutu ekle."
+  ]
+ ],
+ "title": "80. Otomatik Atık Ayrıştırma Sistemi"
+}

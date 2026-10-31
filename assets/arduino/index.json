@@ -582,7 +582,8 @@
    "t": "Çizgi İzleyen Robot",
    "comps": "IR sensör dizisi, motor sürücü",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "Beş kanallı IR sensör dizisi zemindeki siyah çizgiyi görür; kod çizginin konumunu hesaplayıp L298N ile sol ve sağ motoru farklı hızda sürerek robotu çizgide tutar. Çizgi algılayıcıdan konum bulmayı, orantılı (P) kontrolü ve iki motoru PWM ile sürmeyi öğrenirsin. Simülatörde çizgi, dizinin kanal düğmeleriyle verilir."
   },
   {
    "n": 62,
@@ -590,7 +591,8 @@
    "t": "Engelden Kaçan Robot",
    "comps": "HC-SR04, L298N, motorlar",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "HC-SR04 ultrasonik sensör robotun önündeki mesafeyi ölçer; engel 20 cm'den yakınsa robot durur, biraz geri gider, yerinde döner (her seferinde yön değiştirerek) ve yoluna devam eder. Mesafe ölçmeyi, karar vermeyi ve L298N ile iki motoru ileri, geri ve dönüş için sürmeyi öğrenirsin. Simülatörde engel mesafesi sensörün kaydırıcısından verilir."
   },
   {
    "n": 63,
@@ -598,7 +600,9 @@
    "t": "Bluetooth Kontrollü Akıllı Robot",
    "comps": "HC-05, L298N, motorlar",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "Telefondan HC-05 Bluetooth modülüne gönderilen F, B, L, R, S harfleriyle robot ileri, geri, sola, sağa gider ya da durur. Ek özellik olarak HC-SR04 mesafe sensörü ileri giderken engel 15 cm'den yakınsa robotu kendiliğinden durdurur ve D komutuyla mesafeyi telefona yollar. Bluetooth komutu ile otomatik güvenliği birleştirmeyi öğrenirsin. Simülatörde telefon metni modülün kutusundan, engel mesafesi sensörün kaydırıcısından verilir.",
+   "sim": false
   },
   {
    "n": 64,
@@ -606,7 +610,8 @@
    "t": "Uzaktan Kumandalı Robot",
    "comps": "IR alıcı, kumanda, motor sürücü",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "21 tuşlu mini kumandadan gönderilen kızılötesi (NEC) kodlar VS1838B IR alıcıyla okunur; 2 tuşu robotu ileri, 8 geri, 4 sola, 6 sağa götürür, 5 durdurur, VOL+ ve VOL- hızı değiştirir. IRremote kütüphanesiyle kumanda kodlarını okumayı ve kodu motor komutuna çevirmeyi öğrenirsin. Simülatörde tuş, IR alıcının üzerinden seçilip \"Kumandada tuşa bas\" düğmesiyle gönderilir."
   },
   {
    "n": 65,
@@ -614,7 +619,8 @@
    "t": "Mini Sumo Robot",
    "comps": "IR sensör, mesafe sensörü, motorlar",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "İki IR sensör dohyonun beyaz kenar çizgisini, HC-SR04 ise rakibi görür. Robot başlangıçta 5 saniye bekler, sonra rakip arayarak yerinde döner, rakibi bulunca tam hızla saldırır, kenar çizgisini görünce geri çekilip içeri döner. Birden çok sensörle öncelik sıralı karar vermeyi ve durum makinesi mantığını öğrenirsin. Simülatörde kenar ve rakip, sensörlerin düğme ve kaydırıcılarından verilir."
   },
   {
    "n": 66,
@@ -622,7 +628,8 @@
    "t": "Dört Ayaklı Yürüyen Robot",
    "comps": "8 servo, gövde",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "Sekiz servo, dört bacağın kalça ve diz eklemlerini sürer; robot çapraz bacak çiftleriyle (tırap yürüyüşü) adım atar. Servo dizilerini (Servo kalca[4]; Servo diz[4];), açı hesabını ve yürüyüşün evrelere ayrılmasını öğrenirsin. Simülatörde bacakların açıları servo modüllerinden izlenir; robot fiziksel olarak yürümez."
   },
   {
    "n": 67,
@@ -630,7 +637,8 @@
    "t": "Robot Kol",
    "comps": "4–6 servo, joystick",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "Analog joystick dört servolu robot kolu (taban, omuz, dirsek, kavrama) yönlendirir: joystick butonuna basınca kontrol, taban + omuz ile kavrama + dirsek arasında geçer. Joystick'i analogRead ile okumayı, servoyu kademeli (1 derece) döndürmeyi, açı sınırlarını ve butonla mod değiştirmeyi öğrenirsin. Simülatörde joystick eksenleri kaydırıcılarla, buton düğmeyle verilir."
   },
   {
    "n": 68,
@@ -638,7 +646,8 @@
    "t": "Otomatik Engel Algılayan Robot Kol",
    "comps": "Servo, HC-SR04",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "Taban servosu HC-SR04 mesafe sensörünü 0°–180° arasında tarar; 20 cm'den yakın bir nesne bulunca kolun kavrama servosu kapanır, 1,5 saniye tutar ve bırakır. İki servoyu birlikte yönetmeyi, tarama mantığını (açı artır, sınırda yön değiştir) ve nesne bulunca olay başlatmayı öğrenirsin. Simülatörde nesne, sensörün mesafe kaydırıcısıyla verilir."
   },
   {
    "n": 69,
@@ -646,7 +655,8 @@
    "t": "Denge Robotu",
    "comps": "MPU6050, motor sürücü",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "MPU6050 ivmeölçer + jiroskop robotun eğim açısını ölçer; kod açıyı tamamlayıcı filtreyle hesaplayıp PD denetimiyle iki motoru eğilme yönüne sürer. I2C ile ham register okumayı, atan2 ile açı bulmayı, jiroskopla ivmeölçeri birleştirmeyi ve geri besleme denetimini öğrenirsin. Simülatörde fiziksel denge yoktur: yalnızca sensör okuması ve motor komutları doğrulanır; gerçek denge ayarı donanımda yapılır."
   },
   {
    "n": 70,
@@ -654,7 +664,8 @@
    "t": "2 Tekerlekli Otonom Robot",
    "comps": "MPU6050, enkoderli motorlar",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "İki enkoderli DC motor tekerleklerin ne kadar döndüğünü sayar, MPU6050 jiroskobu dönüş açısını ölçer: robot 50 cm ileri gider, 90° döner ve bunu dört kez tekrarlayarak kare çizer. attachInterrupt ile enkoder sayma, tik sayısını mesafeye çevirme, iki tekerleği eşitleme ve jiroskop açısını zamanla toplama (entegrasyon) konularını öğrenirsin. Simülatörde robot hareket etmez: enkoder sayımı motorun dönüşünden gerçekten gelir, jiroskop dönüş hızı ise kaydırıcıdan verilir."
   },
   {
    "n": 71,
@@ -662,7 +673,9 @@
    "t": "Wi-Fi Kontrollü Akıllı Ev",
    "comps": "ESP8266, röle modülü",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "Uno'ya SoftwareSerial ile bağlı ESP-01 Wi-Fi modülü AT komutlarıyla ağa katılır ve 80. portta sunucu açar; gelen \"/1/on\" gibi web istekleri 4 kanallı röle modülünü açıp kapatır. Duvar butonları aynı röleleri elle de çevirir. AT komutlarını, 3,3 V / 5 V seviye uyumunu, röle modülünü ve gelen yazıyı durum makinesiyle ayrıştırmayı öğrenirsin. Simülatörde Wi-Fi'ye katılma ve röle/buton mantığı denenir; gerçek ağ ve web isteği denenemez.",
+   "sim": false
   },
   {
    "n": 72,
@@ -670,7 +683,9 @@
    "t": "İnternet Üzerinden Sensör İzleme",
    "comps": "ESP8266, DHT22",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "DHT22 sıcaklık ve nem sensörü Uno'yla okunur; ESP-01 Wi-Fi modülü AT komutlarıyla ağa katılır ve ölçümleri bir bulut servisine (ThingSpeak türü) HTTP GET ile göndermeye çalışır. DHT22 okumayı, AT komutlarıyla TCP bağlantısı açmayı ve gönderme başarısını denetlemeyi öğrenirsin. Simülatörde DHT22 okuması ve Wi-Fi'ye katılma doğrulanır; internete veri gönderme simülatörde çalışamaz."
   },
   {
    "n": 73,
@@ -678,7 +693,9 @@
    "t": "Web Tabanlı Akıllı Sulama",
    "comps": "ESP8266, nem sensörü, pompa",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "Toprak nem sensörü kuruluğu ölçer; toprak kuruysa NPN transistörle sürülen su pompası çalışır, yeterince ıslanınca durur ve pompa en fazla 5 saniye çalışacak şekilde güvenlik süresi vardır. ESP-01 modülü Wi-Fi'ye katılır ve web komutlarıyla (/p, /s, /a) pompayı elle açıp kapatmak ve otomatik moda dönmek için hazırlanmıştır. Histerezisli otomasyonu, transistörle motor sürmeyi (ters diyotla) ve web komutu ayrıştırmayı öğrenirsin. Simülatörde sensör, pompa ve Wi-Fi'ye katılma denenir; web isteği denenemez."
   },
   {
    "n": 74,
@@ -686,7 +703,9 @@
    "t": "IoT Hava Durumu İstasyonu",
    "comps": "ESP8266, BME280",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "BME280 sensörü I2C ile sıcaklık, nem ve hava basıncını ölçer, basınçtan yükseklik tahmini hesaplanır; ESP-01 Wi-Fi modülü ağa katılır ve ölçümleri bir bulut servisine (ThingSpeak türü) HTTP GET ile göndermeye çalışır. I2C sensör adresini, Adafruit_BME280 kütüphanesini ve ölçümleri bulutla paylaşmayı öğrenirsin. Simülatörde BME280 okuması ve Wi-Fi'ye katılma doğrulanır; internete veri gönderme simülatörde çalışamaz."
   },
   {
    "n": 75,
@@ -694,7 +713,9 @@
    "t": "MQTT Akıllı Ev Sistemi",
    "comps": "ESP8266, röle, sensörler",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "DHT22 (sıcaklık, nem) ve LDR (ışık) ölçümleriyle 4 kanallı röle modülü otomatik çalışır: karanlıkta lamba yanar, sıcakta vantilatör, soğukta ısıtıcı devreye girer. Ölçümler MQTT konularına (ev/salon/sicaklik gibi) yayın biçiminde yazılır; ESP-01 Wi-Fi'ye katılır ve bir MQTT sunucusuna (broker) TCP bağlantısı kurmaya çalışır. MQTT mantığını (konu, yayın, abone), sensör otomasyonunu ve histerezisi öğrenirsin. Simülatörde otomasyon ve ölçümler doğrulanır; gerçek MQTT haberleşmesi simülatörde çalışamaz."
   },
   {
    "n": 76,
@@ -702,7 +723,9 @@
    "t": "NFC Kontrollü Erişim Sistemi",
    "comps": "PN532, LCD",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "sim": false,
+   "d": "PN532 NFC modülü yakındaki bir kartın UID numarasını (kimlik numarasını) okur; kod bu numarayı yetkili kartlar listesiyle karşılaştırır ve 16x2 LCD'de \"ERISIM VAR\" ya da \"ERISIM YOK\" yazar. I2C ile NFC modülü kullanmayı, Adafruit_PN532 kütüphanesini, UID'yi bayt dizisi olarak saklamayı ve karşılaştırmayı öğrenirsin. Simülatörde kart numarası ve kartın yaklaşması modülün düğmesinden verilir; bu proje yalnızca bir ders uygulamasıdır, gerçek bir güvenlik sistemi değildir."
   },
   {
    "n": 77,
@@ -710,7 +733,8 @@
    "t": "Otomatik Akvaryum Kontrolü",
    "comps": "Sıcaklık sensörü, pompa, röle",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "DS18B20 su geçirmez sıcaklık probu akvaryum suyunu ölçer; sıcaklık 24 °C'nin altına inince röle ısıtıcıyı açar, 26 °C'nin üstüne çıkınca kapatır (histerezis). Pompa bir zamanlayıcıyla her 20 saniyenin ilk 5 saniyesinde çalışır. DS18B20 ve 1-Wire hattını, röleyi ve transistörle pompa sürmeyi, sensör hatasında güvenli davranmayı öğrenirsin. Simülatörde ısıtıcı 5 V'luk bir ampulle temsil edilir; gerçek akvaryum ısıtıcısı şebeke gerilimiyle çalışır ve çok tehlikelidir."
   },
   {
    "n": 78,
@@ -718,7 +742,8 @@
    "t": "Akıllı Sera Otomasyonu",
    "comps": "DHT22, nem sensörü, fan, pompa",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "DHT22 sera havasının sıcaklığını ve nemini, toprak nem sensörü toprağın kuruluğunu ölçer. Sıcaklık 28 °C'yi ya da hava nemi %85'i aşınca fan açılır; toprak kuruysa pompa en fazla 3 saniye sulama yapar ve sonraki sulamaya kadar 10 saniye bekler. Birden çok sensörle birden çok çıkışı yönetmeyi, histerezisi, transistörle fan ve pompa sürmeyi ve sulamada güvenlik sınırlarını öğrenirsin. Simülatörde sensör değerleri kaydırıcılardan verilir."
   },
   {
    "n": 79,
@@ -726,7 +751,8 @@
    "t": "Güneş Takip Sistemi",
    "comps": "LDR, servo, güneş paneli",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "İki LDR (ışık direnci) güneşin sol ya da sağda olduğunu anlar; servo, güneş panelini daha çok ışık gelen yöne doğru yavaşça döndürür (tek eksenli güneş takibi). Panel gerilimi gerilim bölücüyle okunur ve Seri Monitör'e yazılır. LDR gerilim bölücüsünü, fark okuyup yön bulmayı, ölü bölgeyi ve 5 V'tan yüksek bir gerilimi analog pinle güvenle ölçmeyi öğrenirsin. Simülatörde ışık, LDR ve panel kaydırıcılarından verilir; servo dönünce ışık otomatik değişmez."
   },
   {
    "n": 80,
@@ -734,7 +760,8 @@
    "t": "Otomatik Atık Ayrıştırma Sistemi",
    "comps": "Renk sensörü, servo, IR sensör",
    "lv": 4,
-   "ready": false
+   "ready": true,
+   "d": "IR sensör bir atığın geldiğini anlar, TCS3200 renk sensörü atığın rengini kırmızı, yeşil ve mavi filtrelerle ölçer; renk sınıflandırılır (mavi: plastik, yeşil: cam, kırmızı: metal, diğer: genel) ve servo yönlendirici ilgili kutuya döner. Renk sensörünü S0–S3 pinleriyle yönetmeyi, pulseIn ile frekans ölçmeyi, ölçümü 0–255'e çevirip kural tabanlı sınıflandırma yapmayı öğrenirsin. Simülatörde atık rengi renk sensörünün kaydırıcılarıyla, atığın gelişi IR sensörün düğmesiyle verilir."
   },
   {
    "n": 81,
