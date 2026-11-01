@@ -143,7 +143,8 @@ section{padding-block:72px;border-bottom:1px solid var(--line)}
 .aex{margin-left:auto;font:500 11px var(--f-mono);font-style:normal;color:var(--muted)}
 .alist .soon em{margin-left:auto;font:500 11px var(--f-mono);font-style:normal;opacity:.8}
 .more{display:flex;justify-content:center;margin-top:16px}
-.post.has-detail{cursor:pointer}
+.post.has-detail,.post.has-link{cursor:pointer}
+.post.has-link:focus-visible{outline:2px solid var(--mask);outline-offset:2px}
 .post.has-detail:focus-visible{outline:2px solid var(--mask);outline-offset:2px}
 dialog#detail{width:min(880px,96vw);max-height:92vh;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);overflow:auto}
 dialog#detail::backdrop{background:rgba(5,20,13,.6)}
@@ -630,12 +631,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
   /* ---------- İçerikler ---------- */
   const POSTS = [
-    { t: 'ESP32 ile Wi-Fi üzerinden robot kontrolü', d: 'ESP32 üzerinde küçük bir web sunucusu kurup telefon tarayıcısından joystick ile robotu sürmek.', tag: 'ESP32', lv: 2, min: 15, f: 'Proje' },
-    { t: 'MPU6050 ile eğim açısı okuma', d: 'İvmeölçer ve jiroskop verisini tamamlayıcı filtreyle birleştirip titremeyen bir açı değeri elde etmek.', tag: 'ESP32', lv: 2, min: 12, f: 'Yazı' },
-    { t: "Raspberry Pi 5'e ROS 2 Jazzy kurulumu", d: 'Ubuntu 24.04 üzerine kurulum, çalışma alanı oluşturma ve sık karşılaşılan colcon hataları.', tag: 'ROS 2', lv: 2, min: 18, f: 'Yazı' },
-    { t: 'İlk ROS 2 düğümün: publisher ve subscriber', d: "Python ile iki düğüm yazıp topic üzerinden sensör verisi aktarmak. rqt_graph ile akışı görselleştirmek.", tag: 'ROS 2', lv: 3, min: 20, f: 'Video' },
-    { t: 'OpenCV ile renk takibi yapan kamera', d: 'HSV maskesiyle bir topu bulup iki servoyla kamerayı onun peşinden döndürmek. Pan-tilt düzeneği dahil.', tag: 'Python', lv: 2, min: 22, f: 'Proje' },
-    { t: "Python'dan Arduino'ya seri haberleşme", d: 'pyserial ile bilgisayardan komut göndermek, gelen veriyi grafiğe dökmek ve bağlantı kopunca toparlamak.', tag: 'Python', lv: 1, min: 10, f: 'Yazı' },
     { t: "Raspberry Pi ile robotları kontrol etmek", d: "Kredi kartı boyutunda tam bir Linux bilgisayarı. Python ile sensörleri okuyup motorları sürmek, kamera ve ağ bağlantısı gerektiren robot projeleri için kullanılır.", tag: "Raspberry Pi", f: "Uygulama" },
     { t: "Scratch Jr. ile blok kodlama", d: "Blok tabanlı kodlamaya ilk adım. Serbest etkinlik ve STEM çalışmalarında kullanılıyor.", tag: "Scratch Jr.", f: 'Uygulama' },
     { t: "Scratch ile oyun ve proje geliştirme", d: "Zamanlama, mesajlaşma blokları, kod akışını izleme, değişken ve fonksiyon (özel blok) konuları Scratch projeleriyle işleniyor.", tag: "Scratch", f: 'Uygulama' },
@@ -672,16 +667,16 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   }
   function renderPosts() {
     const n = q.toLocaleLowerCase('tr');
-    const list = POSTS.filter(p => (tag === 'Tümü' || p.tag === tag) && (!(tag === 'Arduino' && lvSel) || p.lvn === lvSel) && (!n || (p.t + ' ' + p.d + ' ' + p.tag).toLocaleLowerCase('tr').includes(n)));
+    const list = POSTS.filter(p => (tag === 'Tümü' ? !p.dup : p.tag === tag) && (!(tag === 'Arduino' && lvSel) || p.lvn === lvSel) && (!n || (p.t + ' ' + p.d + ' ' + p.tag).toLocaleLowerCase('tr').includes(n)));
     const LIM = 8, shown = showAll ? list : list.slice(0, LIM);
     posts.innerHTML = list.length ? shown.map(p => `
-      <article class="post${hasDetail(p.id) ? ' has-detail' : ''}"${hasDetail(p.id) ? ` data-id="${p.id}" tabindex="0" role="button" aria-label="${escH(p.t)}: ayrıntıları aç"` : ''}>
-        <div class="post-meta"><span class="tag">${p.tag}</span><span>${p.min ? p.min + ' dk' : (p.n ? 'Proje ' + p.n : (hasDetail(p.id) ? 'Ek proje' : 'Uygulama'))}</span></div>
+      <article class="post${hasDetail(p.id) ? ' has-detail' : ''}${p.href ? ' has-link' : ''}"${hasDetail(p.id) ? ` data-id="${p.id}" tabindex="0" role="button" aria-label="${escH(p.t)}: ayrıntıları aç"` : (p.href ? ` data-href="${p.href}" tabindex="0" role="link" aria-label="${escH(p.t)}: PyLearn'de aç"` : '')}>
+        <div class="post-meta"><span class="tag">${p.tag}</span><span>${p.meta || (p.min ? p.min + ' dk' : (p.n ? 'Proje ' + p.n : (hasDetail(p.id) ? 'Ek proje' : 'Uygulama')))}</span></div>
         <h3>${p.t}</h3>
         <p>${p.d}</p>
         <div class="post-foot">
           <span class="level">${p.lvn ? `<i>${[1, 2, 3, 4, 5].map(i => `<b class="${i <= p.lvn ? 'on' : ''}"></b>`).join('')}</i>Seviye ${p.lvn}` : (p.lv ? `<i>${[1, 2, 3].map(i => `<b class="${i <= p.lv ? 'on' : ''}"></b>`).join('')}</i>${LV[p.lv]}` : '')}</span>
-          <span class="fmt">${p.f}${hasDetail(p.id) ? ' · aç →' : ''}</span>
+          <span class="fmt">${p.f}${hasDetail(p.id) ? ' · aç →' : (p.href ? ' · PyLearn ↗' : '')}</span>
         </div>
       </article>`).join('') : `<div class="empty">"${q.replace(/[<>&"]/g, '')}" için içerik bulunamadı. Başka bir kelime dene ya da filtreyi "Tümü" yap.</div>`;
     renderLvl();
@@ -705,8 +700,8 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <section><h4>Nasıl çalışıyor?</h4><dl class="notes">${d.notes.map(n => `<div><dt>${escH(n[0])}</dt><dd>${escH(n[1])}</dd></div>`).join('')}</dl></section>`;
     dlg.querySelector('.dlg').scrollTop = 0; dlg.showModal(); dlg.scrollTop = 0;
   }
-  posts.addEventListener('click', e => { const a = e.target.closest('.has-detail'); if (a) openDetail(a.dataset.id); });
-  posts.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('has-detail')) { e.preventDefault(); openDetail(e.target.dataset.id); } });
+  posts.addEventListener('click', e => { const a = e.target.closest('.has-detail'); if (a) openDetail(a.dataset.id); const l = e.target.closest('[data-href]'); if (l) window.open(l.dataset.href, '_blank', 'noopener'); });
+  posts.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.classList.contains('has-detail')) { e.preventDefault(); openDetail(e.target.dataset.id); } else if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset && e.target.dataset.href) { e.preventDefault(); window.open(e.target.dataset.href, '_blank', 'noopener'); } });
   dlg.addEventListener('click', e => {
     if (e.target === dlg || e.target.closest('[data-close]')) { dlg.close(); return; }
     const c = e.target.closest('[data-copy]');
@@ -719,8 +714,14 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     const cards = j.projects.filter(x => x.ready).sort((a, b) => a.lv - b.lv || (a.n || 999) - (b.n || 999))
       .map(x => ({ id: x.id, t: (x.n ? x.n + '. ' : '') + x.t, d: x.d, tag: 'Arduino', lvn: x.lv, n: x.n, f: 'Proje' }));
     POSTS.unshift(...cards);
+    POSTS.push(...cards.filter(c => (ARD.byId[c.id].comps || '').includes('ESP32')).map(c => ({ ...c, tag: 'ESP32', dup: true })));
     renderPosts(); renderPath();
     const m = /^#arduino\/([a-z0-9-]+)$/.exec(location.hash); if (m) openDetail(m[1]);
+  }).catch(() => {});
+  /* Python: PyLearn'deki 50 modülün yedi aşaması (assets/python/modules.json) */
+  fetch('assets/python/modules.json').then(r => r.json()).then(d => {
+    POSTS.push(...d.stages.map(g => ({ t: 'Python: ' + g.name, d: g.sub + '. Modüller: ' + g.mods.map(m => m.t).join(', ') + '.', tag: 'Python', f: 'Ders', meta: g.mods.length + ' modül', href: d.base + g.mods[0].n })));
+    renderPosts();
   }).catch(() => {});
   document.getElementById('lvlbar').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; lvSel = +b.dataset.l; showAll = false; renderPosts(); });
   /* U4 Öğrenme yolu: Arduino seviyeleri (kart değil, devre izi gibi bir yol) */
