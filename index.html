@@ -271,15 +271,7 @@ dialog#detail::backdrop{background:rgba(5,20,13,.6)}
 .about-text p{color:var(--muted)}
 
 /* İletişim */
-.contact{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;align-items:start}
-@media (max-width:900px){.contact{grid-template-columns:1fr}}
-.news{background:var(--mask);color:var(--on-mask);border-radius:10px;padding:clamp(24px,4vw,40px);display:grid;gap:16px}
-.news h2{font-size:clamp(26px,3.5vw,36px)}
-.news p{opacity:.9;max-width:50ch}
-.news form{display:flex;gap:10px;flex-wrap:wrap}
-.news input{flex:1 1 220px;min-width:0;font:400 16px var(--f-body);padding:12px 14px;border-radius:var(--r);border:1px solid transparent;background:var(--surface);color:var(--ink)}
-.news button{font:600 15px var(--f-body);padding:12px 18px;border-radius:var(--r);border:0;background:var(--ink);color:var(--bg);cursor:pointer}
-.news .msg{font-size:14px;min-height:1.4em}
+.contact .socials{max-width:760px}
 .socials{display:grid;gap:10px}
 .socials a{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);text-decoration:none;font-weight:600}
 .socials a:hover{border-color:var(--mask)}
@@ -503,22 +495,10 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
 <section id="iletisim">
   <div class="wrap contact">
-    <div class="news">
-      <div class="eyebrow" style="color:inherit">Bülten</div>
-      <h2>Yeni içerik çıktığında haber al</h2>
-      <p>Ayda bir e-posta: yeni yazılar, uygulama güncellemeleri ve o ay denediğim bir devre. Reklam yok.</p>
-      <form id="nl" novalidate>
-        <label for="em" class="sr" style="position:absolute;left:-9999px">E-posta adresin</label>
-        <input id="em" type="email" placeholder="e-posta adresin" autocomplete="email" required>
-        <input id="web" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
-        <button type="submit">Abone ol</button>
-      </form>
-      <p style="font-size:12px;opacity:.8;margin:0">Abone olarak e-posta adresinin yalnızca bülten için saklanmasını kabul edersin. Çıkmak için bana yazman yeterli.</p>
-      <p class="msg" id="nlmsg" aria-live="polite"></p>
-    </div>
     <div>
-      <div class="eyebrow">Sosyal</div>
-      <div class="socials" style="margin-top:16px">
+      <div class="eyebrow">İletişim</div>
+      <h2 style="font-size:clamp(28px,4vw,40px);margin-top:12px">Benimle iletişime geç</h2>
+      <div class="socials" style="margin-top:20px">
         <a href="https://github.com/kalefurkan" target="_blank" rel="noopener">GitHub <span>kaynak kodlar →</span></a>
         <a href="https://www.instagram.com/kalee.furkaan/" target="_blank" rel="noopener">Instagram <span>@kalee.furkaan →</span></a>
         <a href="https://wa.me/905456032574?text=Merhaba%2C%20siteniz%20%C3%BCzerinden%20yaz%C4%B1yorum." target="_blank" rel="noopener">WhatsApp <span>mesaj gönder →</span></a>
@@ -777,21 +757,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   });
   document.addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) openDetail(b.dataset.open); });
 
-  /* ---------- Bülten ---------- */
-  const NL_API = 'https://kale-bulten.furkankale-sosyal.workers.dev/abone';
-  document.getElementById('nl').addEventListener('submit', async e => {
-    e.preventDefault();
-    const em = document.getElementById('em').value.trim(), msg = document.getElementById('nlmsg'), btn = e.target.querySelector('button');
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { msg.textContent = 'Geçerli bir e-posta adresi gir, örneğin ad@ornek.com.'; return; }
-    btn.disabled = true; msg.textContent = 'Kaydediliyor…';
-    try {
-      const r = await fetch(NL_API, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: em, website: document.getElementById('web').value }) });
-      if (r.status === 429) msg.textContent = 'Çok fazla deneme yaptın, biraz sonra tekrar dene.';
-      else if (!r.ok) msg.textContent = 'Kaydedilemedi. Biraz sonra tekrar dene.';
-      else { const d = await r.json(); msg.textContent = d.zaten ? 'Bu adres zaten kayıtlı. Teşekkürler!' : 'Abone oldun, teşekkürler! Yeni içerik çıktığında haber vereceğim.'; document.getElementById('em').value = ''; }
-    } catch (err) { msg.textContent = 'Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.'; }
-    btn.disabled = false;
-  });
 })();
 
 </script>
