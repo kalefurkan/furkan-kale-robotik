@@ -446,19 +446,19 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/pylearn.svg" alt="" width="44" height="44" loading="lazy"><h3>PyLearn</h3></div><span class="status beta">Web sürümü yayında</span></div>
         <p>Python öğrenme platformu. Türkçe dersler, her ders için otomatik kontrol edilen alıştırmalar ve kodu doğrudan tarayıcıda çalıştıran editör.</p>
         <ul class="feat"><li>50 modül, 150 ders; modül sonu sınavları</li><li>Python tarayıcı içinde çalışır, kurulum gerekmez</li><li>İlerleme cihazda kalıcı; web ve iOS (Capacitor) için tek kod tabanı</li></ul>
-        <div class="app-foot"><span class="platforms">Web · iOS yolda</span><a href="https://kalefurkan.github.io/pylearn-app/" target="_blank" rel="noopener">Dene →</a></div>
+        <div class="app-foot"><span class="platforms">Web · iOS yolda</span><a href="https://pylearn.furkankale.com/" target="_blank" rel="noopener">Dene →</a></div>
       </div>
       <div class="tool">
         <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/makershub.svg" alt="" width="44" height="44" loading="lazy"><h3>MakersHub Studio</h3></div><span class="status live">Yayında</span></div>
         <p>Arduino ve 3D tasarımı tarayıcıda öğreten eğitim platformu: 3D editör, devre simülasyonu ve öğretmen için sınıf ve ödev yönetimi.</p>
         <ul class="feat"><li>3D editör: 18 şekil, Boolean işlemleri, STL / OBJ / GLB dışa aktarma</li><li>Arduino atölyesi: devre editörü, 81 bileşen, kod simülasyonu</li><li>Öğretmen paneli: sınıf, ödev ve teslim değerlendirme</li></ul>
-        <div class="app-foot"><span class="platforms">Web</span><a href="https://makerlab.furkankale-sosyal.workers.dev" target="_blank" rel="noopener">Aç →</a></div>
+        <div class="app-foot"><span class="platforms">Web</span><a href="https://makershub.furkankale.com" target="_blank" rel="noopener">Aç →</a></div>
       </div>
       <div class="tool">
         <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/kod-noktasi.png" alt="" width="44" height="44" loading="lazy"><h3>Kod Noktası</h3></div><span class="status live">Yayında</span></div>
         <p>Kod okuma oyunu: kodu oku, zihninde çalıştır ve hamleleri yap. Tarayıcıda oynanır, iOS sürümü Capacitor ile hazırlanıyor.</p>
         <ul class="feat"><li>Kodu çalıştırmadan, okuyarak izlemeyi öğreten oyun</li><li>13 dil desteği: Türkçe, İngilizce ve 11 dil daha</li><li>Web ve iOS için tek kod tabanı</li></ul>
-        <div class="app-foot"><span class="platforms">Web · iOS yolda</span><a href="https://kalefurkan.github.io/kod-noktasi-oyun/" target="_blank" rel="noopener">Oyna →</a></div>
+        <div class="app-foot"><span class="platforms">Web · iOS yolda</span><a href="https://kodnoktasi.furkankale.com/" target="_blank" rel="noopener">Oyna →</a></div>
       </div>
     </div>
   </div>
@@ -693,7 +693,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     dlg.querySelector('.dlg').innerHTML = `
       <div class="dlg-head"><div><div class="post-meta"><span class="tag">${p.tag}</span></div><h3 id="dt">${escH(p.t)}</h3><p>${escH(p.d)}</p></div><button type="button" class="dlg-x" data-close>Kapat ✕</button></div>
       <section><h4>Malzemeler</h4><ul class="parts">${d.parts.map(x => `<li>${escH(x)}</li>`).join('')}</ul></section>
-      <section><h4>Devre şeması</h4><figure class="diagram"><img src="${d.img}" alt="${escH(p.t)} devre şeması: MakersHub Studio simülatöründe çalışırken" loading="lazy"><figcaption>MakersHub Studio simülatöründe, kod çalışırken alınmış ekran görüntüsü. <a href="https://makerlab.furkankale-sosyal.workers.dev" target="_blank" rel="noopener">Simülatörü aç →</a></figcaption></figure>
+      <section><h4>Devre şeması</h4><figure class="diagram"><img src="${d.img}" alt="${escH(p.t)} devre şeması: MakersHub Studio simülatöründe çalışırken" loading="lazy"><figcaption>MakersHub Studio simülatöründe, kod çalışırken alınmış ekran görüntüsü. <a href="https://makershub.furkankale.com" target="_blank" rel="noopener">Simülatörü aç →</a></figcaption></figure>
         <table class="wire"><tbody>${d.wiring.map(w => `<tr><td>${escH(w[0])}</td><td>${escH(w[1])}</td></tr>`).join('')}</tbody></table></section>
       <section><h4>Adım adım</h4><ol class="steps">${d.steps.map(x => `<li><span>${escH(x)}</span></li>`).join('')}</ol></section>
       <section><h4>Kod</h4><div class="codewrap"><button type="button" class="copy" data-copy>Kopyala</button><pre class="code"><code>${escH(d.code)}</code></pre></div></section>
