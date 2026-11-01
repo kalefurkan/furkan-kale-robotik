@@ -509,9 +509,11 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <p>Ayda bir e-posta: yeni yazılar, uygulama güncellemeleri ve o ay denediğim bir devre. Reklam yok.</p>
       <form id="nl" novalidate>
         <label for="em" class="sr" style="position:absolute;left:-9999px">E-posta adresin</label>
-        <input id="em" type="email" placeholder="e-posta adresin" autocomplete="email">
+        <input id="em" type="email" placeholder="e-posta adresin" autocomplete="email" required>
+        <input id="web" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
         <button type="submit">Abone ol</button>
       </form>
+      <p style="font-size:12px;opacity:.8;margin:0">Abone olarak e-posta adresinin yalnızca bülten için saklanmasını kabul edersin. Çıkmak için bana yazman yeterli.</p>
       <p class="msg" id="nlmsg" aria-live="polite"></p>
     </div>
     <div>
@@ -776,11 +778,19 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   document.addEventListener('click', e => { const b = e.target.closest('[data-open]'); if (b) openDetail(b.dataset.open); });
 
   /* ---------- Bülten ---------- */
-  document.getElementById('nl').addEventListener('submit', e => {
-    e.preventDefault(); const em = document.getElementById('em').value.trim(), msg = document.getElementById('nlmsg');
-    msg.textContent = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)
-      ? 'Bu bir tasarım önizlemesi. Site yayına alındığında form bir bülten servisine bağlanacak.'
-      : 'Geçerli bir e-posta adresi gir, örneğin ad@ornek.com.';
+  const NL_API = 'https://kale-bulten.furkankale-sosyal.workers.dev/abone';
+  document.getElementById('nl').addEventListener('submit', async e => {
+    e.preventDefault();
+    const em = document.getElementById('em').value.trim(), msg = document.getElementById('nlmsg'), btn = e.target.querySelector('button');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { msg.textContent = 'Geçerli bir e-posta adresi gir, örneğin ad@ornek.com.'; return; }
+    btn.disabled = true; msg.textContent = 'Kaydediliyor…';
+    try {
+      const r = await fetch(NL_API, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: em, website: document.getElementById('web').value }) });
+      if (r.status === 429) msg.textContent = 'Çok fazla deneme yaptın, biraz sonra tekrar dene.';
+      else if (!r.ok) msg.textContent = 'Kaydedilemedi. Biraz sonra tekrar dene.';
+      else { const d = await r.json(); msg.textContent = d.zaten ? 'Bu adres zaten kayıtlı. Teşekkürler!' : 'Abone oldun, teşekkürler! Yeni içerik çıktığında haber vereceğim.'; document.getElementById('em').value = ''; }
+    } catch (err) { msg.textContent = 'Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.'; }
+    btn.disabled = false;
   });
 })();
 

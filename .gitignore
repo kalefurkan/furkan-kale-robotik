@@ -1,1 +1,3 @@
 tools/servolab/out/
+worker-bulten/node_modules/
+worker-bulten/.wrangler/
