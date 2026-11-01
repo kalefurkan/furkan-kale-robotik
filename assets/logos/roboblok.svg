@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="RoboBlok">
+  <rect width="96" height="96" rx="22" fill="#1C6A4C"/>
+  <rect x="14" y="30" width="68" height="46" rx="14" fill="#fff"/>
+  <circle cx="35" cy="53" r="9" fill="#1C6A4C"/><circle cx="61" cy="53" r="9" fill="#1C6A4C"/>
+  <circle cx="35" cy="53" r="3.5" fill="#fff"/><circle cx="61" cy="53" r="3.5" fill="#fff"/>
+  <rect x="42" y="14" width="12" height="16" rx="6" fill="#C8961C"/>
+  <rect x="4" y="44" width="9" height="20" rx="4" fill="#fff"/><rect x="83" y="44" width="9" height="20" rx="4" fill="#fff"/>
+</svg>
