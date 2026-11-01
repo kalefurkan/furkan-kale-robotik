@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="MakersHub Studio">
+  <rect width="96" height="96" rx="22" fill="#00979c"/>
+  <g fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="29" y="29" width="38" height="38" rx="5"/>
+    <rect x="40" y="40" width="16" height="16" rx="2" fill="#ffffff" stroke="none"/>
+    <path d="M38 19v10M48 19v10M58 19v10M38 67v10M48 67v10M58 67v10M19 38h10M19 48h10M19 58h10M67 38h10M67 48h10M67 58h10"/>
+  </g>
+</svg>

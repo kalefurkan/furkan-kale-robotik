@@ -187,6 +187,8 @@ dialog#detail::backdrop{background:rgba(5,20,13,.6)}
 .app{display:grid;grid-template-rows:auto 1fr;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .app-screen{height:180px;background:var(--sunken);border-bottom:1px solid var(--line);display:grid;place-items:center;padding:20px}
 .app-body{display:flex;flex-direction:column;gap:12px;padding:22px}
+.app-id{display:flex;align-items:center;gap:12px;min-width:0}
+.app-logo{width:44px;height:44px;border-radius:10px;flex:none;box-shadow:0 0 0 1px var(--line)}
 .app-title{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .app h3{font-size:24px}
 .status{font:500 12px/1 var(--f-mono);padding:5px 9px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
@@ -443,19 +445,19 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     </div>
     <div class="tools">
       <div class="tool">
-        <div class="app-title"><h3>PyLearn</h3><span class="status beta">Web sürümü yayında</span></div>
+        <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/pylearn.svg" alt="" width="44" height="44" loading="lazy"><h3>PyLearn</h3></div><span class="status beta">Web sürümü yayında</span></div>
         <p>Python öğrenme platformu. Türkçe dersler, her ders için otomatik kontrol edilen alıştırmalar ve kodu doğrudan tarayıcıda çalıştıran editör.</p>
         <ul class="feat"><li>50 modül, 150 ders; modül sonu sınavları</li><li>Python tarayıcı içinde çalışır, kurulum gerekmez</li><li>İlerleme cihazda kalıcı; web ve iOS (Capacitor) için tek kod tabanı</li></ul>
         <div class="app-foot"><span class="platforms">Web · iOS yolda</span><a href="https://kalefurkan.github.io/pylearn-app/" target="_blank" rel="noopener">Dene →</a></div>
       </div>
       <div class="tool">
-        <div class="app-title"><h3>MakersHub Studio</h3><span class="status live">Yayında</span></div>
+        <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/makershub.svg" alt="" width="44" height="44" loading="lazy"><h3>MakersHub Studio</h3></div><span class="status live">Yayında</span></div>
         <p>Arduino ve 3D tasarımı tarayıcıda öğreten eğitim platformu: 3D editör, devre simülasyonu ve öğretmen için sınıf ve ödev yönetimi.</p>
         <ul class="feat"><li>3D editör: 18 şekil, Boolean işlemleri, STL / OBJ / GLB dışa aktarma</li><li>Arduino atölyesi: devre editörü, 81 bileşen, kod simülasyonu</li><li>Öğretmen paneli: sınıf, ödev ve teslim değerlendirme</li></ul>
         <div class="app-foot"><span class="platforms">Web</span><a href="https://makerlab.furkankale-sosyal.workers.dev" target="_blank" rel="noopener">Aç →</a></div>
       </div>
       <div class="tool">
-        <div class="app-title"><h3>Kod Noktası</h3><span class="status live">Yayında</span></div>
+        <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/kod-noktasi.png" alt="" width="44" height="44" loading="lazy"><h3>Kod Noktası</h3></div><span class="status live">Yayında</span></div>
         <p>Kod okuma oyunu: kodu oku, zihninde çalıştır ve hamleleri yap. Tarayıcıda oynanır, iOS sürümü Capacitor ile hazırlanıyor.</p>
         <ul class="feat"><li>Kodu çalıştırmadan, okuyarak izlemeyi öğreten oyun</li><li>13 dil desteği: Türkçe, İngilizce ve 11 dil daha</li><li>Web ve iOS için tek kod tabanı</li></ul>
         <div class="app-foot"><span class="platforms">Web · iOS yolda</span><a href="https://kalefurkan.github.io/kod-noktasi-oyun/" target="_blank" rel="noopener">Oyna →</a></div>
