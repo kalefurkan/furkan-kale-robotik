@@ -222,7 +222,8 @@ dialog#detail::backdrop{background:rgba(5,20,13,.6)}
 
 /* Araçlar */
 .tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
-@media (max-width:900px){.tools{grid-template-columns:1fr}}
+.tools.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:900px){.tools,.tools.four{grid-template-columns:1fr}}
 .tool{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;display:grid;gap:18px;min-width:0}
 .tool h3{font-size:22px}
 .tool > p{color:var(--muted);font-size:15px;margin-top:-10px}
@@ -442,10 +443,10 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <div>
         <div class="eyebrow">Platformlarım</div>
         <h2>Kendi geliştirdiğim eğitim uygulamaları</h2>
-        <p>Öğrencilerin tarayıcıda deneyerek öğrendiği üç platform.</p>
+        <p>Öğrencilerin tarayıcıda deneyerek öğrendiği dört platform.</p>
       </div>
     </div>
-    <div class="tools">
+    <div class="tools four">
       <div class="tool">
         <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/pylearn.svg" alt="" width="44" height="44" loading="lazy"><h3>PyLearn</h3></div><span class="status beta">Web sürümü yayında</span></div>
         <p>Python öğrenme platformu. Türkçe dersler, her ders için otomatik kontrol edilen alıştırmalar ve kodu doğrudan tarayıcıda çalıştıran editör.</p>
@@ -463,6 +464,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <p>Kod okuma oyunu: kodu oku, zihninde çalıştır ve hamleleri yap. Tarayıcıda oynanır, iOS sürümü Capacitor ile hazırlanıyor.</p>
         <ul class="feat"><li>Kodu çalıştırmadan, okuyarak izlemeyi öğreten oyun</li><li>13 dil desteği: Türkçe, İngilizce ve 11 dil daha</li><li>Web ve iOS için tek kod tabanı</li></ul>
         <div class="app-foot"><span class="platforms">Web · iOS yolda</span><a href="https://kodnoktasi.furkankale.com/" target="_blank" rel="noopener">Oyna →</a></div>
+      </div>
+      <div class="tool">
+        <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/mozaik.svg" alt="" width="44" height="44" loading="lazy"><h3>Mozaik Atölyesi</h3></div><span class="status live">Yayında</span></div>
+        <p>Okul öncesi ve 1-2. sınıflar için mozaik oyunu: örnek resme bak, aynısını boya. Ayna bölümleriyle simetriyi de öğretir.</p>
+        <ul class="feat"><li>28 bölüm: okul öncesi, 1. ve 2. sınıf; 3×3'ten 8×8'e ızgaralar</li><li>Yol gösterici, ipucu ampulü ve sesli Türkçe yönergeler</li><li>Akıllı tahta, tablet ve telefonda çalışır; kurulum gerekmez</li></ul>
+        <div class="app-foot"><span class="platforms">Web</span><a href="mozaik/">Oyna →</a></div>
       </div>
     </div>
   </div>
@@ -487,7 +494,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <div class="about-text">
       <div class="eyebrow">Hakkımda</div>
       <h2>Merhaba, ben Furkan Kale.</h2>
-      <p>Çocuklara ve gençlere robotik, kodlama ve elektronik öğretmek için materyal ve yazılım geliştiriyorum. Python öğrenme platformu PyLearn, Arduino ve 3D tasarım atölyesi MakersHub Studio ve kod okuma oyunu Kod Noktası benim yazdığım uygulamalar.</p>
+      <p>Çocuklara ve gençlere robotik, kodlama ve elektronik öğretmek için materyal ve yazılım geliştiriyorum. Python öğrenme platformu PyLearn, Arduino ve 3D tasarım atölyesi MakersHub Studio kod okuma oyunu Kod Noktası ve okul öncesi ile ilkokul için mozaik oyunu Mozaik Atölyesi benim yazdığım uygulamalar.</p>
       <p>Bu sitede Scratch'ten Arduino ve Python'a uzanan içerikleri, adım adım anlatılan 100 Arduino projesini ve kendi araçlarımı topluyorum. Projelerin devre görüntüleri MakersHub simülatöründen alındı, kodlar açık. Hata bulursan ya da bir konu önermek istersen yazman yeterli.</p>
     </div>
     <figure class="about-photo"><img src="assets/furkan-portre.webp" width="1254" height="1254" loading="lazy" alt="Furkan Kale: yarısı robot, yarısı insan olarak çizilmiş, robotik atölyesinde laboratuvar önlüğü giyen portre illüstrasyonu"></figure>
