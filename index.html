@@ -651,7 +651,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   const DETAILS = {};
   const hasDetail = id => !!ARD.byId[id];
   const getDetail = id => DETAILS[id] ? Promise.resolve(DETAILS[id]) : fetch(`assets/arduino/p/${id}.json`).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(d => (DETAILS[id] = d));
-  const TAGS = ['Tümü', 'Arduino', 'ESP32', 'Python', 'Raspberry Pi', 'Scratch Jr.', 'Scratch', 'Kodu Game Lab', 'Minecraft', 'Tinkercad', 'SPIKE', 'TaleBot', 'Cognimates', 'Draw Your Game', 'MakeCode Arcade', 'Code Spark'];
+  const TAGS = ['Tümü', 'Arduino', 'Python', 'Raspberry Pi', 'Scratch Jr.', 'Scratch', 'Kodu Game Lab', 'Minecraft', 'Tinkercad', 'SPIKE', 'TaleBot', 'Cognimates', 'Draw Your Game', 'MakeCode Arcade', 'Code Spark'];
   const LV = ['', 'Başlangıç', 'Orta', 'İleri'];
   let tag = 'Tümü', q = '', showAll = false, lvSel = 0;
   try { const s = localStorage.getItem('fk-tag'); if (TAGS.includes(s)) tag = s; } catch (e) {}
@@ -715,7 +715,6 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     const cards = j.projects.filter(x => x.ready).sort((a, b) => a.lv - b.lv || (a.n || 999) - (b.n || 999))
       .map(x => ({ id: x.id, t: (x.n ? x.n + '. ' : '') + x.t, d: x.d, tag: 'Arduino', lvn: x.lv, n: x.n, f: 'Proje' }));
     POSTS.unshift(...cards);
-    POSTS.push(...cards.filter(c => (ARD.byId[c.id].comps || '').includes('ESP32')).map(c => ({ ...c, tag: 'ESP32', dup: true })));
     renderPosts(); renderPath();
     const m = /^#arduino\/([a-z0-9-]+)$/.exec(location.hash); if (m) openDetail(m[1]);
   }).catch(() => {});
