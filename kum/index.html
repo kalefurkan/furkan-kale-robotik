@@ -16,7 +16,7 @@ html,body{height:100%;overflow:hidden;background:#EDE9E3;font-family:system-ui,-
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 button:focus-visible{outline:3px solid #3A86FF;outline-offset:3px}
 [hidden]{display:none!important}
-#cv{position:fixed;inset:0;width:100%;height:100%;touch-action:none;image-rendering:pixelated;cursor:crosshair;background:linear-gradient(#F4F1EC,#DCD6CD)}
+#cv{position:fixed;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;background:linear-gradient(#F4F1EC,#DCD6CD)}
 .bar{position:fixed;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:10px;pointer-events:none;z-index:5}
 .bar>*{pointer-events:auto}
 .sp{flex:1;pointer-events:none}
@@ -83,7 +83,7 @@ function hsl(h, s, l) { // -> [r,g,b]
 }
 const pack = (r, g, b) => (255 << 24) | (b << 16) | (g << 8) | r;
 function grain() { // her tane rengin hafif farklı bir tonu
-  const l = Math.min(.92, Math.max(.06, light + (Math.random() - .5) * .12));
+  const l = Math.min(.92, Math.max(.06, light + (Math.random() - .5) * .16 + (Math.random() < .08 ? -.12 : 0)));
   const [r, g, b] = hsl(hue + (Math.random() - .5) * 8, light > .9 || light < .08 ? .2 : .85, l); return pack(r, g, b);
 }
 const swatch = document.getElementById('swatch');
@@ -91,50 +91,55 @@ function showSwatch() { const [r, g, b] = hsl(hue, .85, light); swatch.style.bac
 
 /* ---------- ızgara ---------- */
 function resize() {
-  CS = innerWidth < 700 ? 3 : 4;
-  const nw = Math.ceil(innerWidth / CS), nh = Math.ceil(innerHeight / CS);
+  const dpr = Math.min(window.devicePixelRatio || 1, 3); CS = Math.max(1, 2 / dpr) * (innerWidth * innerHeight > 2.2e6 / dpr ? 1.25 : 1);
+  const nw = Math.ceil(innerWidth / CS), nh = Math.ceil(innerHeight / CS); rowCount = new Int32Array(nh);
   const nt = new Uint8Array(nw * nh), nc = new Uint32Array(nw * nh);
   if (type) for (let y = 0; y < Math.min(H, nh); y++) for (let x = 0; x < Math.min(W, nw); x++) { // tabana hizalı koru
     const sy = H - 1 - y, dy = nh - 1 - y, s = sy * W + x, d = dy * nw + x; nt[d] = type[s]; nc[d] = col[s]; }
   W = nw; H = nh; type = nt; col = nc; cv.width = W; cv.height = H;
-  img = ctx.createImageData(W, H); img32 = new Uint32Array(img.data.buffer);
+  img = ctx.createImageData(W, H); img32 = new Uint32Array(img.data.buffer); recount();
 }
 
 /* ---------- geri al ---------- */
 const undo = [];
 function snapshot() { undo.push({ w: W, h: H, t: type.slice(), c: col.slice() }); if (undo.length > 25) undo.shift(); }
-function restore() { const s = undo.pop(); if (!s) return; if (s.w === W && s.h === H) { type = s.t; col = s.c; } }
+function restore() { const s = undo.pop(); if (!s) return; if (s.w === W && s.h === H) { type = s.t; col = s.c; recount(); } }
 
 /* ---------- fizik ---------- */
-let flip = 0;
+let flip = 0, rowCount = new Int32Array(1);
+function recount() { rowCount.fill(0); for (let i = 0; i < type.length; i++) if (type[i] === SAND) rowCount[(i / W) | 0]++; }
 function step() {
   flip ^= 1;
   for (let y = H - 2; y >= 0; y--) {
+    if (!rowCount[y]) continue;
     const ltr = (y + flip) & 1, row = y * W, below = row + W;
     for (let k = 0; k < W; k++) {
       const x = ltr ? k : W - 1 - k, i = row + x;
       if (type[i] !== SAND) continue;
       let j = below + x;
-      if (type[j] === EMPTY) { move(i, j); continue; }
+      if (type[j] === EMPTY) { // serbest düşüş: tane her adımda birkaç hücre iner, akış dağınık görünür
+        const maxd = 2 + ((Math.random() * 4) | 0); let d = 1;
+        while (d < maxd && y + d + 1 < H && type[j + W * d] === EMPTY) d++;
+        move(i, j + W * (d - 1)); continue; }
       const d = Math.random() < .5 ? -1 : 1, x1 = x + d, x2 = x - d;
       if (x1 >= 0 && x1 < W && type[below + x1] === EMPTY && type[row + x1] === EMPTY) { move(i, below + x1); continue; }
       if (x2 >= 0 && x2 < W && type[below + x2] === EMPTY && type[row + x2] === EMPTY) { move(i, below + x2); }
     }
   }
 }
-function move(i, j) { type[j] = SAND; col[j] = col[i]; type[i] = EMPTY; col[i] = BG; }
+function move(i, j) { type[j] = SAND; col[j] = col[i]; type[i] = EMPTY; col[i] = BG; const a = (i / W) | 0, b = (j / W) | 0; if (a !== b) { rowCount[a]--; rowCount[b]++; } }
 
 /* ---------- çizim ---------- */
 const ptrs = new Map(); let tool = 'sand';
 const sizeEl = document.getElementById('size');
 function pour(px, py) {
-  const cx = Math.floor(px / CS), cy = Math.floor(py / CS), r = +sizeEl.value;
+  const cx = Math.floor(px / CS), cy = Math.floor(py / CS), k0 = 3 / CS, r = Math.max(1, Math.round(+sizeEl.value * k0));
   if (tool === 'sand') {
-    const n = 2 + r * 2;
+    const n = Math.max(1, Math.round((1 + +sizeEl.value) * k0 * .9));
     for (let k = 0; k < n; k++) {
-      const a = Math.random() * Math.PI * 2, d = Math.random() * r, x = Math.round(cx + Math.cos(a) * d), y = Math.round(cy + Math.sin(a) * d * .6);
+      const x = Math.round(cx + (Math.random() - .5) * 2 * r), y = Math.round(cy + (Math.random() - .5) * r * .5);
       if (x < 0 || y < 0 || x >= W || y >= H) continue; const i = y * W + x;
-      if (type[i] === EMPTY) { type[i] = SAND; col[i] = grain(); }
+      if (type[i] === EMPTY) { type[i] = SAND; col[i] = grain(); rowCount[y]++; }
     }
     if (rainbow) hue = (hue + 1.2) % 360;
   } else {
@@ -142,12 +147,12 @@ function pour(px, py) {
     for (let y = cy - rr; y <= cy + rr; y++) for (let x = cx - rr; x <= cx + rr; x++) {
       if (x < 0 || y < 0 || x >= W || y >= H || (x - cx) ** 2 + (y - cy) ** 2 > rr * rr) continue; const i = y * W + x;
       if (tool === 'wall') { type[i] = WALL; const v = 70 + ((x * 7 + y * 13) % 9) * 3; col[i] = pack(v, v - 6, v - 14); }
-      else { type[i] = EMPTY; col[i] = BG; }
+      else { if (type[i] === SAND) rowCount[y]--; type[i] = EMPTY; col[i] = BG; }
     }
   }
 }
 function line(a, b, x, y) { // hızlı sürüklemede boşluk kalmasın (duvar/silgi)
-  const n = Math.ceil(Math.hypot(x - a, y - b) / CS); for (let k = 1; k <= n; k++) pour(a + (x - a) * k / n, b + (y - b) * k / n);
+  const n = Math.ceil(Math.hypot(x - a, y - b) / 3); for (let k = 1; k <= n; k++) pour(a + (x - a) * k / n, b + (y - b) * k / n);
 }
 cv.addEventListener('pointerdown', e => { e.preventDefault(); if (!ptrs.size) snapshot(); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); cv.setPointerCapture(e.pointerId); hideHint(); });
 cv.addEventListener('pointermove', e => { const p = ptrs.get(e.pointerId); if (!p) return; if (tool !== 'sand') line(p.x, p.y, e.clientX, e.clientY); p.x = e.clientX; p.y = e.clientY; });
@@ -155,17 +160,17 @@ const up = e => ptrs.delete(e.pointerId); cv.addEventListener('pointerup', up); 
 
 /* ---------- döngü ---------- */
 function render() { for (let i = 0; i < type.length; i++) img32[i] = type[i] ? col[i] : 0; ctx.putImageData(img, 0, 0); }
-function frame() { ptrs.forEach(p => pour(p.x, p.y)); step(); step(); render(); requestAnimationFrame(frame); }
+function frame() { ptrs.forEach(p => pour(p.x, p.y)); const n = Math.max(2, Math.round(4 / CS)); for (let k = 0; k < n; k++) step(); render(); requestAnimationFrame(frame); }
 
 /* ---------- araçlar ---------- */
 const $ = id => document.getElementById(id);
 function setTool(t) { tool = tool === t ? 'sand' : t; $('bWall').setAttribute('aria-pressed', String(tool === 'wall')); $('bErase').setAttribute('aria-pressed', String(tool === 'erase')); cv.style.cursor = tool === 'sand' ? 'crosshair' : 'cell'; }
 $('bWall').onclick = () => setTool('wall'); $('bErase').onclick = () => setTool('erase');
 $('bUndo').onclick = restore;
-$('bClear').onclick = () => { snapshot(); type.fill(0); col.fill(0); };
+$('bClear').onclick = () => { snapshot(); type.fill(0); col.fill(0); rowCount.fill(0); };
 $('bRainbow').onclick = () => { rainbow = !rainbow; $('bRainbow').setAttribute('aria-pressed', String(rainbow)); showSwatch(); if (tool !== 'sand') setTool(tool); };
 $('bSave').onclick = () => {
-  const out = document.createElement('canvas'); out.width = W * 2; out.height = H * 2; const o = out.getContext('2d');
+  const out = document.createElement('canvas'); out.width = W * 2; out.height = H * 2; /* ince tanelerle tam çözünürlük */ const o = out.getContext('2d');
   const g = o.createLinearGradient(0, 0, 0, out.height); g.addColorStop(0, '#F4F1EC'); g.addColorStop(1, '#DCD6CD'); o.fillStyle = g; o.fillRect(0, 0, out.width, out.height);
   o.imageSmoothingEnabled = false; o.drawImage(cv, 0, 0, out.width, out.height);
   const a = document.createElement('a'); a.download = 'kum-atolyesi.png'; a.href = out.toDataURL('image/png'); a.click(); toast('Resim kaydedildi');
