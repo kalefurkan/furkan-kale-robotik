@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kum Atölyesi</title>
+<meta name="description" content="Parmağınla renkli kum dök, tepeler ve katmanlar oluştur. Tarayıcıda çalışan kum sanatı uygulaması.">
+<link rel="icon" href="../assets/logos/kum.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../assets/icon-180.png">
+<style>
+/* Kum Atölyesi · Furkan Kale
+   Tam ekran tuval; araçlar üstte yüzen yuvarlak düğmeler. Renk seçici tam ekran ton/açıklık paleti. */
+:root{--ink:#2B2340;--glass:rgba(255,255,255,.78);--line:rgba(43,35,64,.12);--accent:#FF7A45;color-scheme:light}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:#EDE9E3;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+button:focus-visible{outline:3px solid #3A86FF;outline-offset:3px}
+[hidden]{display:none!important}
+#cv{position:fixed;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;background:linear-gradient(#F4F1EC,#DCD6CD)}
+.bar{position:fixed;top:max(14px,env(safe-area-inset-top));left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));display:flex;align-items:center;gap:10px;pointer-events:none;z-index:5}
+.bar>*{pointer-events:auto}
+.sp{flex:1;pointer-events:none}
+.btn{width:52px;height:52px;border-radius:50%;background:var(--glass);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 4px 14px -6px rgba(0,0,0,.35);display:grid;place-items:center;transition:transform .12s}
+.btn:active{transform:scale(.92)}
+.btn svg{width:26px;height:26px}
+.btn[aria-pressed="true"]{background:var(--ink);color:#fff}
+.back{height:40px;padding:0 14px;border-radius:999px;background:var(--glass);backdrop-filter:blur(8px);font-weight:600;font-size:14px;text-decoration:none;color:var(--ink);display:flex;align-items:center;box-shadow:0 4px 14px -6px rgba(0,0,0,.3)}
+#swatch{width:62px;height:62px;border-radius:50%;box-shadow:0 0 0 5px #fff,0 6px 18px -6px rgba(0,0,0,.45);transition:transform .12s}
+#swatch:active{transform:scale(.92)}
+#swatch.rainbow{background:conic-gradient(#E63946,#FFD60A,#2A9D5C,#3A86FF,#8338EC,#E63946)!important}
+.size{display:flex;align-items:center;gap:8px;height:52px;padding:0 16px;border-radius:999px;background:var(--glass);backdrop-filter:blur(8px);box-shadow:0 4px 14px -6px rgba(0,0,0,.35)}
+.size input{width:110px;accent-color:var(--ink)}
+.size i{width:8px;height:8px;border-radius:50%;background:var(--ink)}.size i.b{width:18px;height:18px}
+#picker{position:fixed;inset:0;z-index:10;touch-action:none;cursor:crosshair}
+#picker canvas{width:100%;height:100%;display:block}
+#picker .bar{z-index:11}
+.hint{position:fixed;left:50%;bottom:max(22px,env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--glass);backdrop-filter:blur(8px);padding:10px 18px;border-radius:999px;font-size:15px;font-weight:600;box-shadow:0 4px 14px -6px rgba(0,0,0,.3);pointer-events:none;transition:opacity .6s;white-space:nowrap}
+.toast{position:fixed;left:50%;top:84px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:8px 16px;border-radius:999px;font-size:14px;font-weight:600;z-index:20;transition:opacity .4s}
+@media (max-width:640px){.btn{width:46px;height:46px}.btn svg{width:22px;height:22px}#swatch{width:52px;height:52px}.size{display:none}.back span{display:none}.bar{gap:7px}}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<canvas id="cv" aria-label="Kum tuvali: basılı tutarak kum dök"></canvas>
+
+<div class="bar" id="mainbar">
+  <a class="back" href="../index.html#araclar">←<span>&nbsp;Siteye dön</span></a>
+  <button class="btn" id="bUndo" aria-label="Geri al"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+  <button class="btn" id="bClear" aria-label="Hepsini temizle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>
+  <button class="btn" id="bWall" aria-pressed="false" aria-label="Duvar çiz"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="5" width="9" height="5" rx="1"/><rect x="13" y="5" width="9" height="5" rx="1"/><rect x="2" y="12" width="5" height="5" rx="1"/><rect x="9" y="12" width="13" height="5" rx="1"/></svg></button>
+  <button class="btn" id="bErase" aria-pressed="false" aria-label="Silgi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m15 4 5 5-9.5 9.5H6L3.5 16a1.5 1.5 0 0 1 0-2.1z"/><path d="M8.5 10.5 13.5 15.5M6 18.5h13"/></svg></button>
+  <div class="size" title="Fırça kalınlığı"><i></i><input id="size" type="range" min="1" max="10" value="4" aria-label="Fırça kalınlığı"><i class="b"></i></div>
+  <span class="sp"></span>
+  <button class="btn" id="bSave" aria-label="Resmi kaydet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg></button>
+  <button class="btn" id="bRainbow" aria-pressed="false" aria-label="Gökkuşağı modu"><svg viewBox="0 0 24 24" fill="none" stroke-width="2.6" stroke-linecap="round"><path d="M3 17a9 9 0 0 1 18 0" stroke="#E63946"/><path d="M6.5 17a5.5 5.5 0 0 1 11 0" stroke="#FFD60A"/><path d="M10 17a2 2 0 0 1 4 0" stroke="#3A86FF"/></svg></button>
+  <button id="swatch" aria-label="Renk seç"></button>
+</div>
+
+<div id="picker" hidden>
+  <canvas id="pcv" aria-label="Renk paleti: bir renge dokun"></canvas>
+  <div class="bar">
+    <button class="btn" id="bRandom" aria-label="Rastgele renk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/><circle cx="16" cy="16" r="1.6" fill="currentColor"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="16" cy="8" r="1.6" fill="currentColor"/><circle cx="8" cy="16" r="1.6" fill="currentColor"/></svg></button>
+    <span class="sp"></span>
+    <button id="pClose" class="btn" aria-label="Paleti kapat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+</div>
+<div class="hint" id="hint">Basılı tut, kum dökülsün</div>
+
+<script>
+(() => {
+'use strict';
+const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
+let CS = 3, W = 0, H = 0, type, col, img, img32, buf;
+const EMPTY = 0, SAND = 1, WALL = 2;
+const BG = 0; // boş hücre: şeffaf (arka plan CSS'ten)
+
+/* ---------- renk ---------- */
+let hue = 18, light = .55, rainbow = false;
+function hsl(h, s, l) { // -> [r,g,b]
+  h = ((h % 360) + 360) % 360 / 360; const q = l < .5 ? l * (1 + s) : l + s - l * s, p = 2 * l - q;
+  const f = t => { t = (t + 1) % 1; return t < 1 / 6 ? p + (q - p) * 6 * t : t < .5 ? q : t < 2 / 3 ? p + (q - p) * (2 / 3 - t) * 6 : p; };
+  return [f(h + 1 / 3), f(h), f(h - 1 / 3)].map(v => Math.round(v * 255));
+}
+const pack = (r, g, b) => (255 << 24) | (b << 16) | (g << 8) | r;
+function grain() { // her tane rengin hafif farklı bir tonu
+  const l = Math.min(.92, Math.max(.06, light + (Math.random() - .5) * .16 + (Math.random() < .08 ? -.12 : 0)));
+  const [r, g, b] = hsl(hue + (Math.random() - .5) * 8, light > .9 || light < .08 ? .2 : .85, l); return pack(r, g, b);
+}
+const swatch = document.getElementById('swatch');
+function showSwatch() { const [r, g, b] = hsl(hue, .85, light); swatch.style.background = `rgb(${r},${g},${b})`; swatch.classList.toggle('rainbow', rainbow); }
+
+/* ---------- ızgara ---------- */
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 3); CS = Math.max(1, 2 / dpr) * (innerWidth * innerHeight > 2.2e6 / dpr ? 1.25 : 1);
+  const nw = Math.ceil(innerWidth / CS), nh = Math.ceil(innerHeight / CS); rowCount = new Int32Array(nh);
+  const nt = new Uint8Array(nw * nh), nc = new Uint32Array(nw * nh);
+  if (type) for (let y = 0; y < Math.min(H, nh); y++) for (let x = 0; x < Math.min(W, nw); x++) { // tabana hizalı koru
+    const sy = H - 1 - y, dy = nh - 1 - y, s = sy * W + x, d = dy * nw + x; nt[d] = type[s]; nc[d] = col[s]; }
+  W = nw; H = nh; type = nt; col = nc; cv.width = W; cv.height = H;
+  img = ctx.createImageData(W, H); img32 = new Uint32Array(img.data.buffer); recount();
+}
+
+/* ---------- geri al ---------- */
+const undo = [];
+function snapshot() { undo.push({ w: W, h: H, t: type.slice(), c: col.slice() }); if (undo.length > 25) undo.shift(); }
+function restore() { const s = undo.pop(); if (!s) return; if (s.w === W && s.h === H) { type = s.t; col = s.c; recount(); } }
+
+/* ---------- fizik ---------- */
+let flip = 0, rowCount = new Int32Array(1);
+function recount() { rowCount.fill(0); for (let i = 0; i < type.length; i++) if (type[i] === SAND) rowCount[(i / W) | 0]++; }
+function step() {
+  flip ^= 1;
+  for (let y = H - 2; y >= 0; y--) {
+    if (!rowCount[y]) continue;
+    const ltr = (y + flip) & 1, row = y * W, below = row + W;
+    for (let k = 0; k < W; k++) {
+      const x = ltr ? k : W - 1 - k, i = row + x;
+      if (type[i] !== SAND) continue;
+      let j = below + x;
+      if (type[j] === EMPTY) { // serbest düşüş: tane her adımda birkaç hücre iner, akış dağınık görünür
+        const maxd = 2 + ((Math.random() * 4) | 0); let d = 1;
+        while (d < maxd && y + d + 1 < H && type[j + W * d] === EMPTY) d++;
+        move(i, j + W * (d - 1)); continue; }
+      const d = Math.random() < .5 ? -1 : 1, x1 = x + d, x2 = x - d;
+      if (x1 >= 0 && x1 < W && type[below + x1] === EMPTY && type[row + x1] === EMPTY) { move(i, below + x1); continue; }
+      if (x2 >= 0 && x2 < W && type[below + x2] === EMPTY && type[row + x2] === EMPTY) { move(i, below + x2); }
+    }
+  }
+}
+function move(i, j) { type[j] = SAND; col[j] = col[i]; type[i] = EMPTY; col[i] = BG; const a = (i / W) | 0, b = (j / W) | 0; if (a !== b) { rowCount[a]--; rowCount[b]++; } }
+
+/* ---------- çizim ---------- */
+const ptrs = new Map(); let tool = 'sand';
+const sizeEl = document.getElementById('size');
+function pour(px, py) {
+  const cx = Math.floor(px / CS), cy = Math.floor(py / CS), k0 = 3 / CS, r = Math.max(1, Math.round(+sizeEl.value * k0));
+  if (tool === 'sand') {
+    const n = Math.max(1, Math.round((1 + +sizeEl.value) * k0 * .9));
+    for (let k = 0; k < n; k++) {
+      const x = Math.round(cx + (Math.random() - .5) * 2 * r), y = Math.round(cy + (Math.random() - .5) * r * .5);
+      if (x < 0 || y < 0 || x >= W || y >= H) continue; const i = y * W + x;
+      if (type[i] === EMPTY) { type[i] = SAND; col[i] = grain(); rowCount[y]++; }
+    }
+    if (rainbow) hue = (hue + 1.2) % 360;
+  } else {
+    const rr = tool === 'wall' ? Math.max(1, Math.round(r * .6)) : r + 2;
+    for (let y = cy - rr; y <= cy + rr; y++) for (let x = cx - rr; x <= cx + rr; x++) {
+      if (x < 0 || y < 0 || x >= W || y >= H || (x - cx) ** 2 + (y - cy) ** 2 > rr * rr) continue; const i = y * W + x;
+      if (tool === 'wall') { type[i] = WALL; const v = 70 + ((x * 7 + y * 13) % 9) * 3; col[i] = pack(v, v - 6, v - 14); }
+      else { if (type[i] === SAND) rowCount[y]--; type[i] = EMPTY; col[i] = BG; }
+    }
+  }
+}
+function line(a, b, x, y) { // hızlı sürüklemede boşluk kalmasın (duvar/silgi)
+  const n = Math.ceil(Math.hypot(x - a, y - b) / 3); for (let k = 1; k <= n; k++) pour(a + (x - a) * k / n, b + (y - b) * k / n);
+}
+cv.addEventListener('pointerdown', e => { e.preventDefault(); if (!ptrs.size) snapshot(); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); cv.setPointerCapture(e.pointerId); hideHint(); });
+cv.addEventListener('pointermove', e => { const p = ptrs.get(e.pointerId); if (!p) return; if (tool !== 'sand') line(p.x, p.y, e.clientX, e.clientY); p.x = e.clientX; p.y = e.clientY; });
+const up = e => ptrs.delete(e.pointerId); cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+
+/* ---------- döngü ---------- */
+function render() { for (let i = 0; i < type.length; i++) img32[i] = type[i] ? col[i] : 0; ctx.putImageData(img, 0, 0); }
+function frame() { ptrs.forEach(p => pour(p.x, p.y)); const n = Math.max(2, Math.round(4 / CS)); for (let k = 0; k < n; k++) step(); render(); requestAnimationFrame(frame); }
+
+/* ---------- araçlar ---------- */
+const $ = id => document.getElementById(id);
+function setTool(t) { tool = tool === t ? 'sand' : t; $('bWall').setAttribute('aria-pressed', String(tool === 'wall')); $('bErase').setAttribute('aria-pressed', String(tool === 'erase')); cv.style.cursor = tool === 'sand' ? 'crosshair' : 'cell'; }
+$('bWall').onclick = () => setTool('wall'); $('bErase').onclick = () => setTool('erase');
+$('bUndo').onclick = restore;
+$('bClear').onclick = () => { snapshot(); type.fill(0); col.fill(0); rowCount.fill(0); };
+$('bRainbow').onclick = () => { rainbow = !rainbow; $('bRainbow').setAttribute('aria-pressed', String(rainbow)); showSwatch(); if (tool !== 'sand') setTool(tool); };
+$('bSave').onclick = () => {
+  const out = document.createElement('canvas'); out.width = W * 2; out.height = H * 2; /* ince tanelerle tam çözünürlük */ const o = out.getContext('2d');
+  const g = o.createLinearGradient(0, 0, 0, out.height); g.addColorStop(0, '#F4F1EC'); g.addColorStop(1, '#DCD6CD'); o.fillStyle = g; o.fillRect(0, 0, out.width, out.height);
+  o.imageSmoothingEnabled = false; o.drawImage(cv, 0, 0, out.width, out.height);
+  const a = document.createElement('a'); a.download = 'kum-atolyesi.png'; a.href = out.toDataURL('image/png'); a.click(); toast('Resim kaydedildi');
+};
+function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => { d.style.opacity = 0; setTimeout(() => d.remove(), 400); }, 1400); }
+let hinted = false; function hideHint() { if (hinted) return; hinted = true; $('hint').style.opacity = 0; }
+
+/* ---------- renk seçici ---------- */
+const picker = $('picker'), pcv = $('pcv'), pctx = pcv.getContext('2d');
+function drawPicker() {
+  pcv.width = innerWidth; pcv.height = innerHeight; const w = pcv.width, h = pcv.height;
+  const gx = pctx.createLinearGradient(0, 0, w, 0); for (let k = 0; k <= 12; k++) { const [r, g, b] = hsl(k * 30, .9, .5); gx.addColorStop(k / 12, `rgb(${r},${g},${b})`); }
+  pctx.fillStyle = gx; pctx.fillRect(0, 0, w, h);
+  const gy = pctx.createLinearGradient(0, 0, 0, h); gy.addColorStop(0, 'rgba(0,0,0,1)'); gy.addColorStop(.1, 'rgba(255,255,255,1)'); gy.addColorStop(.25, 'rgba(255,255,255,.85)'); gy.addColorStop(.5, 'rgba(255,255,255,0)'); gy.addColorStop(.5, 'rgba(0,0,0,0)'); gy.addColorStop(1, 'rgba(0,0,0,1)');
+  pctx.fillStyle = gy; pctx.fillRect(0, 0, w, h);
+}
+function pickAt(x, y) { // paletteki konumdan ton ve açıklık
+  hue = x / innerWidth * 360; const t = y / innerHeight;
+  light = t < .1 ? .05 + t / .1 * .9 : t < .5 ? .95 - (t - .1) / .4 * .45 : .5 - (t - .5) / .5 * .45;
+  rainbow = false; $('bRainbow').setAttribute('aria-pressed', 'false'); showSwatch();
+}
+swatch.onclick = () => { drawPicker(); picker.hidden = false; };
+pcv.addEventListener('pointerdown', e => { pickAt(e.clientX, e.clientY); picker.hidden = true; if (tool !== 'sand') setTool(tool); });
+$('pClose').onclick = () => { picker.hidden = true; };
+$('bRandom').onclick = () => { hue = Math.random() * 360; light = .35 + Math.random() * .35; rainbow = false; $('bRainbow').setAttribute('aria-pressed', 'false'); showSwatch(); picker.hidden = true; if (tool !== 'sand') setTool(tool); toast('Rastgele renk seçildi'); };
+
+addEventListener('resize', () => { resize(); if (!picker.hidden) drawPicker(); });
+document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); restore(); } if (e.key === 'Escape') picker.hidden = true; });
+resize(); showSwatch(); requestAnimationFrame(frame);
+window.__kum = { get grid() { return { W, H, sand: type.reduce((a, v) => a + (v === SAND), 0) }; } };
+})();
+</script>
+</body>
+</html>
