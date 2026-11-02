@@ -223,6 +223,7 @@ dialog#detail::backdrop{background:rgba(5,20,13,.6)}
 /* Araçlar */
 .tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
 .tools.four{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tools.four>.tool:last-child:nth-child(odd){grid-column:1/-1}
 @media (max-width:900px){.tools,.tools.four{grid-template-columns:1fr}}
 .tool{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:24px;display:grid;gap:18px;min-width:0}
 .tool h3{font-size:22px}
@@ -443,7 +444,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <div>
         <div class="eyebrow">Platformlarım</div>
         <h2>Kendi geliştirdiğim eğitim uygulamaları</h2>
-        <p>Öğrencilerin tarayıcıda deneyerek öğrendiği dört platform.</p>
+        <p>Öğrencilerin tarayıcıda deneyerek öğrendiği beş uygulama.</p>
       </div>
     </div>
     <div class="tools four">
@@ -470,6 +471,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <p>Okul öncesi ve 1-2. sınıflar için mozaik oyunu: örnek resme bak, aynısını boya. Ayna bölümleriyle simetriyi de öğretir.</p>
         <ul class="feat"><li>150 bölüm: okul öncesi, 1. ve 2. sınıf için 50'şer; 3×3'ten 8×8'e ızgaralar</li><li>Yol gösterici, ipucu ampulü ve her renk için ayrı bir nota</li><li>Akıllı tahta, tablet ve telefonda çalışır; kurulum gerekmez</li></ul>
         <div class="app-foot"><span class="platforms">Web</span><a href="mozaik/">Oyna →</a></div>
+      </div>
+      <div class="tool">
+        <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/kum.svg" alt="" width="44" height="44" loading="lazy"><h3>Kum Atölyesi</h3></div><span class="status live">Yayında</span></div>
+        <p>Parmağınla renkli kum dök: taneler gerçek gibi düşer, kayar ve tepeler oluşturur. Kum sanatı ve eğim, birikme gibi kavramlar için.</p>
+        <ul class="feat"><li>Tam ekran renk paleti, rastgele renk ve gökkuşağı modu</li><li>Duvar ve rampa çiz, kumun nasıl biriktiğini izle</li><li>Çoklu dokunma, geri al ve resmi kaydetme</li></ul>
+        <div class="app-foot"><span class="platforms">Web</span><a href="kum/">Oyna →</a></div>
       </div>
     </div>
   </div>
