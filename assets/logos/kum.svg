@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Kum Atölyesi">
+  <rect width="96" height="96" rx="22" fill="#F4F1EC"/>
+  <path d="M8 84 30 52l12 14 16-30 30 48z" fill="#2F6FDB"/>
+  <path d="M8 84 30 60l12 12 16-24 30 36z" fill="#E63946"/>
+  <path d="M8 84l22-14 12 8 16-14 30 20z" fill="#FFD60A"/>
+  <circle cx="58" cy="16" r="3" fill="#2A9D5C"/><circle cx="58" cy="26" r="2.5" fill="#2A9D5C"/><circle cx="58" cy="35" r="2" fill="#2A9D5C"/>
+</svg>
