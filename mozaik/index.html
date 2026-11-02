@@ -152,7 +152,7 @@ svg{display:block}
 .lv{display:flex;flex-direction:column;align-items:center;gap:8px;padding:14px 12px 12px;border-radius:var(--radius);background:var(--card);box-shadow:0 4px 0 var(--line);transition:transform .12s;position:relative}
 .lv:active{transform:translateY(3px)}
 .lv .no{position:absolute;left:10px;top:8px;font-weight:800;font-size:14px;color:var(--muted)}
-.lv .mode{position:absolute;right:8px;top:8px;font-weight:800;font-size:12px;color:#fff;background:var(--accent);border-radius:999px;padding:2px 8px}
+.lv .mode{position:absolute;z-index:2;right:8px;top:8px;font-weight:800;font-size:12px;color:#fff;background:var(--accent);border-radius:999px;padding:2px 8px}
 .lv b{font-weight:800;font-size:19px;line-height:1.1;text-align:center}
 .lv .meta{font-size:14px;font-weight:700;color:var(--muted)}
 .lv .stars svg{width:20px;height:20px}
@@ -193,7 +193,6 @@ svg{display:block}
   <header class="bar">
     <button class="ibtn" id="btnHome" aria-label="Bölümler"><svg viewBox="0 0 24 24" fill="none" stroke="#2B2340" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg></button>
     <div class="title"><span class="lvl" id="lvlTag">1. bölüm</span><h1 id="lvlName">Mozaik</h1><div class="stars" id="lvlStars"></div></div>
-    <button class="ibtn" id="btnSpeak" aria-label="Yönergeyi tekrar dinle"><svg viewBox="0 0 24 24" fill="none" stroke="#2B2340" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
     <button class="ibtn" id="btnFull" aria-label="Tam ekran"><svg viewBox="0 0 24 24" fill="none" stroke="#2B2340" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
     <button class="ibtn" id="btnSet" aria-label="Ayarlar"><svg viewBox="0 0 24 24" fill="none" stroke="#2B2340" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
@@ -259,7 +258,6 @@ svg{display:block}
       <button class="opt" data-opt="instant" role="switch"><span>Anında geri bildirim<small>Yanlış boyanan kare hemen işaretlenir. Kapalıyken "Kontrol et" düğmesi çıkar.</small></span><i class="sw2"></i></button>
       <button class="opt" data-opt="guide" role="switch"><span>Yol gösterici<small>Parmağın olduğu kare örnekte de işaretlenir.</small></span><i class="sw2"></i></button>
       <button class="opt" data-opt="sfx" role="switch"><span>Ses efektleri<small>Her renk farklı bir nota çalar.</small></span><i class="sw2"></i></button>
-      <button class="opt" data-opt="voice" role="switch"><span>Sesli yönerge<small>Talimatları Türkçe okur (cihaz destekliyorsa).</small></span><i class="sw2"></i></button>
       <button class="opt" data-opt="symbols" role="switch"><span>Renk sembolleri<small>Renk ayırt etmekte zorlanan çocuklar için şekiller.</small></span><i class="sw2"></i></button>
       <button class="opt danger" id="btnReset"><span id="resetTxt">İlerlemeyi sıfırla<small>Tüm yıldızlar silinir.</small></span></button>
     </div>
@@ -300,51 +298,22 @@ const SYM = {
 const symSVG = (k) => { const c = COLORS[k]; const fill = (k === 'Y' || k === 'L' || k === 'K') ? '#00000066' : '#ffffffcc'; return `<svg class="sym" viewBox="0 0 24 24" fill="${fill}">${SYM[c.sym]}</svg>`; };
 
 /* ---------------- bölümler ----------------
-   '.' = boş kare. Desenler bu oyun için çizildi. */
-const P = {
-  trafik: ['.R.', '.Y.', '.G.'],
-  arti: ['.R.', 'RRR', '.R.'],
-  serit: ['RRR', 'YYY', 'GGG'],
-  kose: ['B.B', '.Y.', 'B.B'],
-  ev4: ['.RR.', 'RRRR', 'YNNY', 'YNNY'],
-  mantar4: ['.RR.', 'RRRR', '.YY.', '.YY.'],
-  cicek4: ['.KK.', 'KYYK', '.KK.', '.GG.'],
-  tekne4: ['..R.', '.RR.', 'NNNN', '.NN.'],
-  kalp: ['.R.R.', 'RRRRR', 'RRRRR', '.RRR.', '..R..'],
-  agac: ['.GGG.', 'GGGGG', '.GGG.', '..N..', '..N..'],
-  yildiz: ['..Y..', '.YYY.', 'YYYYY', '.YYY.', '.Y.Y.'],
-  dondurma: ['.KKK.', 'KKKKK', 'OOOOO', '.OOO.', '..O..'],
-  gulen: ['.YYY.', 'YDYDY', 'YYYYY', 'YDDDY', '.YYY.'],
-  ev6: ['..RR..', '.RRRR.', 'RRRRRR', '.YYYY.', '.LYYN.', '.YYYN.'],
-  araba: ['......', '..RRR.', '.RLRLR', 'RRRRRR', '.D..D.', '......'],
-  kelebek: ['P....P', 'PPDDPP', 'PKDDKP', 'PPDDPP', '.PDDP.', 'P....P'],
-  ugur: ['...DD...', '..DDDD..', '.RRDDRR.', 'RDRDDRDR', 'RRRDDRRR', 'RDRDDRDR', '.RRDDRR.', '..RDDR..'],
-  balik: ['........', 'O...OO..', 'OO.OOOO.', 'OOOOODOO', 'OOOOOOOO', 'OO.OOOO.', 'O...OO..', 'LLLLLLLL'],
-  kedi: ['N......N', 'NN....NN', 'NNNNNNNN', 'NGNNNNGN', 'NNNKKNNN', 'NNNNNNNN', '.NNNNNN.', '..NNNN..'],
-  gokkusagi: ['..RRRR..', '.ROOOOR.', 'ROYYYYOR', 'ROY..YOR', 'RO....OR', 'R......R', 'LL....LL', 'LLL..LLL'],
-  saksi: ['..KKKK..', '.KKYYKK.', '.KYYYYK.', '..KKKK..', '...GG...', '.G.GG.G.', '.NNNNNN.', '..NNNN..'],
-  ev8: ['...RR...', '..RRRR..', '.RRRRRR.', 'RRRRRRRR', '.YYYYYY.', '.YLYYNY.', '.YYYYNY.', 'GGGGGGGG'],
-  roket: ['...RR...', '..RRRR..', '..LBBL..', '..LLLL..', '..LLLL..', '.RLLLLR.', 'RR.LL.RR', '...OO...'],
-  robot: ['...YY...', '.LLLLLL.', '.LBLLBL.', '.LLLLLL.', '.LRRRRL.', '..LLLL..', 'DLLLLLLD', '.D....D.']
-};
+   Her yaş grubu için 50 bölüm. Satırlar "/" ile ayrılır, "." boş karedir.
+   [grup, kimlik, ad, satırlar, mod ("m" = ayna)] · Resimler bu oyun için çizildi;
+   "Desen" ve "Mandala" bölümleri simetrik olarak üretildi. */
+const LEVEL_DATA = [["oo","arti","Artı",".R./RRR/.R.",""],["oo","kalp3","Küçük kalp","R.R/RRR/.R.",""],["oo","d1","Desen 1","PPP/PPP/...",""],["oo","d2","Desen 2","GGG/GGG/.G.",""],["oo","kose","Dört köşe","B.B/.Y./B.B",""],["oo","agac3","Fidan",".G./GGG/.N.",""],["oo","mantar3","Küçük mantar","RRR/.Y./.Y.",""],["oo","gunes3","Güneş","O.O/.Y./O.O",""],["oo","elma3","Elma",".G./RRR/.R.",""],["oo","d3","Desen 3",".G./.L./GLG",""],["oo","d4","Desen 4",".R./.O./ROR",""],["oo","d5","Desen 5","L.L/GGG/...",""],["oo","dondurma3","Külah","KKK/OOO/.O.",""],["oo","d6","Desen 6",".N./OOO/NNN",""],["oo","d7","Desen 7","NGN/G.G/G.G",""],["oo","d8","Desen 8",".P./KPK/KPK",""],["oo","trafik","Trafik ışığı",".R./.Y./.G.",""],["oo","cicek3","Papatya",".K./KYK/.G.",""],["oo","ev3","Kulübe",".R./RRR/YNY",""],["oo","serit","Renkli şeritler","RRR/YYY/GGG",""],["oo","d9","Desen 9",".OO./..../.KK./O..O",""],["oo","gunes4","Parlak güneş","O..O/.YY./.YY./O..O",""],["oo","araba4","Araba","..../.RR./RRRR/D..D",""],["oo","d10","Desen 10",".BB./PBBP/..../.BB.",""],["oo","d11","Desen 11",".OO./O..O/ORRO/....",""],["oo","tekne4","Yelkenli","..R./.RR./NNNN/.NN.",""],["oo","elma4","Kırmızı elma","..G./.RR./RRRR/.RR.",""],["oo","lolipop4","Lolipop",".KK./KKKK/.KK./..N.",""],["oo","mantar4","Mantar",".RR./RRRR/.YY./.YY.",""],["oo","agac4","Ağaç",".GG./GGGG/.NN./.NN.",""],["oo","d12","Desen 12","R..R/D..D/.DD./RDDR",""],["oo","d13","Desen 13","L..L/L..L/L..L/BBBB",""],["oo","d14","Desen 14","D..D/..../DRRD/RRRR",""],["oo","d15","Desen 15","ONNO/.OO./.NN./N..N",""],["oo","dondurma4","Dondurma",".KK./KKKK/OOOO/.OO.",""],["oo","cadir4","Çadır",".RR./RRRR/R..R/GGGG",""],["oo","kurbaga4","Kurbağa","G..G/GGGG/GRRG/.GG.",""],["oo","d16","Desen 16","..../PKKP/KKKK/KKKK",""],["oo","pencere4","Pencere","NNNN/NLLN/NLLN/NNNN",""],["oo","yuz4","Mutlu yüz","YYYY/DYYD/YYYY/YDDY",""],["oo","d17","Desen 17",".YY./.GG./.GG./.NN.",""],["oo","cicek4","Çiçek",".KK./KYYK/.KK./.GG.",""],["oo","d18","Desen 18","Y..Y/.BB./.YY./BOOB",""],["oo","d19","Desen 19","..../Y..Y/YYYY/ONNO",""],["oo","d20","Desen 20","P..P/.LL./.PP./BLLB",""],["oo","d21","Desen 21","NOON/.NN./.YY./.YY.",""],["oo","d22","Desen 22",".PP./BBBB/L..L/BBBB",""],["oo","d23","Desen 23",".RR./ROOR/YOOY/.OO.",""],["oo","ev4","Ev",".RR./RRRR/YNNY/YNNY",""],["oo","robot4","Robot yüzü","LLLL/BLLB/LLLL/LRRL",""],["s1","ok5","Yukarı ok","..G../.GGG./GGGGG/..G../..G..",""],["s1","kupa5","Kupa","YYYYY/.YYY./..Y../..Y../.YYY.",""],["s1","yildiz","Yıldız","..Y../.YYY./YYYYY/.YYY./.Y.Y.",""],["s1","kalp","Kalp",".R.R./RRRRR/RRRRR/.RRR./..R..",""],["s1","kar5","Kar tanesi","L.L.L/.LLL./LLLLL/.LLL./L.L.L",""],["s1","m1","Mandala 1","B.B.B/...../BOOOB/...../B.B.B",""],["s1","semsiye5","Şemsiye",".PPP./PPPPP/..N../..N../.NN..",""],["s1","agac","Ağaç",".GGG./GGGGG/.GGG./..N../..N..",""],["s1","cam5","Çam ağacı","..G../.GGG./GGGGG/.GGG./..N..",""],["s1","tekne5","Tekne","..R../..RR./..RRR/NNNNN/.NNN.",""],["s1","mantar5","Benekli mantar",".RRR./RYRYR/RRRRR/..Y../..Y..",""],["s1","dondurma","Dondurma",".KKK./KKKKK/OOOOO/.OOO./..O..",""],["s1","elma5","Elma","..G../.RRR./RRRRR/RRRRR/.RRR.",""],["s1","gunes5","Güneş","O.O.O/.YYY./OYYYO/.YYY./O.O.O",""],["s1","bayrak5","Bayrak","NRRRR/NRRRR/NRRRR/N..../N....",""],["s1","m2","Mandala 2","BPBPB/.BBB./B...B/.BBB./BPBPB",""],["s1","m3","Mandala 3",".GGG./LLGLL/L.G.L/LLGLL/.GGG.",""],["s1","m4","Mandala 4","LP.PL/LPPPL/P...P/LPPPL/LP.PL",""],["s1","gulen","Gülen yüz",".YYY./YDYDY/YYYYY/YDDDY/.YYY.",""],["s1","m5","Mandala 5","..P../L...L/B...B/L...L/..P..",""],["s1","m6","Mandala 6","...../.ORO./Y.O.Y/.ORO./.....",""],["s1","m7","Mandala 7","Y.Y.Y/.BOB./..O../.BOB./Y.Y.Y",""],["s1","cicek5","Pembe çiçek",".KKK./KKYKK/.KKK./..G../.GGG.",""],["s1","ev5","Ev","..R../.RRR./RRRRR/.YNY./.YNY.",""],["s1","cilek5","Çilek",".GGG./RRRRR/RYRYR/.RRR./..R..",""],["s1","m8","Mandala 8","YN.NY/Y...Y/OYYYO/Y...Y/YN.NY",""],["s1","m9","Mandala 9","BL.LB/GG.GG/.GBG./GG.GG/BL.LB",""],["s1","roket5","Küçük roket","..R../.LLL./.LBL./.LLL./R.O.R",""],["s1","agac6","Büyük ağaç","..GG../.GGGG./GGGGGG/.GGGG./..NN../..NN..",""],["s1","gunes6","Güneş","O.OO.O/.YYYY./OYYYYO/OYYYYO/.YYYY./O.OO.O",""],["s1","araba","Araba","....../..RRR./.RLRLR/RRRRRR/.D..D./......",""],["s1","ucurtma6","Uçurtma","..PP../.PPPP./PPYYPP/.PPPP./..PP../...N..",""],["s1","m10","Mandala 10","....../.YKKY./KPKKPK/KPKKPK/.YKKY./......",""],["s1","m11","Mandala 11",".G..G./Y....Y/GYNNYG/GYNNYG/Y....Y/.G..G.",""],["s1","m12","Mandala 12","KO..OK/....../PPKKPP/PPKKPP/....../KO..OK",""],["s1","papatya6","Papatya",".K..K./KKKKKK/.KYYK./KKKKKK/.K..K./..GG..",""],["s1","gemi6","Gemi","...R../..RR../.RRR../NNNNNN/.NNNN./LLLLLL",""],["s1","balik6","Balık","....../O..OO./OOOODO/OOOOOO/O..OO./LLLLLL",""],["s1","m13","Mandala 13","GL..LG/L.BB.L/.BGGB./.BGGB./L.BB.L/GL..LG",""],["s1","kelebek","Kelebek","P....P/PPDDPP/PKDDKP/PPDDPP/.PDDP./P....P",""],["s1","kedi6","Kedi","N....N/NN..NN/NNNNNN/NGNNGN/NNKKNN/.NNNN.",""],["s1","m14","Mandala 14",".O..O./NYOOYN/NYOOYN/NYOOYN/NYOOYN/.O..O.",""],["s1","kale6","Kale","NN..NN/NNNNNN/NNNNNN/NNDDNN/NNDDNN/GGGGGG",""],["s1","robot6","Robot","..YY../.LLLL./.BLLB./.LRRL./LLLLLL/.L..L.",""],["s1","ev6","Bahçeli ev","..RR../.RRRR./RRRRRR/.YYYY./.LYYN./.YYYN.",""],["s1","m15","Mandala 15","KPKKPK/LRKKRL/....../....../LRKKRL/KPKKPK",""],["s1","m16","Mandala 16","Y....Y/KKRRKK/P.RR.P/P.RR.P/KKRRKK/Y....Y",""],["s1","m17","Mandala 17","YO..OY/.OGGO./.RRRR./.RRRR./.OGGO./YO..OY",""],["s1","pasta6","Doğum günü pastası",".Y..Y./.R..R./KKKKKK/RKRKRK/KKKKKK/NNNNNN",""],["s1","m18","Mandala 18","BDDDDB/R.YY.R/BY..YB/BY..YB/R.YY.R/BDDDDB",""],["s2","yildiz8","Parlayan yıldız","...YY.../...YY.../YYYYYYYY/.YYYYYY./..YYYY../.YYYYYY./.YY..YY./Y......Y",""],["s2","kalp8","Büyük kalp",".RR..RR./RRRRRRRR/RRRRRRRR/RRRRRRRR/.RRRRRR./..RRRR../...RR.../........",""],["s2","balon8","Balon","..RRRR../.RRRRRR./.RRRRRR./.RRRRRR./..RRRR../...RR.../....N.../...N....",""],["s2","agac8","Ulu ağaç","...GG.../..GGGG../.GGGGGG./GGGGGGGG/.GGGGGG./...NN.../...NN.../..NNNN..",""],["s2","lale8","Lale","..R..R../.RRRRRR./.RRRRRR./..RRRR../...GG.../GG.GG.GG/.GGGGGG./...GG...",""],["s2","ahtapot8","Ahtapot","..PPPP../.PPPPPP./.PDPPDP./.PPPPPP./..PPPP../.P.PP.P./P..PP..P/P.P..P.P",""],["s2","yildiz8","Ayna: Parlayan yıldız","...YY.../...YY.../YYYYYYYY/.YYYYYY./..YYYY../.YYYYYY./.YY..YY./Y......Y","m"],["s2","ugur","Uğur böceği","...DD.../..DDDD../.RRDDRR./RDRDDRDR/RRRDDRRR/RDRDDRDR/.RRDDRR./..RDDR..",""],["s2","gulen8","Güneş yüz","..YYYY../.YYYYYY./YYDYYDYY/YYYYYYYY/YDYYYYDY/YYDDDDYY/.YYYYYY./..YYYY..",""],["s2","kalp8","Ayna: Büyük kalp",".RR..RR./RRRRRRRR/RRRRRRRR/RRRRRRRR/.RRRRRR./..RRRR../...RR.../........","m"],["s2","m1","Mandala 1","..YYYY../..YRRY../......../R.O..O.R/R.O..O.R/......../..YRRY../..YYYY..",""],["s2","m2","Mandala 2","BB.BB.BB/.Y....Y./B.R..R.B/Y......Y/Y......Y/B.R..R.B/.Y....Y./BB.BB.BB",""],["s2","agac8","Ayna: Ulu ağaç","...GG.../..GGGG../.GGGGGG./GGGGGGGG/.GGGGGG./...NN.../...NN.../..NNNN..","m"],["s2","araba8","Kırmızı araba","......../..RRRR../.RLRRLR./RRRRRRRR/RRRRRRRR/.DD..DD./.DD..DD./........",""],["s2","gemi8","Yelkenli gemi","....R.../...RR.../..RRR.../.RRRR.../NNNNNNNN/.NNNNNN./..NNNN../LLLLLLLL",""],["s2","lale8","Ayna: Lale","..R..R../.RRRRRR./.RRRRRR./..RRRR../...GG.../GG.GG.GG/.GGGGGG./...GG...","m"],["s2","dondurma8","Külah dondurma","...KK.../..KKKK../.KKPPKK./KKKKKKKK/.OOOOOO./..OOOO../..OOOO../...OO...",""],["s2","m3","Mandala 3",".PL..LP./......../LLLKKLLL/PLK..KLP/PLK..KLP/LLLKKLLL/......../.PL..LP.",""],["s2","ahtapot8","Ayna: Ahtapot","..PPPP../.PPPPPP./.PDPPDP./.PPPPPP./..PPPP../.P.PP.P./P..PP..P/P.P..P.P","m"],["s2","balik","Balık","......../O...OO../OO.OOOO./OOOOODOO/OOOOOOOO/OO.OOOO./O...OO../LLLLLLLL",""],["s2","mantar8","Orman mantarı","..RRRR../.RRYYRR./RRYRRYRR/RRRRRRRR/...YY.../...YY.../..YYYY../GGGGGGGG",""],["s2","ugur","Ayna: Uğur böceği","...DD.../..DDDD../.RRDDRR./RDRDDRDR/RRRDDRRR/RDRDDRDR/.RRDDRR./..RDDR..","m"],["s2","m4","Mandala 4","B.OBBO.B/YO.YY.OY/BO.BB.OB/Y..OO..Y/Y..OO..Y/BO.BB.OB/YO.YY.OY/B.OBBO.B",""],["s2","kelebek8","Büyük kelebek","PP....PP/PPP..PPP/PKPDDPKP/PPPDDPPP/..PDDP../.PPDDPP./PKP..PKP/PP....PP",""],["s2","gulen8","Ayna: Güneş yüz","..YYYY../.YYYYYY./YYDYYDYY/YYYYYYYY/YDYYYYDY/YYDDDDYY/.YYYYYY./..YYYY..","m"],["s2","kurbaga8","Kurbağa",".GG..GG./GDGGGGDG/GGGGGGGG/GRRRRRRG/GGGGGGGG/.GGGGGG./GG....GG/........",""],["s2","kedi","Kedi","N......N/NN....NN/NNNNNNNN/NGNNNNGN/NNNKKNNN/NNNNNNNN/.NNNNNN./..NNNN..",""],["s2","mantar8","Ayna: Orman mantarı","..RRRR../.RRYYRR./RRYRRYRR/RRRRRRRR/...YY.../...YY.../..YYYY../GGGGGGGG","m"],["s2","kale8","Kale","N.N..N.N/NNNNNNNN/.NNNNNN./.NNDDNN./.NNDDNN./.NNDDNN./GGGGGGGG/GGGGGGGG",""],["s2","m5","Mandala 5","N......N/GRG..GRG/..R..R../..Y..Y../..Y..Y../..R..R../GRG..GRG/N......N",""],["s2","kelebek8","Ayna: Büyük kelebek","PP....PP/PPP..PPP/PKPDDPKP/PPPDDPPP/..PDDP../.PPDDPP./PKP..PKP/PP....PP","m"],["s2","roket","Roket","...RR.../..RRRR../..LBBL../..LLLL../..LLLL../.RLLLLR./RR.LL.RR/...OO...",""],["s2","m6","Mandala 6","R..GG..R/Y.Y..Y.Y/.BG..GB./B..BB..B/B..BB..B/.BG..GB./Y.Y..Y.Y/R..GG..R",""],["s2","kurbaga8","Ayna: Kurbağa",".GG..GG./GDGGGGDG/GGGGGGGG/GRRRRRRG/GGGGGGGG/.GGGGGG./GG....GG/........","m"],["s2","m7","Mandala 7","RP.KK.PR/...PP.../KRL..LRK/...PP.../...PP.../KRL..LRK/...PP.../RP.KK.PR",""],["s2","saksi","Saksıda çiçek","..KKKK../.KKYYKK./.KYYYYK./..KKKK../...GG.../.G.GG.G./.NNNNNN./..NNNN..",""],["s2","kedi","Ayna: Kedi","N......N/NN....NN/NNNNNNNN/NGNNNNGN/NNNKKNNN/NNNNNNNN/.NNNNNN./..NNNN..","m"],["s2","gokkusagi","Gökkuşağı","..RRRR../.ROOOOR./ROYYYYOR/ROY..YOR/RO....OR/R......R/LL....LL/LLL..LLL",""],["s2","baykus8","Baykuş","N......N/NN....NN/NYYNNYYN/NYDNNDYN/NNNOONNN/NNNNNNNN/.NNNNNN./..O..O..",""],["s2","roket","Ayna: Roket","...RR.../..RRRR../..LBBL../..LLLL../..LLLL../.RLLLLR./RR.LL.RR/...OO...","m"],["s2","m8","Mandala 8","DBDBBDBD/B..YY..B/BD.DD.DB/D.RDDR.D/D.RDDR.D/BD.DD.DB/B..YY..B/DBDBBDBD",""],["s2","m9","Mandala 9",".GOOOOG./YGYRRYGY/..O..O../OYGGGGYO/OYGGGGYO/..O..O../YGYRRYGY/.GOOOOG.",""],["s2","robot","Robot","...YY.../.LLLLLL./.LBLLBL./.LLLLLL./.LRRRRL./..LLLL../DLLLLLLD/.D....D.",""],["s2","m10","Mandala 10","PY....YP/OP.PP.PO/..YPPY../K.YRRY.K/K.YRRY.K/..YPPY../OP.PP.PO/PY....YP",""],["s2","gokkusagi","Ayna: Gökkuşağı","..RRRR../.ROOOOR./ROYYYYOR/ROY..YOR/RO....OR/R......R/LL....LL/LLL..LLL","m"],["s2","m11","Mandala 11",".Y....Y./OK.YY.KO/..PRRP../RKPOOPKR/RKPOOPKR/..PRRP../OK.YY.KO/.Y....Y.",""],["s2","ev8","Köy evi","...RR.../..RRRR../.RRRRRR./RRRRRRRR/.YYYYYY./.YLYYNY./.YYYYNY./GGGGGGGG",""],["s2","baykus8","Ayna: Baykuş","N......N/NN....NN/NYYNNYYN/NYDNNDYN/NNNOONNN/NNNNNNNN/.NNNNNN./..O..O..","m"],["s2","m12","Mandala 12","GYG..GYG/BRO..ORB/YGRBBRGY/.Y.YY.Y./.Y.YY.Y./YGRBBRGY/BRO..ORB/GYG..GYG",""],["s2","robot","Ayna: Robot","...YY.../.LLLLLL./.LBLLBL./.LLLLLL./.LRRRRL./..LLLL../DLLLLLLD/.D....D.","m"]];
 const GROUPS = [
-  { id: 'oo', name: 'Okul öncesi', sub: '3×3 · 4×4', instant: true, levels: [
-    ['trafik', 'Trafik ışığı'], ['arti', 'Artı'], ['serit', 'Renkli şeritler'], ['kose', 'Dört köşe'],
-    ['ev4', 'Ev'], ['mantar4', 'Mantar'], ['cicek4', 'Çiçek'], ['tekne4', 'Yelkenli']] },
-  { id: 's1', name: '1. sınıf', sub: '5×5 · 6×6', instant: true, levels: [
-    ['kalp', 'Kalp'], ['agac', 'Ağaç'], ['yildiz', 'Yıldız'], ['dondurma', 'Dondurma'],
-    ['gulen', 'Gülen yüz'], ['ev6', 'Bahçeli ev'], ['araba', 'Araba'], ['kelebek', 'Kelebek']] },
-  { id: 's2', name: '2. sınıf', sub: '8×8 · ayna', instant: false, levels: [
-    ['ugur', 'Uğur böceği'], ['balik', 'Balık'], ['kedi', 'Kedi'], ['gokkusagi', 'Gökkuşağı'],
-    ['saksi', 'Saksıda çiçek'], ['ev8', 'Köy evi'], ['roket', 'Roket'], ['robot', 'Robot'],
-    ['kalp', 'Ayna: Kalp', 'mirror'], ['kelebek', 'Ayna: Kelebek', 'mirror'], ['kedi', 'Ayna: Kedi', 'mirror'], ['ugur', 'Ayna: Uğur böceği', 'mirror']] }
+  { id: 'oo', name: 'Okul öncesi', sub: '3×3 · 4×4', instant: true },
+  { id: 's1', name: '1. sınıf', sub: '5×5 · 6×6', instant: true },
+  { id: 's2', name: '2. sınıf', sub: '8×8 · ayna', instant: false }
 ];
-const LEVELS = [];
-GROUPS.forEach(g => g.levels.forEach(([pid, name, mode]) => LEVELS.push({ id: `${g.id}-${pid}${mode ? '-' + mode : ''}`, pid, name, mode: mode || 'copy', group: g.id, rows: P[pid] })));
+const LEVELS = LEVEL_DATA.map(([group, pid, name, rows, m]) => ({ id: `${group}-${pid}${m ? '-mirror' : ''}`, pid, name, mode: m ? 'mirror' : 'copy', group, rows: rows.split('/') }));
+// her yaş grubu kendi içinde 1'den 50'ye numaralanır
+const levelNo = (i) => LEVELS.slice(0, i + 1).filter(l => l.group === LEVELS[i].group).length;
 
 /* ---------------- kayıt ---------------- */
 const KEY = 'mozaik-atolyesi-v1';
-const DEF = { stars: {}, last: 0, tab: 'oo', instant: null, guide: true, sfx: true, voice: true, symbols: false };
+const DEF = { stars: {}, last: 0, tab: 'oo', instant: null, guide: true, sfx: true, symbols: false };
 let S = { ...DEF };
 try { const raw = localStorage.getItem(KEY); if (raw) S = { ...DEF, ...JSON.parse(raw) }; } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
@@ -367,13 +336,6 @@ function tone(f, d = .16, type = 'triangle', vol = .18, when = 0) {
 }
 const sfxWrong = () => { tone(220, .14, 'square', .06); tone(185, .18, 'square', .05, .08); };
 const sfxWin = () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, .28, 'triangle', .16, i * .1));
-let trVoice = null;
-function pickVoice() { try { const v = speechSynthesis.getVoices(); trVoice = v.find(x => /^tr/i.test(x.lang)) || null; } catch (e) {} }
-if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-function say(text) {
-  if (!S.voice || !('speechSynthesis' in window)) return;
-  try { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'tr-TR'; if (trVoice) u.voice = trVoice; u.rate = .95; u.pitch = 1.1; speechSynthesis.speak(u); } catch (e) {}
-}
 
 /* ---------------- oyun durumu ---------------- */
 let L = null, idx = 0, W = 0, H = 0, target = [], cells = [], locked = [], undo = [], hints = 0, wrongs = 0, checks = 0, current = null, done = false;
@@ -429,12 +391,12 @@ function start(i) {
   cells = Array(W * H).fill(''); locked = Array(W * H).fill(false);
   if (L.mode === 'mirror') { const keep = Math.ceil(W / 2); for (let y = 0; y < H; y++) for (let x = 0; x < keep; x++) { const j = y * W + x; cells[j] = target[j]; locked[j] = true; } }
   undo = []; hints = 0; wrongs = 0; checks = 0; done = false; current = null; confettiRun++;
-  $('lvlTag').textContent = `${idx + 1}. bölüm`; $('lvlName').textContent = L.name; $('lvlStars').innerHTML = starsHTML(S.stars[L.id] || 0);
+  $('lvlTag').textContent = `${groupOf(L).name} · ${levelNo(idx)}`; $('lvlName').textContent = L.name; $('lvlStars').innerHTML = starsHTML(S.stars[L.id] || 0);
   $('targetTag').querySelector('span').textContent = L.mode === 'mirror' ? 'Bütün resim' : 'Örnek';
   $('btnCheck').hidden = instantOn(L);
-  renderPalette(); layout(); updateProgress(); setMsg('');
+  renderPalette(); layout(); updateProgress();
   $('menu').hidden = true; $('win').hidden = true;
-  setTimeout(() => say(L.mode === 'mirror' ? 'Çizginin sağ tarafını, aynadaki gibi tamamla.' : 'Örnekteki resmin aynısını boya.'), 250);
+  setMsg(L.mode === 'mirror' ? 'Çizginin sağını, aynadaki gibi tamamla.' : 'Örnekteki resmin aynısını boya.');
 }
 
 function setMsg(t, color) { const m = $('msg'); m.textContent = t; m.style.color = color || ''; }
@@ -488,13 +450,13 @@ $('btnHint').addEventListener('click', () => {
   [board.children[i], tgt.children[i]].forEach(el => { el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); });
   const need = target[i]; const sw = [...$('pal').children].find(b => b.dataset.k === (need || ''));
   if (sw) { sw.classList.remove('flash'); void sw.offsetWidth; sw.classList.add('flash'); setTimeout(() => sw.classList.remove('flash'), 1600); }
-  setMsg(need ? `Bu kare ${COLORS[need].name} olmalı.` : 'Bu kare boş kalmalı.', '#B4461C'); say(need ? `Bu kare ${COLORS[need].name} olmalı.` : 'Bu kare boş kalmalı.');
+  setMsg(need ? `Bu kare ${COLORS[need].name} olmalı.` : 'Bu kare boş kalmalı.', '#B4461C');
   tone(880, .12, 'sine', .12); tone(1175, .16, 'sine', .1, .1); showCross(i);
 });
 $('btnCheck').addEventListener('click', () => {
   if (done) return; if (isWin()) return win(); checks++;
   let bad = 0; board.querySelectorAll('.cell').forEach((el, i) => { el.classList.remove('wrong', 'missing'); if (locked[i]) return; if (cells[i] && cells[i] !== target[i]) { el.classList.add('wrong'); bad++; } else if (!cells[i] && target[i]) { el.classList.add('missing'); bad++; } });
-  sfxWrong(); setMsg(`${bad} kare eksik ya da yanlış. Kırmızı işaretlere bak.`, '#E63946'); say(`${bad} kareyi düzeltmen gerekiyor.`);
+  sfxWrong(); setMsg(`${bad} kare eksik ya da yanlış. Kırmızı işaretlere bak.`, '#E63946');
 });
 
 /* ---------------- kazanma ---------------- */
@@ -511,7 +473,7 @@ function win() {
   $('winText').textContent = L.mode === 'mirror' ? 'Resmin iki yarısı aynı oldu.' : `${L.name} resmini tamamladın.`;
   const wg = $('winGrid'); const cs = Math.max(12, Math.floor(160 / W)); buildGrid(wg, W, H, cs, 3); wg.querySelectorAll('.cell').forEach((c, i) => paintCell(c, target[i]));
   $('winNext').hidden = idx === LEVELS.length - 1;
-  setTimeout(() => { $('win').hidden = false; sfxWin(); confetti(); say(st === 3 ? 'Harika! Çok güzel oldu.' : 'Tebrikler, tamamladın!'); $('winNext').focus({ preventScroll: true }); }, 350);
+  setTimeout(() => { $('win').hidden = false; sfxWin(); confetti(); $('winNext').focus({ preventScroll: true }); }, 350);
 }
 $('winAgain').addEventListener('click', () => start(idx));
 $('winNext').addEventListener('click', () => start(idx + 1));
@@ -542,15 +504,14 @@ function renderMenu() {
     b.innerHTML = `${g.name} <small>${g.sub} · ★ ${got}/${max}</small>`; b.onclick = () => { S.tab = g.id; save(); renderMenu(); }; tabs.appendChild(b); });
   const box = $('levels'); box.innerHTML = '';
   LEVELS.forEach((lv, i) => { if (lv.group !== S.tab) return; const b = document.createElement('button'); b.className = 'lv';
-    b.innerHTML = `<span class="no">${i + 1}</span>${lv.mode === 'mirror' ? '<span class="mode">Ayna</span>' : ''}`; b.appendChild(thumb(lv));
+    b.innerHTML = `<span class="no">${levelNo(i)}</span>${lv.mode === 'mirror' ? '<span class="mode">Ayna</span>' : ''}`; b.appendChild(thumb(lv));
     b.insertAdjacentHTML('beforeend', `<b>${lv.name.replace('Ayna: ', '')}</b><span class="meta">${lv.rows[0].length}×${lv.rows.length} · ${new Set(lv.rows.join('').replace(/\./g, '')).size} renk</span><span class="stars">${starsHTML(S.stars[lv.id] || 0)}</span>`);
-    b.setAttribute('aria-label', `${i + 1}. bölüm: ${lv.name}`); b.onclick = () => start(i); box.appendChild(b); });
-  const any = Object.keys(S.stars).length; $('contTxt').textContent = any ? `Devam et · ${S.last + 1}. bölüm` : 'Oyna';
+    b.setAttribute('aria-label', `${levelNo(i)}. bölüm: ${lv.name}`); b.onclick = () => start(i); box.appendChild(b); });
+  const any = Object.keys(S.stars).length; $('contTxt').textContent = any ? `Devam et · ${groupOf(LEVELS[S.last]).name} ${levelNo(S.last)}` : 'Oyna';
 }
-function openMenu() { $('win').hidden = true; renderMenu(); $('menu').hidden = false; try { speechSynthesis.cancel(); } catch (e) {} }
+function openMenu() { $('win').hidden = true; renderMenu(); $('menu').hidden = false; }
 $('btnContinue').addEventListener('click', () => { const any = Object.keys(S.stars).length; if (!any) return start(LEVELS.findIndex(l => l.group === S.tab)); const nxt = S.stars[LEVELS[S.last].id] ? S.last + 1 : S.last; start(Math.min(nxt, LEVELS.length - 1)); });
 $('btnHome').addEventListener('click', openMenu);
-$('btnSpeak').addEventListener('click', () => { const was = S.voice; S.voice = true; say(L && L.mode === 'mirror' ? 'Çizginin sağ tarafını, aynadaki gibi tamamla.' : 'Sağdaki renklerden birini seç. Örnekteki resmin aynısını boya.'); S.voice = was; });
 $('btnFull').addEventListener('click', () => { try { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen(); } catch (e) {} });
 
 /* ---------------- ayarlar ---------------- */
