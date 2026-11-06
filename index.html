@@ -192,6 +192,7 @@ dialog#detail::backdrop{background:rgba(5,20,13,.6)}
 .app-title{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .app h3{font-size:24px}
 .status{font:500 12px/1 var(--f-mono);padding:5px 9px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.soon{font:500 13px/1 var(--f-mono);color:var(--muted,#888);cursor:not-allowed;padding:6px 2px}
 .status.live{color:var(--ok)}.status.beta{color:var(--info)}.status.dev{color:var(--warn)}
 .app p{color:var(--muted);font-size:15px}
 .feat{list-style:none;padding:0;margin:0;display:grid;gap:6px;font-size:14px}
@@ -444,7 +445,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <div>
         <div class="eyebrow">Platformlarım</div>
         <h2>Kendi geliştirdiğim eğitim uygulamaları</h2>
-        <p>Öğrencilerin tarayıcıda deneyerek öğrendiği beş uygulama.</p>
+        <p>Öğrencilerin tarayıcıda deneyerek öğrendiği yedi uygulama.</p>
       </div>
     </div>
     <div class="tools four">
@@ -478,6 +479,18 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <ul class="feat"><li>Tam ekran renk paleti, rastgele renk ve gökkuşağı modu</li><li>Duvar ve rampa çiz, kumun nasıl biriktiğini izle</li><li>Çoklu dokunma, geri al ve resmi kaydetme</li></ul>
         <div class="app-foot"><span class="platforms">Web</span><a href="kum/">Oyna →</a></div>
       </div>
+      <div class="tool">
+        <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/kodlandia.svg" alt="" width="44" height="44" loading="lazy"><h3>Kodlandia</h3></div><span class="status live">Yayında</span></div>
+        <p>Anaokulundan 7. sınıfa kodlama oyunu: kediyi 3B dünyalarda yürüt, altın topla, blokla ya da Python ile programla. Öğretmenler sınıf açıp konu atayabilir.</p>
+        <ul class="feat"><li>1300 bölüm: anaokulu-4. sınıf blok, 5-7. sınıf blok ve Python</li><li>Hata ayıklama, döngü, fonksiyon ve koşul; her bölümde en kısa çözüm için yıldız</li><li>Öğretmen paneli: sınıf, davet kodu, PIN'li öğrenci girişi, konu konu müfredat atama</li></ul>
+        <div class="app-foot"><span class="platforms">Web</span><a href="https://kodlandia.furkankale.com" target="_blank" rel="noopener">Oyna →</a></div>
+      </div>
+      <div class="tool">
+        <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/robotstudio.svg" alt="" width="44" height="44" loading="lazy"><h3>RobotStudio</h3></div><span class="status dev">Yakında</span></div>
+        <p>Tarayıcıda 3D robot tasarla: parça yerleştir, Arduino ve servolarını kabloyla bağla, blokla ya da C++ ile programla ve gerçek fizik kurallarıyla çalıştır.</p>
+        <ul class="feat"><li>3D çalışma alanı; Arduino Uno, servo, HC-SR04 ve kutu/silindir parçalar</li><li>Pin pin kablolama, servo ile bağlı kol simülasyonu, Dünya / Ay / Mars / sıfır-G</li><li>Bloktan Arduino C++ kodu; hesap açıp projelerini bulutta sakla</li></ul>
+        <div class="app-foot"><span class="platforms">Web · Masaüstü</span><span class="soon" aria-disabled="true">Yakında</span></div>
+      </div>
     </div>
   </div>
 </section>
@@ -501,7 +514,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <div class="about-text">
       <div class="eyebrow">Hakkımda</div>
       <h2>Merhaba, ben Furkan Kale.</h2>
-      <p>Çocuklara ve gençlere robotik, kodlama ve elektronik öğretmek için materyal ve yazılım geliştiriyorum. Python öğrenme platformu PyLearn, Arduino ve 3D tasarım atölyesi MakersHub Studio kod okuma oyunu Kod Noktası ve okul öncesi ile ilkokul için mozaik oyunu Mozaik Atölyesi benim yazdığım uygulamalar.</p>
+      <p>Çocuklara ve gençlere robotik, kodlama ve elektronik öğretmek için materyal ve yazılım geliştiriyorum. Python öğrenme platformu PyLearn, Arduino ve 3D tasarım atölyesi MakersHub Studio kod okuma oyunu Kod Noktası ve okul öncesi ile ilkokul için mozaik oyunu Mozaik Atölyesi ve anaokulundan 7. sınıfa kodlama oyunu Kodlandia benim yazdığım uygulamalar.</p>
       <p>Bu sitede Scratch'ten Arduino ve Python'a uzanan içerikleri, adım adım anlatılan 90 Arduino projesini ve kendi araçlarımı topluyorum. Projelerin devre görüntüleri MakersHub simülatöründen alındı, kodlar açık. Hata bulursan ya da bir konu önermek istersen yazman yeterli.</p>
     </div>
     <figure class="about-photo"><img src="assets/furkan-portre.webp" width="1254" height="1254" loading="lazy" alt="Furkan Kale: yarısı robot, yarısı insan olarak çizilmiş, robotik atölyesinde laboratuvar önlüğü giyen portre illüstrasyonu"></figure>
