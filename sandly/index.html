@@ -39,6 +39,7 @@ button:focus-visible{outline:3px solid #3A86FF;outline-offset:3px}
 @media (max-width:640px){.btn{width:46px;height:46px}.btn svg{width:22px;height:22px}#swatch{width:52px;height:52px}.size{display:none}.back span{display:none}.bar{gap:7px}}
 @media (prefers-reduced-motion: reduce){*{transition:none!important}}
 </style>
+<link rel="stylesheet" href="../assets/motion.css">
 </head>
 <body>
 <canvas id="cv" aria-label="Kum tuvali: basılı tutarak kum dök"></canvas>
@@ -203,5 +204,6 @@ resize(); showSwatch(); requestAnimationFrame(frame);
 window.__kum = { get grid() { return { W, H, sand: type.reduce((a, v) => a + (v === SAND), 0) }; } };
 })();
 </script>
+<script src="../assets/motion.js" defer data-mode="game"></script>
 </body>
 </html>

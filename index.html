@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="assets/motion.css">
 <style>
 /* Layout: bir devre kartı gibi; her bölüm kart üzerindeki bir bileşen alanı, serigrafi etiketiyle (U1, J2…) işaretli. 1180px ızgara. */
 :root{
@@ -326,13 +327,13 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     </div>
     <figure class="sim" style="margin:0">
       <div class="sim-bar"><span>2 eksenli kol · ters kinematik</span><span class="live">canlı</span></div>
-      <canvas id="arm" aria-label="İmleci takip eden iki eklemli robot kol simülasyonu"></canvas>
+      <canvas id="arm" aria-label="İmleci takip eden iki eklemli robot kol simülasyonu; basılı tutarak küpü tutabilirsin"></canvas>
       <div class="readout">
         <div><span>Omuz J1</span><strong id="r1">90°</strong></div>
         <div><span>Dirsek J2</span><strong id="r2">90°</strong></div>
         <div><span>Uç (x, y)</span><strong id="r3">0, 0</strong></div>
       </div>
-<pre class="sim-code" id="simcode"><span class="c">// imleci kolun üzerinde gezdir</span>
+<pre class="sim-code" id="simcode"><span class="c">// imleci gezdir; tıklayıp basılı tutarak küpü tut</span>
 <span class="k">omuz</span>.write(<span class="n">90</span>); <span class="k">dirsek</span>.write(<span class="n">90</span>);</pre>
     </figure>
   </div>
@@ -407,6 +408,12 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
         <ul class="feat"><li>1300 bölüm: anaokulu-4. sınıf blok, 5-7. sınıf blok ve Python</li><li>Hata ayıklama, döngü, fonksiyon ve koşul; her bölümde en kısa çözüm için yıldız</li><li>Öğretmen paneli: sınıf, davet kodu, seviye seviye müfredat atama; öğrenci kendi hayvanını ve şifresini seçer</li></ul>
         <div class="app-foot"><span class="platforms">Web</span><a href="https://kodlandia.furkankale.com" target="_blank" rel="noopener">Oyna →</a></div>
       </div>
+      <div class="tool">
+        <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/pathly.svg" alt="" width="44" height="44" loading="lazy"><h3>Pathly</h3></div><span class="status live">Yayında</span></div>
+        <p>4–8 yaş için algoritma macerası: komutlarla yolunu çiz, toprağa su ver, sokak lambalarını yak. Okuma yazma gerekmez; her şey simge ve renklerle anlatılır.</p>
+        <ul class="feat"><li>İki dünya, 300 bölüm: Bulut Adası Bahçıvanları (komutlar, sıralama, yön, algoritma) ve Gece Fenerciler (döngü ve koşul blokları); 3. dünya yapım aşamasında</li><li>Her çözüm sunucuda yeniden doğrulanır; yıldız, XP ve rozetler gerçek ilerlemeden gelir</li><li>Öğretmen paneli: sınıf kodu, konu konu açma, ilerleme takibi; öğrenci resimli şifreyle girer</li></ul>
+        <div class="app-foot"><span class="platforms">Web</span><a href="https://pathly.furkankale.com" target="_blank" rel="noopener">Oyna →</a></div>
+      </div>
     </div>
   </div>
 </section>
@@ -430,7 +437,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     <div class="about-text">
       <div class="eyebrow">Hakkımda</div>
       <h2>Merhaba, ben Furkan Kale.</h2>
-      <p>Çocuklara ve gençlere robotik, kodlama ve elektronik öğretmek için materyal ve yazılım geliştiriyorum. Python öğrenme platformu PyLearn, Arduino ve 3D tasarım atölyesi MakersHub Studio kod okuma oyunu Kod Noktası ve okul öncesi ile ilkokul için mozaik oyunu Tilely ve anaokulundan 7. sınıfa kodlama oyunu Kodlandia benim yazdığım uygulamalar.</p>
+      <p>Çocuklara ve gençlere robotik, kodlama ve elektronik öğretmek için materyal ve yazılım geliştiriyorum. Python öğrenme platformu PyLearn, Arduino ve 3D tasarım atölyesi MakersHub Studio kod okuma oyunu Kod Noktası ve okul öncesi ile ilkokul için mozaik oyunu Tilely anaokulundan 7. sınıfa kodlama oyunu Kodlandia ve 4-8 yaş için algoritma macerası Pathly benim yazdığım uygulamalar.</p>
       <p>Bu sitede Scratch'ten Arduino ve Python'a uzanan içerikleri, adım adım anlatılan 90 Arduino projesini ve kendi araçlarımı topluyorum. Projelerin devre görüntüleri MakersHub simülatöründen alındı, kodlar açık. Hata bulursan ya da bir konu önermek istersen yazman yeterli.</p>
     </div>
     <figure class="about-photo"><img src="assets/furkan-portre.webp" width="1254" height="1254" loading="lazy" alt="Furkan Kale: yarısı robot, yarısı insan olarak çizilmiş, robotik atölyesinde laboratuvar önlüğü giyen portre illüstrasyonu"></figure>
@@ -480,6 +487,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
 <footer><div class="wrap"><span>© 2026 Furkan KALE. Tüm hakları saklıdır.</span></div></footer>
 
+<script src="assets/motion.js" defer data-mode="site"></script>
 <script>
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -490,6 +498,10 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   const cv = document.getElementById('arm'), ctx = cv.getContext('2d');
   const r1 = document.getElementById('r1'), r2 = document.getElementById('r2'), r3 = document.getElementById('r3'), code = document.getElementById('simcode');
   let W = 0, H = 0, C = {}, target = null, cur = null, lastMove = -1e9, trail = [], last = '';
+  // tutucu ve taşınacak küp
+  let grip = 0, gripT = 0, gap = 14, pressed = false, cube = null, auto = { ph: 0, t0: 0, dest: 0 }, wasAuto = false;
+  const CUBE = 18;
+  const tableY = () => geo().by + 14 - CUBE / 2;
   const readColors = () => { C = { ink: css('--ink'), muted: css('--muted'), line: css('--line'), mask: css('--mask'), gold: css('--gold'), trace: css('--trace'), surface: css('--surface') }; };
   readColors();
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', readColors);
@@ -500,6 +512,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
     W = r.width; H = r.height; cv.width = W * d; cv.height = H * d; ctx.setTransform(d, 0, 0, d, 0, 0);
     const g = geo(); if (!cur) { cur = { x: g.bx + g.L1 * 0.9, y: g.by - g.L1 * 1.1 }; target = { ...cur }; }
+    cube = { x: g.bx - (g.L1 + g.L2) * 0.52, y: tableY(), vy: 0, held: false };
   }
   new ResizeObserver(resize).observe(cv); resize();
 
@@ -517,11 +530,28 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 
   function draw(now) {
     if (!W) return;
-    if (now - lastMove > 2500 && !reduce) {
-      const g = geo(), t = now / 1000, R = (g.L1 + g.L2) * 0.62;
-      target = { x: g.bx + R * 0.9 * Math.cos(t * 0.55), y: g.by - R * 0.55 - R * 0.42 * Math.sin(t * 1.1) };
+    const idle = now - lastMove > 2500 && !reduce;
+    if (idle) {
+      // boşta: küpü bir yandan alıp karşı yana bırakır (al-bırak)
+      const g = geo(), R = g.L1 + g.L2, ty0 = g.by + 14 - CUBE / 2;
+      if (!wasAuto) { auto.ph = 0; auto.t0 = now; wasAuto = true; }
+      if (auto.ph === 0 && now === auto.t0) auto.dest = cube.x < g.bx ? g.bx + R * 0.5 : g.bx - R * 0.5;
+      const hover = ty0 - 70, low = ty0 - 2;
+      // [hedef x, hedef y (tutucu ucu), tutucu, süre sn]
+      const S = [[cube.x, hover, 0, 1.1], [cube.x, low, 0, 0.8], [cube.x, low, 1, 0.5], [cube.x, hover, 1, 0.8], [auto.dest, hover, 1, 1.2], [auto.dest, low - 1, 1, 0.8], [auto.dest, low, 0, 0.5], [auto.dest, hover, 0, 0.8]];
+      let st = S[auto.ph];
+      if ((now - auto.t0) / 1000 > st[3]) {
+        auto.ph = (auto.ph + 1) % S.length; auto.t0 = now; st = S[auto.ph];
+        if (auto.ph === 0) auto.dest = cube.x < g.bx ? g.bx + R * 0.5 : g.bx - R * 0.5;
+      }
+      // tutucu aşağı baktığı için bilek, hedef uçun 10 px üstünde durur
+      target = { x: st[0], y: st[1] - 10 };
+      gripT = st[2];
+    } else {
+      wasAuto = false; gripT = pressed ? 1 : 0;
     }
     const k = reduce ? 1 : 0.12; cur.x += (target.x - cur.x) * k; cur.y += (target.y - cur.y) * k;
+    grip += (gripT - grip) * (reduce ? 1 : 0.22);
     const s = ik(cur.x, cur.y);
     ctx.clearRect(0, 0, W, H);
     // lehim padleri ızgarası
@@ -546,10 +576,23 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       ctx.strokeStyle = C.ink; ctx.lineWidth = w + 4; ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke();
       ctx.strokeStyle = C.mask; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(a, b); ctx.lineTo(c, d); ctx.stroke();
     });
-    // tutucu
-    const ang = s.t1 - s.t2, gx = Math.cos(ang), gy = -Math.sin(ang), nx = -gy, ny = gx;
+    // küp: tutulunca uca yapışır, bırakılınca masaya düşer
+    // bilek servosu tutucuyu hep aşağı baktırır: uç konumu bilekten sabit uzaklıkta
+    const gx = 0, gy = 1, nx = -1, ny = 0;
+    const tipX = s.wx + gx * 10, tipY = s.wy + gy * 10;
+    if (!cube.held && grip > 0.7 && Math.hypot(tipX - cube.x, tipY - cube.y) < 22) { cube.held = true; }
+    if (cube.held && grip < 0.5) { cube.held = false; cube.vy = 0; }
+    if (cube.held) { cube.x = tipX; cube.y = tipY; }
+    else { cube.vy += 0.7; cube.y = Math.min(tableY(), cube.y + cube.vy); if (cube.y >= tableY()) cube.vy = 0; }
+    cube.x = Math.max(24, Math.min(W - 24, cube.x));
+    ctx.save(); ctx.translate(cube.x, cube.y);
+    ctx.fillStyle = C.gold; ctx.strokeStyle = C.ink; ctx.lineWidth = 2;
+    ctx.fillRect(-CUBE / 2, -CUBE / 2, CUBE, CUBE); ctx.strokeRect(-CUBE / 2, -CUBE / 2, CUBE, CUBE);
+    ctx.restore();
+    // tutucu: parmaklar açılıp kapanır (küp tutulurken küpün genişliğinde durur)
+    const gapT = cube.held ? CUBE / 2 + 2 : 14 - 9 * grip; gap += (gapT - gap) * 0.35;
     ctx.strokeStyle = C.ink; ctx.lineWidth = 4;
-    [-1, 1].forEach(sg => { ctx.beginPath(); ctx.moveTo(s.wx + nx * 8 * sg, s.wy + ny * 8 * sg); ctx.lineTo(s.wx + nx * 8 * sg + gx * 14, s.wy + ny * 8 * sg + gy * 14); ctx.stroke(); });
+    [-1, 1].forEach(sg => { ctx.beginPath(); ctx.moveTo(s.wx + nx * gap * sg, s.wy + ny * gap * sg); ctx.lineTo(s.wx + nx * gap * sg + gx * 16, s.wy + ny * gap * sg + gy * 16); ctx.stroke(); });
     // eklemler (servo)
     [[s.bx, s.by, 'J1'], [s.ex, s.ey, 'J2']].forEach(([x, y, l]) => {
       ctx.fillStyle = C.surface; ctx.strokeStyle = C.gold; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 10, 0, 7); ctx.fill(); ctx.stroke();
@@ -561,16 +604,20 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     const a2 = Math.round(Math.min(180, Math.max(0, s.t2 * 180 / Math.PI)));
     const scale = 250 / (s.L1 + s.L2); // mm: 250 mm erişimli bir kol varsay
     const px = Math.round((s.wx - s.bx) * scale), py = Math.round((s.by - s.wy) * scale);
-    const key = a1 + '|' + a2 + '|' + px + '|' + py;
+    const ga = Math.round(90 - 60 * grip);
+    const key = a1 + '|' + a2 + '|' + px + '|' + py + '|' + ga;
     if (key !== last) {
       last = key; r1.textContent = a1 + '°'; r2.textContent = a2 + '°'; r3.textContent = px + ', ' + py;
-      code.innerHTML = '<span class="c">// uç: x=' + px + ' mm, y=' + py + ' mm</span>\n<span class="k">omuz</span>.write(<span class="n">' + a1 + '</span>); <span class="k">dirsek</span>.write(<span class="n">' + a2 + '</span>);';
+      code.innerHTML = '<span class="c">// uç: x=' + px + ' mm, y=' + py + ' mm</span>\n<span class="k">omuz</span>.write(<span class="n">' + a1 + '</span>); <span class="k">dirsek</span>.write(<span class="n">' + a2 + '</span>); <span class="k">tutucu</span>.write(<span class="n">' + ga + '</span>);';
     }
   }
   function loop(now) { draw(now); if (!reduce) requestAnimationFrame(loop); }
   requestAnimationFrame(loop);
   const point = e => { const r = cv.getBoundingClientRect(); target = { x: e.clientX - r.left, y: e.clientY - r.top }; lastMove = performance.now(); if (reduce) draw(lastMove); };
-  cv.addEventListener('pointermove', point); cv.addEventListener('pointerdown', point);
+  cv.addEventListener('pointermove', point);
+  cv.addEventListener('pointerdown', e => { point(e); pressed = true; try { cv.setPointerCapture(e.pointerId); } catch (x) {} });
+  const release = () => { pressed = false; if (reduce) draw(performance.now()); };
+  cv.addEventListener('pointerup', release); cv.addEventListener('pointercancel', release); cv.addEventListener('lostpointercapture', release);
   if (reduce) { new ResizeObserver(() => draw(0)).observe(cv); }
 
   /* ---------- İçerikler ---------- */

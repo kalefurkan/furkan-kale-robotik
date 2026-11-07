@@ -1,0 +1,65 @@
+/* Ortak hareket katmanı (furkankale.com ve araç sayfaları).
+   Hepsi `html.fx` altında: motion.js yüklenmezse ya da "hareketi azalt" açıksa hiçbir şey değişmez. */
+
+/* Kaydırma ilerleme çizgisi */
+html.fx .fx-progress{position:fixed;left:0;top:0;height:3px;width:100%;transform-origin:0 50%;transform:scaleX(var(--fx-p,0));background:linear-gradient(90deg,var(--mask,#1C6A4C),var(--gold,#C8961C));z-index:60;pointer-events:none}
+
+/* Paralaks noktalı arka plan: sayfa kayarken yavaş kayar */
+html.fx .fx-dots{position:fixed;inset:-40px 0;z-index:-1;pointer-events:none;opacity:.55;
+  background-image:radial-gradient(var(--line,#D2DCD4) 1px,transparent 1.4px);background-size:26px 26px;
+  background-position:0 calc(var(--fx-y,0) * -0.22px);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(180deg,transparent,#000 14%,#000 86%,transparent)}
+
+/* Kaydırınca beliren öğeler (translate/opacity kullanır; transform ile çakışmaz) */
+html.fx .rv{opacity:0;translate:0 22px;transition:opacity .6s cubic-bezier(.2,.7,.2,1) var(--rd,0ms),translate .6s cubic-bezier(.2,.7,.2,1) var(--rd,0ms)}
+html.fx .rv.in{opacity:1;translate:0 0}
+html.fx .rv-init{transition:none!important}
+
+/* Dinamik kartlar (filtre değişince yeniden çizilenler) */
+@keyframes fx-pop{from{opacity:0;translate:0 14px;scale:.98}to{opacity:1;translate:0 0;scale:1}}
+html.fx .posts>.post{animation:fx-pop .45s cubic-bezier(.2,.7,.2,1) both}
+html.fx .posts>.post:nth-child(2){animation-delay:40ms}html.fx .posts>.post:nth-child(3){animation-delay:80ms}html.fx .posts>.post:nth-child(4){animation-delay:120ms}
+html.fx .posts>.post:nth-child(5){animation-delay:160ms}html.fx .posts>.post:nth-child(6){animation-delay:200ms}html.fx .posts>.post:nth-child(7){animation-delay:240ms}html.fx .posts>.post:nth-child(8){animation-delay:280ms}
+
+/* Kart etkileşimi: imleci izleyen ışık + eğim */
+html.fx .fx-card{position:relative;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) translateY(var(--ty,0px));transition:transform .25s ease,border-color .2s,box-shadow .25s;will-change:transform}
+html.fx .fx-card.fx-hover{--ty:-3px;border-color:var(--mask,#1C6A4C);box-shadow:0 18px 34px -22px color-mix(in srgb,var(--ink,#10241B) 55%,transparent)}
+html.fx .fx-card::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .25s;
+  background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),color-mix(in srgb,var(--gold,#C8961C) 22%,transparent),transparent 70%)}
+html.fx .fx-card.fx-hover::after{opacity:1}
+html.fx .fx-card.fx-flat{transform:none}
+
+/* Düğmeler: basınca küçülür, üstüne gelince parlama şeridi geçer */
+html.fx .btn{position:relative;overflow:hidden;transition:transform .15s,background .15s,box-shadow .2s}
+html.fx .btn:active{transform:translateY(0) scale(.97)}
+html.fx .btn-primary:hover{box-shadow:0 10px 22px -12px var(--mask,#1C6A4C)}
+html.fx .btn::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.28) 50%,transparent 65%);transform:translateX(-120%)}
+html.fx .btn:hover::after{transform:translateX(120%);transition:transform .7s ease}
+html.fx .filter-btn{transition:transform .12s,background .15s,color .15s,border-color .15s}
+html.fx .filter-btn:active{transform:scale(.95)}
+html.fx .nav a{transition:color .15s,background .15s}
+
+/* Başlıkta vurgulu sözcük: hafif altın alt çizgi çizilir */
+html.fx .hero h1 em{background:linear-gradient(var(--gold,#C8961C),var(--gold,#C8961C)) 0 100%/0% 3px no-repeat;transition:background-size .9s .35s cubic-bezier(.2,.7,.2,1)}
+html.fx .hero.in-view h1 em{background-size:100% 3px}
+
+/* İmleç efekti (yalnızca ince imleçli, hover destekleyen cihazlarda) */
+.fx-cursor,.fx-cursor-dot{display:none}
+@media (hover:hover) and (pointer:fine){
+  html.fx.fx-cur .fx-cursor,html.fx.fx-cur .fx-cursor-dot{display:block;position:fixed;left:0;top:0;pointer-events:none;z-index:70;border-radius:50%;opacity:0;transition:opacity .2s}
+  html.fx.fx-cur .fx-cursor{width:34px;height:34px;margin:-17px 0 0 -17px;border:1.5px solid var(--gold,#C8961C);mix-blend-mode:normal;transition:opacity .2s,width .2s,height .2s,margin .2s,background .2s,border-color .2s}
+  html.fx.fx-cur .fx-cursor-dot{width:6px;height:6px;margin:-3px 0 0 -3px;background:var(--gold,#C8961C)}
+  html.fx.fx-cur.fx-on .fx-cursor,html.fx.fx-cur.fx-on .fx-cursor-dot{opacity:1}
+  html.fx.fx-cur.fx-link .fx-cursor{width:54px;height:54px;margin:-27px 0 0 -27px;background:color-mix(in srgb,var(--gold,#C8961C) 16%,transparent)}
+  html.fx.fx-cur.fx-down .fx-cursor{width:24px;height:24px;margin:-12px 0 0 -12px}
+  html.fx.fx-cur.fx-hide .fx-cursor,html.fx.fx-cur.fx-hide .fx-cursor-dot{opacity:0}
+}
+
+/* Oyun sayfalarının üst çubuğu: yumuşak giriş */
+@keyframes fx-bar{from{opacity:0;translate:0 -10px}to{opacity:1;translate:0 0}}
+html.fx.fx-game .bar{animation:fx-bar .5s cubic-bezier(.2,.7,.2,1) both}
+
+@media (prefers-reduced-motion:reduce){
+  html.fx .rv,html.fx .posts>.post,html.fx .fx-card,html.fx.fx-game .bar{animation:none!important;opacity:1!important;translate:none!important;transform:none!important}
+  .fx-progress,.fx-dots,.fx-cursor,.fx-cursor-dot{display:none!important}
+}

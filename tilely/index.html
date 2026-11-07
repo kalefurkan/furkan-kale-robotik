@@ -187,6 +187,7 @@ svg{display:block}
 #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
 @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
 </style>
+<link rel="stylesheet" href="../assets/motion.css">
 </head>
 <body>
 <div id="app">
@@ -537,5 +538,6 @@ renderMenu();
 window.__mozaik = { start, LEVELS, get state() { return { idx, cells, target, done, hints, wrongs, checks }; } };
 })();
 </script>
+<script src="../assets/motion.js" defer data-mode="game"></script>
 </body>
 </html>
