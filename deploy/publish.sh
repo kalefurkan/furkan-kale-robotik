@@ -4,5 +4,5 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 rm -rf dist && mkdir dist
-cp -R index.html favicon.ico _redirects assets tilely sandly roboblok servolab pinharita dist/
+cp -R index.html favicon.ico _redirects robots.txt sitemap.xml 404.html gizlilik kullanim assets tilely sandly roboblok servolab pinharita dist/
 cd deploy && npx --yes wrangler@latest deploy
