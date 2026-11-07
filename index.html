@@ -300,8 +300,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
     </a>
     <nav class="nav" aria-label="Ana menü">
       <a href="#icerikler">İçerikler</a>
-      <a href="#uygulamalar">Uygulamalar</a>
-      <a href="#araclar">Platformlarım</a>
+      <a href="#araclar">Uygulamalarım</a>
       <a href="#yol">Öğrenme yolu</a>
       <a href="#hakkimda">Hakkımda</a>
       <a href="#iletisim">İletişim</a>
@@ -319,7 +318,7 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
       <p class="lede">Scratch Jr.'dan Arduino ve Python'a robotik ve kodlama içerikleri: devre şeması, kod ve adım adım anlatımıyla 90 Arduino projesi, Python yol haritası ve kendi geliştirdiğim uygulamalar.</p>
       <div class="ctas">
         <a class="btn btn-primary" href="#icerikler">İçeriklere göz at →</a>
-        <a class="btn btn-ghost" href="#uygulamalar">Uygulamalarım</a>
+        <a class="btn btn-ghost" href="#araclar">Uygulamalarım</a>
       </div>
       <ul class="topics" aria-label="Konular">
         <li>Scratch Jr.</li><li>Scratch</li><li>Kodu Game Lab</li><li>Minecraft</li><li>Tinkercad</li><li>SPIKE</li><li>Arduino</li><li>Python</li>
@@ -362,88 +361,11 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
   </div>
 </section>
 
-<section id="uygulamalar">
-  <div class="wrap">
-    <div class="sec-head">
-      <div>
-        <div class="eyebrow">Uygulamalarım</div>
-        <h2>Atölyede ihtiyaç duyup yazdığım araçlar</h2>
-        <p>Her biri bir projede karşılaştığım sorunu çözmek için başladı. Tarayıcıda, kurulum gerekmeden çalışır.</p>
-      </div>
-    </div>
-    <div class="apps">
-      <article class="app">
-        <div class="app-screen">
-          <div class="m-servo" aria-hidden="true">
-            <div class="m-row"><span>J1</span><div class="m-track"><b style="width:52%"></b></div><span>94°</span></div>
-            <div class="m-row"><span>J2</span><div class="m-track"><b style="width:30%"></b></div><span>54°</span></div>
-            <div class="m-row"><span>J3</span><div class="m-track"><b style="width:74%"></b></div><span>133°</span></div>
-            <div class="m-row"><span>GR</span><div class="m-track"><b style="width:12%"></b></div><span>22°</span></div>
-          </div>
-        </div>
-        <div class="app-body">
-          <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/servolab.svg" alt="" width="44" height="44" loading="lazy"><h3>ServoLab</h3></div><span class="status live">Yayında</span></div>
-          <p>Robot kolunun servolarını tarayıcıdan sür: her servoyu kalibre et, pozları kaydedip oynat ve hareketi çalışan bir Arduino sketch'ine dönüştür. Kurulum gerekmez.</p>
-          <ul class="feat">
-            <li>2–6 servo: açı sınırı, 400–2600 µs darbe aralığı, ters çevirme, ev açısı</li>
-            <li>Canlı kol önizlemesi ve poz zaman çizelgesi (doğrusal ya da yumuşak geçiş, JSON dışa/içe aktarma)</li>
-            <li>Servo.h kodu ve alıcı sketch'ler üretir: Uno, ESP32, USB, HC-05, ESP32 BLE</li>
-            <li>USB (Web Serial) ve BLE (Web Bluetooth) ile bağlanır; çevrimdışı çalışır. HC-05 klasik Bluetooth olduğu için tarayıcıdan bağlanamaz, sayfada yolu anlatılıyor</li>
-          </ul>
-          <div class="app-foot"><span class="platforms">Web · Chrome / Edge</span><a href="servolab/">Aç →</a></div>
-        </div>
-      </article>
-      <article class="app">
-        <div class="app-screen">
-          <div aria-hidden="true">
-            <div class="m-pins">
-              <span></span><span class="p"></span><span></span><span class="p"></span><span class="a"></span><span class="a"></span><span></span><span class="i"></span><span class="i"></span><span></span>
-              <span></span><span></span><span class="p"></span><span></span><span class="a"></span><span></span><span class="p"></span><span></span><span></span><span class="a"></span>
-            </div>
-            <div class="m-legend"><span><i style="background:var(--gold)"></i>PWM</span><span><i style="background:var(--mask)"></i>ADC</span><span><i style="background:var(--info)"></i>I²C</span></div>
-          </div>
-        </div>
-        <div class="app-body">
-          <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/pinharita.svg" alt="" width="44" height="44" loading="lazy"><h3>PinHarita</h3></div><span class="status beta">Beta</span></div>
-          <p>Kartını seç, hangi pinin PWM, ADC, I²C, SPI ya da UART yapabildiğini diyagramda gör; pinlere görev ata, çakışmaları ve önyükleme sorunlarını gerekçesiyle öğren.</p>
-          <ul class="feat">
-            <li>Arduino UNO R4, ESP32-S3-DevKitC-1, Raspberry Pi Pico 2 ve Raspberry Pi 5 (40 pin)</li>
-            <li>İşlev filtresi ve arama; her pin için çevre birimi, mantık seviyesi ve kod karşılığı</li>
-            <li>Çakışma denetimi: aynı pine iki görev, desteklenmeyen işlev, strapping/kullanılamaz pin, ESP32-S3'te ADC2 + Wi-Fi, 5 V–3,3 V seviyesi</li>
-            <li>Planı Arduino sabitleri (const int) ya da CSV olarak dışa aktarır, bağlantıyla paylaşır; kaynak bağlantıları uygulamada, doğrulanamayan pinler "doğrula" rozetli; çevrimdışı çalışır</li>
-          </ul>
-          <div class="app-foot"><span class="platforms">Web</span><a href="pinharita/">Aç →</a></div>
-        </div>
-      </article>
-      <article class="app">
-        <div class="app-screen">
-          <div class="m-blocks" aria-hidden="true">
-            <div class="b1">tekrarla 4 kez</div>
-            <div class="b2">ileri git 20 cm</div>
-            <div class="b3">sağa dön 90°</div>
-            <div class="b1">bitti</div>
-          </div>
-        </div>
-        <div class="app-body">
-          <div class="app-title"><div class="app-id"><img class="app-logo" src="assets/logos/roboblok.svg" alt="" width="44" height="44" loading="lazy"><h3>RoboBlok</h3></div><span class="status live">Yayında</span></div>
-          <p>Çocuklar ve yeni başlayanlar için blok tabanlı robot kodlama. Blokları diz, robotu tarayıcıdaki sanal alanda çalıştır; bloklar aynı anda Arduino C++ koduna çevrilir.</p>
-          <ul class="feat">
-            <li>Bloktan Arduino C++ koduna anlık çeviri (L298N + HC-SR04)</li>
-            <li>Robot simülasyonu: hareket, dönüş, mesafe sensörü, tekrarla ve eğer blokları; hazır örnekler</li>
-            <li>Türkçe arayüz</li>
-          </ul>
-          <div class="app-foot"><span class="platforms">Web</span><a href="roboblok/">Dene →</a></div>
-        </div>
-      </article>
-    </div>
-  </div>
-</section>
-
 <section id="araclar">
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <div class="eyebrow">Platformlarım</div>
+        <div class="eyebrow">Uygulamalarım</div>
         <h2>Kendi geliştirdiğim eğitim uygulamaları</h2>
         <p>Öğrencilerin tarayıcıda deneyerek öğrendiği yedi uygulama.</p>
       </div>
