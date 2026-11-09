@@ -1,0 +1,91 @@
+/* Pixel art drawn separately for each board size. A dot is an empty tile. */
+(function (root) {
+  'use strict';
+
+  const sprites = {
+    oo: [
+      ['İki yapraklı filiz', 'G..G/.GG./..G./.NN.'],
+      ['Fiyonklu hediye', '.KK./K..K/RRKR/RRKR'],
+      ['Uçan kuş', '...O/B.BB/.BBB/..B.'],
+      ['Salyangoz', '..../.ON./ONN./GGGG'],
+      ['Kapı anahtarı', 'YY../Y.Y./.YY./..YY'],
+      ['Mavi kupa', 'BBB./B.BL/BBBL/BBB.'],
+      ['Siyah nota', '..DD/..D./..D./DDD.'],
+      ['Yapraklı kiraz', '..G./.GG./R.G./R..R'],
+      ['Kelebek kanatları', 'P..P/PKKP/.DD./P..P'],
+      ['Ortası açık pencere', 'PPPP/P..P/PPPP/....'],
+      ['Siyah H harfi', '..../D..D/DDDD/D..D'],
+      ['Bir fincan çay', '.L../NNN./NYNL/NNN.'],
+      ['Kırmızı paten', 'R.../RR../RRRR/.D.D'],
+      ['İki noktalı zar', 'DDDD/D.DD/DD.D/DDDD'],
+      ['İki dişli tarak', 'Y.Y./Y.Y./YYYY/YYYY'],
+      ['Köşeli sarı ok', '...Y/..YY/YY.Y/.Y..'],
+      ['Küçük saksı', '.G../GGG./.N.N/.NNN']
+    ],
+    s1: [
+      ['Uzun kulaklı eşek', 'N....N/NN..NN/.NNNN./.DNND./.NNNN./..KK..'],
+      ['Bal arısı', '.L..L./LL..LL/.YDDY./.YDDY./..DD../......'],
+      ['Pembe denizatı', '..KKK./..KKDD/..KK../..KK../.KK.../.KKK..'],
+      ['Yeşil kaplumbağa', '....../..GG../.GGGG./GGGGGY/.G..G./......'],
+      ['Pembe flamingo', '...KK./...KDD/..KK../KKKK../.KKK../..K.K.'],
+      ['Sivri gagalı penguen', '...DD./..DYD./..DD../.DLLD./.DLLD./..OO..'],
+      ['Çekirge', '...G../G.GGG./.GGGGD/..GG../.G..G./G....G'],
+      ['Koala', 'NN..NN/NDDDDN/.DLLD./.DDND./..DD../......'],
+      ['Geyik boynuzları', 'N.NN.N/.N..N./.NNNN./NDDDDN/.NDDN./..NN..'],
+      ['Fener balığı', '...YY./..Y.../.BBB../BBDBBB/.BBBBB/..B.B.'],
+      ['Paraşüt', '..RR../.RRRR./RRRRRR/.N..N./..NN../..NN..'],
+      ['Tekerlekli traktör', '..NN../..GGG./..GLG./GGGGGG/.D..DD/.DD.DD'],
+      ['Saplı şemsiye', '..PP../.PPPP./PPPPPP/..N.../N.N.../.NN...'],
+      ['Yaprak tırmığı', 'N.N.NN/NNNNN./..N.../..N.../..N.../..N...'],
+      ['Dişli anahtar', 'N...N./NN.NN./.NNN../..N.../..N.../.NNN..'],
+      ['Gövdeli gitar', '....N./...NN./..NN../.NO.../NONN../.NN...'],
+      ['Camlı denizaltı', '...DD./...D../..YYY./.YLYYY/LYYYYY/.YYY..'],
+      ['Tavşan terliği', '....K./...KK./K..KK./K.KKK./KKDKKK/.KKKKK'],
+      ['Nar meyvesi', '..RR../.R.R../.RRRR./RRRRRR/RRORRR/.RRRR.'],
+      ['Sarı hilal', '..YYY./.YY.../YY..../YY..../.YYY../..YYY.'],
+      ['Dik duran çizme', '.PP.../.PP.../.PP.../.PPP../.PPPP./.DDDD.'],
+      ['Çift camlı tren', '....../L..LL./BLBLB./BBBBBB/.D.D.D/.D.D.D'],
+      ['Altı basamaklı merdiven', '.....Y/....YY/...YYY/..YYYY/.YYYYY/YYYYYY'],
+      ['Bisiklet', '..N.../...NN./.B.B../.B..B./DDB.DD/DD..DD'],
+      ['Sincap', '.NN.../NNN.K./.NNKKK/..NKK./.NNNK./...N.N'],
+      ['Açık makas', 'N....N/.N..N./..NN../..NN../.P..P./PP..PP'],
+      ['Dört noktalı zar', 'DDDDDD/DYDDYD/DDDDDD/DYDDYD/DDDDDD/DDDDDD'],
+      ['Yarasa', 'D....D/DD..DD/DDDDDD/.DDDD./..DD../......']
+    ],
+    s2: [
+      ['Sevimli kirpi', '......../...N..../..NNN.../.NNNNN../NNNNNND./.NNNNNKO/..NNKKK./..N...N.'],
+      ['Çizgili zebra', '.....D.D/....DDDD/...DLDLD/..DDDDDD/.DLLDD../DLDLDD../.D.DD.../.D.DD...'],
+      ['Uzun boyunlu zürafa', '.....N.N/.....OOO/.....ODO/.....OOO/...OOON./.ONOON../.ON.OO../.N..NN..'],
+      ['Sivri kulaklı tilki', 'O......O/OO....OO/.OODDOO./.ODOODO./..OOOO../.DOOOOD./..DOOD../...DD...'],
+      ['Tombul fok', '....L.../...LLL../...LDLL./...LLLL./..LLL.../.LLLLLL./LLL..LLL/.L....L.'],
+      ['Gölde yüzen ördek', '.....YY./....YDYY/....YYOO/.Y..YY../YYYYYYY./.YYYYY../..LLL.../LLLLLLLL'],
+      ['Kabuklu yengeç', 'RR....RR/RR....RR/.RR..RR./..RRRR../.DRRRRD./RRRRRRRR/R.RRRR.R/R......R'],
+      ['Yelpaze kuyruklu tavus kuşu', '.BG..GB./BBGBBGBB/BGGBBGGB/.BGDDGB./..BDBB../....DY../...DD.../..N.N...'],
+      ['Denizanası', '...PP.../..PPPP../.PPPPPP./.PKPKPP./PPPPPPPP/.K.K.K../K..K..K./...K...K'],
+      ['Kakadu', '...YYY../..YY..../..DDD.../.DDLD.../.DDDDD../..DDDD../...DDD../...N.D..'],
+      ['Fare peyniri', '......../....YY../...YYYY./..YYYYYY/.YYOYYOY/YYYYYYYY/YYOYYOYY/YYYYYYYY'],
+      ['Fener kulesi', '...DD.../..DDDD../..DYYD../..DDDD../..RRRR../...LL.../..RRRR../.DDDDDD.'],
+      ['Bulutlu yağmur', '..LLL.../.LLLLL../LLLLLLL./.LLLLLL./......../.B..B.../..B...B./.B..B...'],
+      ['Güneş gözlüğü', '......../......../DDDDDDDD/.DDDDDD./.DBDDBD./.DDD.DD./......../........'],
+      ['Masa lambası', '...YY.../..YYYY../.YYYYYY./YYYYYYYY/....N.../....N.../....N.../..NNNN..'],
+      ['Yel değirmeni', '..D...../..DD..D./..D.DDD./...DD.../.DDD.D../.D..DD../....D.../...NNN..'],
+      ['Klavye tuşları', '......../.DDDDD../DDLDLDD./DLDLDLDD/DDDDDDDD/DDLLLLDD/.DDDDDD./........'],
+      ['Dallı kaktüs', '...G..../...G..G./.G.G..G./.G.G.GG./.GGG.G../...GGG../..NNNN../...NN...'],
+      ['Altın taç', '......../Y..Y...Y/YY.YY.YY/Y.YYY.YY/YYYYYYYY/YOYOYOYY/YYYYYYYY/.YYYYYY.'],
+      ['Keman', '.....NN./.....NN./....NN../...NN.../..ONNO../.OOONOO./.OOOOOO./..OOOO..'],
+      ['Kavanoz ve şekerler', '..NNNN../..NNNN../.LLLLLL./.LKLKLL./.LLLKLL./.LKLLLL./.LLLLLL./..LLLL..'],
+      ['Lastikli sapan', 'N.....N./NNKKKNN./.N...N../.NN.NN../..NNN.../...N..../...N..../..NN....'],
+      ['Kuleli şato', 'N.N..N.N/NNN..NNN/.N.NN.N./.NNNNNN./.NYNNYN./.NNDDNN./.NNDDNN./.NNDDNN.'],
+      ['Saplı çilek', '.G....G./..GGGG../.RGGGRR./RRRYRRRR/.RRYRRY./.RYRRR../..RRY.../...R....'],
+      ['Şövalye kalkanı', '.DDDDDD./.DBBBBD./.DBYBBD./.DYYYBD./..DYBD../..DBBD../...DD.../........'],
+      ['Göktaşı', '......OY/.....OYO/....OYO./...OYO../.DDD..../.DNDD.../DDNNDD../.DDDD...'],
+      ['Bisiklet kaskı', '...BBB../..BLLBB./.BBBBBBB/BBBBBBBB/BBBDDDDD/.DB.B.../..D.D.../...D....'],
+      ['Kırmızı benekli böcek', '......../....D.../..DDDD../.DRDDRD./DRDDDDRD/.DDRRDD./..DDDD../..D..D..'],
+      ['Su kenarında timsah', '......../.......D/.G....GG/.GG.GGGG/GGDGGGGG/GGGGGG../.G.G.G../LLLLLLLL'],
+      ['Gölde duran kuğu', '...LL.../..LLYL../..LL..../..LL..../..LL.LLL/.LLLLLLL/..LLLLL./BBBBBBBB']
+    ]
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = sprites;
+  else root.TilelySprites = sprites;
+})(typeof globalThis !== 'undefined' ? globalThis : window);

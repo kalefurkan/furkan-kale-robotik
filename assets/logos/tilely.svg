@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+  <title id="title">Tilely — mozaik T</title>
+  <defs>
+    <linearGradient id="base" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop stop-color="#22436D"/><stop offset="1" stop-color="#172940"/>
+    </linearGradient>
+    <linearGradient id="a" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop stop-color="#ADEFE7"/><stop offset="1" stop-color="#65D8CC"/>
+    </linearGradient>
+    <linearGradient id="b" x2="0" y2="1" gradientUnits="objectBoundingBox">
+      <stop stop-color="#FFDC92"/><stop offset="1" stop-color="#FFAC63"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="29" fill="url(#base)"/>
+  <rect x="5" y="5" width="118" height="118" rx="28" fill="none" stroke="#89B7DC" stroke-opacity=".25" stroke-width="2"/>
+  <path d="M64 17v94" stroke="#CFE0F8" stroke-opacity=".25" stroke-width="2" stroke-linecap="round" stroke-dasharray="1 5"/>
+  <g fill="#0C1C34" opacity=".65">
+    <rect x="21" y="30" width="14" height="17" rx="4"/><rect x="39" y="30" width="14" height="17" rx="4"/><rect x="57" y="30" width="14" height="17" rx="4"/><rect x="75" y="30" width="14" height="17" rx="4"/><rect x="93" y="30" width="14" height="17" rx="4"/>
+    <rect x="57" y="49" width="14" height="17" rx="4"/><rect x="57" y="68" width="14" height="17" rx="4"/><rect x="57" y="87" width="14" height="17" rx="4"/>
+  </g>
+  <rect x="21" y="27" width="14" height="17" rx="4" fill="#799CFF"/>
+  <rect x="39" y="27" width="14" height="17" rx="4" fill="url(#a)"/>
+  <rect x="57" y="27" width="14" height="17" rx="4" fill="#FFF3D3"/>
+  <rect x="75" y="27" width="14" height="17" rx="4" fill="url(#b)"/>
+  <rect x="93" y="27" width="14" height="17" rx="4" fill="#FF8E99"/>
+  <rect x="57" y="46" width="14" height="17" rx="4" fill="#FFF3D3"/>
+  <rect x="57" y="65" width="14" height="17" rx="4" fill="url(#a)"/>
+  <rect x="57" y="84" width="14" height="17" rx="4" fill="#799CFF"/>
+</svg>
