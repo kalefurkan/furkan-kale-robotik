@@ -1,0 +1,9 @@
+{
+  "appId": "com.furkankale.tilely",
+  "appName": "Tilely",
+  "webDir": "www",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#FFF7EA"
+  }
+}
